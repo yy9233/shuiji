@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1A2A3A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>水机 · 个人工作台</title>
+<!-- PWA：安装到桌面 / 添加到主屏幕 -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="水机">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  /* ================= 基础 ================= */
+  :root{
+    --bg:#1A2A3A;
+    --card:rgba(255,255,255,0.08);
+    --text:#FFFFFF;
+    --sub:#B0BEC5;
+    --accent:#4FC3F7;
+    --do:#4FC3F7;        /* 动手类 蓝 */
+    --talk:#FFA726;      /* 沟通类 橙 */
+    --wait:#90A4AE;      /* 等待类 灰 */
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:#141f2b;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    color:var(--text);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+  input{font-family:inherit;color:inherit;}
+
+  /* 应用外壳：手机宽度居中，上下固定，中间滚动 */
+  .app{
+    position:relative;
+    width:100%;
+    max-width:480px;
+    height:100vh;
+    height:100dvh;
+    margin:0 auto;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-shadow:0 0 40px rgba(0,0,0,0.5);
+  }
+
+  /* ================= 顶部栏 ================= */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px 10px;
+    flex-shrink:0;
+  }
+  .top-title{font-size:20px;font-weight:700;letter-spacing:1px;}
+  .top-right{display:flex;align-items:center;gap:10px;}
+  .done-count{color:var(--sub);font-size:13px;white-space:nowrap;}
+  .mood-emoji{
+    font-size:18px;opacity:0.8;
+    transition:transform .12s ease, opacity .12s ease;
+    padding:2px;
+  }
+  .mood-emoji:active{transform:scale(1.35);opacity:1;}
+
+  /* ================= 顶部提示条 ================= */
+  .banner{
+    margin:0 18px 6px;
+    padding:9px 14px;
+    border-radius:12px;
+    font-size:14px;
+    text-align:center;
+    flex-shrink:0;
+  }
+  .perfect-banner{
+    background:rgba(79,195,247,0.15);
+    color:var(--accent);
+    animation:bannerIn .35s ease;
+  }
+  .soft-reminder{
+    background:rgba(255,167,38,0.12);
+    color:var(--talk);
+  }
+  @keyframes bannerIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
+
+  /* ================= 主区域（可滚动） ================= */
+  .main{flex:1;overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch;padding:6px 18px 90px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ================= 输入区域 ================= */
+  .input-row{display:flex;gap:8px;margin-bottom:14px;}
+  .input-row input{
+    flex:1;min-width:0;
+    background:var(--card);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:12px 16px;
+    font-size:16px;color:var(--text);
+    outline:none;
+  }
+  .input-row input::placeholder{color:var(--sub);opacity:.8;}
+  .input-row input:focus{border-color:rgba(79,195,247,0.5);}
+  .add-btn,.mic-btn{
+    width:48px;height:48px;border-radius:16px;flex-shrink:0;
+    background:var(--card);
+    font-size:22px;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .add-btn{color:var(--accent);font-weight:700;}
+  .add-btn:active{transform:scale(.92);}
+  .add-btn.cooldown{color:var(--sub);opacity:.7;font-size:13px;}
+  .add-btn:disabled{opacity:.45;}
+  .mic-btn{color:var(--sub);font-size:20px;}
+  .mic-btn:active{transform:scale(.92);}
+
+  /* ================= 下拉提示 / 昨日重现 ================= */
+  .pull-hint{
+    text-align:center;color:var(--sub);font-size:13px;
+    padding:6px 0;opacity:0;transition:opacity .15s ease;
+    height:28px;
+  }
+  .pull-hint.visible{opacity:1;}
+  .old-panel{
+    background:var(--card);border-radius:16px;padding:12px;margin-bottom:14px;
+  }
+  .old-title{color:var(--sub);font-size:13px;margin-bottom:8px;}
+  .old-task{
+    color:var(--sub);opacity:.7;
+    padding:9px 12px;border-radius:12px;
+    display:flex;align-items:center;gap:10px;
+    font-size:15px;
+  }
+  .old-task:active{background:rgba(255,255,255,0.06);}
+  .old-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .old-close{text-align:center;color:var(--sub);font-size:12px;margin-top:6px;padding:4px;}
+
+  /* ================= 任务卡片 ================= */
+  .task-list{position:relative;}
+  .task-card{
+    display:flex;align-items:center;gap:12px;
+    background:var(--card);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:12px;
+    touch-action:pan-y;                 /* 保留纵向滚动，横向滑动交给 JS */
+    user-select:none;
+    transition:box-shadow .15s ease;
+    will-change:transform;
+  }
+  .task-card:active{box-shadow:0 0 0 2px rgba(79,195,247,0.25);}
+  .task-card.swiping{transition:none;}
+  .task-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .task-dot.do{background:var(--do);}
+  .task-dot.talk{background:var(--talk);}
+  .task-dot.wait{background:var(--wait);}
+  .task-text{flex:1;font-size:17px;word-break:break-word;}
+  .task-card.delayed{opacity:.4;}
+  .task-card.done-out{transition:transform .3s ease, opacity .3s ease;transform:translateX(-60px);opacity:0;}
+  .inline-input{
+    flex:1;background:rgba(79,195,247,0.12);
+    border:1px solid rgba(79,195,247,0.5);border-radius:10px;
+    padding:6px 10px;font-size:16px;color:var(--text);outline:none;min-width:0;
+  }
+  .empty{color:var(--sub);opacity:.7;text-align:center;padding:34px 0;font-size:15px;}
+  .hidden{display:none !important;}
+
+  /* ================= 每日水语 ================= */
+  .water-phrase{
+    text-align:center;color:var(--text);opacity:.5;
+    font-size:14px;margin:18px 0 14px;letter-spacing:1px;
+  }
+
+  /* ================= 微习惯签到 ================= */
+  .habits{text-align:center;margin-top:4px;}
+  .streak-line{color:var(--sub);font-size:14px;margin-bottom:12px;}
+  .habit-row{display:flex;justify-content:center;gap:40px;}
+  .habit-btn{
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:26px;
+    filter:grayscale(1) opacity(.6);
+    transition:filter .2s ease, transform .1s ease;
+  }
+  .habit-btn:active{transform:scale(.9);}
+  .habit-btn.active{filter:none;}
+  .habit-label{font-size:12px;color:var(--sub);}
+
+  /* ================= 底部导航 ================= */
+  .tabbar{
+    position:absolute;left:0;right:0;bottom:0;
+    display:flex;
+    background:rgba(20,31,43,0.95);
+    backdrop-filter:blur(8px);
+    border-top:1px solid rgba(255,255,255,0.06);
+    padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+    flex-shrink:0;
+  }
+  .tab{
+    flex:1;text-align:center;padding:6px 0;
+    color:var(--sub);font-size:14px;
+    transition:color .15s ease;
+  }
+  .tab.active{color:var(--accent);font-weight:600;}
+
+  /* ================= 回顾页 ================= */
+  .view-title{font-size:18px;font-weight:700;margin:12px 0 14px;}
+  .view-sub{color:var(--sub);font-size:14px;margin:16px 0 8px;}
+  .heat-grid{display:flex;gap:8px;margin-bottom:6px;}
+  .heat-cell{
+    flex:1;min-height:38px;border-radius:10px;
+    background:rgba(255,255,255,0.06);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;
+  }
+  .heat-cell.happy{background:rgba(79,195,247,0.4);}
+  .heat-cell.neutral{background:rgba(144,164,174,0.35);}
+  .heat-cell.bad{background:rgba(255,167,38,0.45);}
+  .heat-legend{display:flex;gap:14px;color:var(--sub);font-size:12px;margin-top:6px;}
+  .rev-group{margin-bottom:18px;}
+  .rev-date{color:var(--sub);font-size:13px;margin-bottom:8px;}
+  .rev-item{
+    display:flex;align-items:center;gap:10px;
+    background:var(--card);border-radius:14px;
+    padding:12px 14px;margin-bottom:8px;font-size:15px;
+  }
+  .rev-check{color:var(--accent);font-size:14px;}
+  .rev-cat{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+  /* ================= 吃啥页 ================= */
+  .loc-line{
+    display:flex;align-items:center;gap:8px;
+    color:var(--sub);font-size:14px;margin:12px 0;
+    min-height:22px;
+  }
+  .spinner{
+    width:16px;height:16px;border-radius:50%;
+    border:2px solid rgba(255,255,255,0.15);
+    border-top-color:var(--accent);
+    animation:spin .7s linear infinite;
+    display:inline-block;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .eat-actions{display:flex;gap:10px;margin-bottom:14px;}
+  .eat-actions button{
+    flex:1;padding:11px 0;border-radius:14px;background:var(--card);
+    color:var(--text);font-size:15px;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .eat-actions button:active{transform:scale(.96);}
+  .eat-actions .primary{background:rgba(79,195,247,0.18);color:var(--accent);}
+  .eat-card{
+    background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;
+    touch-action:pan-y;
+    transition:box-shadow .15s ease;
+  }
+  .eat-card:active{box-shadow:0 0 0 2px rgba(79,195,247,0.25);}
+  .eat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .eat-name{font-size:16px;font-weight:600;flex:1;}
+  .visited-chip{
+    flex-shrink:0;font-size:12px;color:var(--sub);
+    background:rgba(255,255,255,0.08);border-radius:999px;
+    padding:4px 10px;
+    transition:background .15s ease;
+  }
+  .visited-chip:active{background:rgba(79,195,247,0.3);color:var(--accent);}
+  .eat-sub{color:var(--sub);font-size:14px;margin-top:4px;}
+  .eat-detail div{margin:4px 0;color:var(--sub);font-size:14px;}
+  .eat-detail .ed-name{color:var(--text);font-size:17px;font-weight:600;margin-bottom:6px;}
+
+  /* ================= 设置页 ================= */
+  .setting-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:12px;
+  }
+  .setting-row label{font-size:15px;}
+  .setting-row input[type="text"]{
+    flex:1;min-width:0;background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);border-radius:12px;
+    padding:8px 12px;font-size:14px;color:var(--text);outline:none;
+  }
+  .switch{appearance:none;width:46px;height:26px;border-radius:999px;background:rgba(255,255,255,0.15);position:relative;transition:background .2s ease;flex-shrink:0;}
+  .switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s ease;}
+  .switch:checked{background:var(--accent);}
+  .switch:checked::after{transform:translateX(20px);}
+  .setting-btn{
+    width:100%;padding:14px;border-radius:16px;background:var(--card);
+    font-size:15px;margin-bottom:12px;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .setting-btn:active{transform:scale(.98);}
+  .setting-btn.danger{background:rgba(255,107,107,0.12);color:#FF8A80;}
+  .about{text-align:center;color:var(--sub);font-size:12px;opacity:.6;margin-top:22px;}
+
+  /* ================= 弹窗 ================= */
+  .modal-mask{
+    position:absolute;inset:0;z-index:40;
+    background:rgba(10,16,22,0.6);
+    display:flex;align-items:center;justify-content:center;
+    padding:28px;
+  }
+  .modal{
+    width:100%;max-width:360px;
+    background:#22364a;border-radius:20px;padding:22px;
+    animation:modalIn .2s ease;
+  }
+  @keyframes modalIn{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
+  .modal-title{font-size:17px;font-weight:700;margin-bottom:12px;}
+  .modal-body{color:var(--sub);font-size:15px;margin-bottom:18px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-btn{
+    flex:1;padding:12px 0;border-radius:14px;background:var(--card);
+    font-size:15px;transition:background .15s ease;
+  }
+  .modal-btn.primary{background:rgba(79,195,247,0.2);color:var(--accent);}
+  .modal-btn:active{background:rgba(79,195,247,0.25);}
+
+  /* ================= Toast ================= */
+  #toast{
+    position:absolute;left:50%;bottom:96px;z-index:60;
+    transform:translateX(-50%) translateY(10px);
+    background:rgba(20,31,43,0.95);
+    color:var(--text);font-size:14px;
+    padding:10px 18px;border-radius:999px;
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    white-space:nowrap;max-width:90%;
+    box-shadow:0 6px 24px rgba(0,0,0,0.4);
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 顶部栏 -->
+  <header class="topbar">
+    <div class="top-title">工作台</div>
+    <div class="top-right">
+      <span class="mood-emoji" data-mood="happy" title="开心">😊</span>
+      <span class="mood-emoji" data-mood="neutral" title="一般">😣</span>
+      <span class="mood-emoji" data-mood="bad" title="糟糕">😫</span>
+      <span class="done-count" id="doneCount">今日完成 0/0</span>
+    </div>
+  </header>
+
+  <!-- 顶部提示条 -->
+  <div class="banner perfect-banner hidden" id="perfectBanner">今日圆满 🌊</div>
+  <div class="banner soft-reminder hidden" id="softReminder">还有一件事没动，不急，晚上前有空就做。</div>
+
+  <!-- 主区域 -->
+  <main class="main" id="main">
+
+    <!-- 今日 -->
+    <section class="view active" id="view-today">
+      <div class="input-row">
+        <input id="taskInput" placeholder="添加待办…" autocomplete="off" enterkeyhint="done">
+        <button class="add-btn" id="addBtn" title="添加">＋</button>
+        <button class="mic-btn hidden" id="micBtn" title="语音输入">🎤</button>
+      </div>
+
+      <div class="pull-hint" id="pullHint">↓ 下拉召唤昨日</div>
+
+      <div class="old-panel hidden" id="oldPanel">
+        <div class="old-title">昨日重现 · 过去几天未完成的旧任务</div>
+        <div id="oldList"></div>
+        <div class="old-close" id="oldClose">收起</div>
+      </div>
+
+      <div class="task-list" id="taskList">
+        <div class="empty" id="emptyState">还没有待办事项，添加一个开始今天吧</div>
+      </div>
+
+      <div class="water-phrase" id="waterPhrase"></div>
+
+      <div class="habits">
+        <div class="streak-line" id="streakLine">已连续坚持 0 天</div>
+        <div class="habit-row">
+          <button class="habit-btn" data-type="drink">
+            <span>💧</span><span class="habit-label">喝水</span>
+          </button>
+          <button class="habit-btn" data-type="stretch">
+            <span>🧘</span><span class="habit-label">拉伸</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 回顾 -->
+    <section class="view" id="view-review">
+      <div class="view-title">回顾</div>
+      <div class="mood-heatmap hidden" id="moodHeatmap">
+        <div class="view-sub">情绪热力图 · 本周</div>
+        <div class="heat-grid" id="heatGrid"></div>
+        <div class="heat-legend">
+          <span>😊 好</span><span>😣 一般</span><span>😫 糟</span><span>· 未记</span>
+        </div>
+      </div>
+      <div class="view-sub">本周已完成</div>
+      <div id="reviewList"></div>
+    </section>
+
+    <!-- 吃啥 -->
+    <section class="view" id="view-eat">
+      <div class="loc-line" id="locLine">正在定位… <span class="spinner"></span></div>
+      <div class="eat-actions">
+        <button class="primary" id="shakeBtn">🎲 摇一摇</button>
+        <button id="refreshEatBtn">↻ 刷新</button>
+      </div>
+      <div id="eatList" class="eat-list"></div>
+    </section>
+
+    <!-- 设置 -->
+    <section class="view" id="view-settings">
+      <div class="view-title">设置</div>
+      <div class="setting-row">
+        <label>高德 API Key</label>
+        <input id="amapKeyInput" type="text" placeholder="填入 Web 服务 Key" autocomplete="off">
+      </div>
+      <div class="setting-row">
+        <label>柔和提醒</label>
+        <input type="checkbox" class="switch" id="softReminderToggle">
+      </div>
+      <button class="setting-btn" id="exportBtn">导出数据（JSON）</button>
+      <button class="setting-btn danger" id="clearBtn">清空所有数据</button>
+      <div class="about">水机 · 个人工作台 V3<br>极简 · 补水 · 零认知负担</div>
+    </section>
+
+  </main>
+
+  <!-- 底部导航 -->
+  <nav class="tabbar">
+    <button class="tab active" data-view="today">今日</button>
+    <button class="tab" data-view="review">回顾</button>
+    <button class="tab" data-view="eat">吃啥</button>
+    <button class="tab" data-view="settings">设置</button>
+  </nav>
+
+  <!-- 弹窗 -->
+  <div class="modal-mask hidden" id="modalMask">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+ * 水机 · 个人工作台  —  单文件应用
+ * 依赖：IndexedDB / Web Speech API / Web Audio API / 高德 Web 服务 API
+ * ===================================================================== */
+
+/* ========================= 工具函数 ========================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function todayStr(d){ d = d || new Date(); const p = n => String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+const WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
+function fmtDate(s){ // 'YYYY-MM-DD' → '8月13日 周四'
+  const d = new Date(s + 'T00:00:00');
+  return (d.getMonth()+1) + '月' + d.getDate() + '日 ' + WEEK[d.getDay()];
+}
+function fmtDist(m){ return m < 1000 ? Math.round(m)+'m' : (m/1000).toFixed(1)+'km'; }
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------- 通用弹窗（返回 Promise<按钮value>） ---------- */
+function showModal(title, bodyHTML, buttons){
+  return new Promise(res => {
+    $('modalTitle').textContent = title;
+    $('modalBody').innerHTML = bodyHTML || '';
+    const acts = $('modalActions');
+    acts.innerHTML = '';
+    buttons.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = 'modal-btn' + (b.primary ? ' primary' : '');
+      btn.textContent = b.label;
+      btn.onclick = () => { hideModal(); res(b.value); };
+      acts.appendChild(btn);
+    });
+    $('modalMask').classList.remove('hidden');
+  });
+}
+function hideModal(){ $('modalMask').classList.add('hidden'); }
+function confirmBox(text){
+  return showModal('提示', text, [
+    {label:'取消', value:false},
+    {label:'确定', value:true, primary:true}
+  ]);
+}
+
+/* ========================= 音效（Web Audio API） ========================= */
+let actx = null;
+function audioCtx(){
+  if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if(actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function playTone(freq, dur, gain, delay){
+  const c = audioCtx();
+  const t0 = c.currentTime + (delay || 0);
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine';
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(gain, t0);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.02);
+}
+/* 左滑完成 → 叮（高频短促） */
+function ding(){ playTone(880, 0.12, 0.22); playTone(1318, 0.22, 0.18, 0.06); }
+/* 习惯签到 → 咕嘟（低频水滴） */
+function blub(){ playTone(320, 0.16, 0.18); playTone(200, 0.14, 0.14, 0.08); }
+
+/* ========================= 每日水语 ========================= */
+const PHRASES = [
+  '水不急，缓缓流',
+  '今天只做三件，够了',
+  '慢一点，稳一点',
+  '先喝口水，再说别的',
+  '把心放平，把事做完',
+  '一天一点点，也了不起',
+  '深呼吸，你已经很好了',
+  '不用完美，完成就行',
+  '此刻，先照顾好自己',
+  '水满了，自然会溢',
+  '顺流而行，不必硬扛',
+  '安住当下，一件一件来'
+];
+function phraseOfDay(){
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 864e5);
+  return PHRASES[dayOfYear % PHRASES.length];
+}
+
+/* ========================= IndexedDB ========================= */
+let db = null;
+function openDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('shuiji', 1);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains('tasks'))  d.createObjectStore('tasks',  {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('habits')) d.createObjectStore('habits', {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('moods'))  d.createObjectStore('moods',  {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('eats'))   d.createObjectStore('eats',   {keyPath:'id', autoIncrement:true});
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = e => reject(e);
+  });
+}
+function getAll(store){
+  return new Promise((res, rej) => { const r = db.transaction(store).objectStore(store).getAll();
+    r.onsuccess = () => res(r.result); r.onerror = rej; });
+}
+function getById(store, id){
+  return new Promise((res, rej) => { const r = db.transaction(store).objectStore(store).get(id);
+    r.onsuccess = () => res(r.result); r.onerror = rej; });
+}
+function add(store, val){
+  return new Promise((res, rej) => { const r = db.transaction(store,'readwrite').objectStore(store).add(val);
+    r.onsuccess = () => res(r.result); r.onerror = rej; });
+}
+function put(store, val){
+  return new Promise((res, rej) => { const r = db.transaction(store,'readwrite').objectStore(store).put(val);
+    r.onsuccess = () => res(r.result); r.onerror = rej; });
+}
+function del(store, id){
+  return new Promise((res, rej) => { const r = db.transaction(store,'readwrite').objectStore(store).delete(id);
+    r.onsuccess = () => res(); r.onerror = rej; });
+}
+function clearStore(store){
+  return new Promise((res, rej) => { const r = db.transaction(store,'readwrite').objectStore(store).clear();
+    r.onsuccess = () => res(); r.onerror = rej; });
+}
+
+/* ========================= 分类识别 ========================= */
+/* 语音/文字自动分类：问查联系找→沟通；写改做整理→动手；其他→等待 */
+function detectCategory(text){
+  if(/[问查联系找]/.test(text)) return 'talk';
+  if(/[写改做整理]/.test(text)) return 'do';
+  return 'wait';
+}
+
+/* ========================= 待办冷却期（防冲动添加） ========================= */
+const cool = { day:'', adds:0, end:0 };
+function loadCool(){
+  cool.day  = localStorage.getItem('shuiji_coolDay')  || todayStr();
+  cool.adds = parseInt(localStorage.getItem('shuiji_coolAdds') || '0', 10) || 0;
+  cool.end  = parseInt(localStorage.getItem('shuiji_coolEnd')  || '0', 10) || 0;
+}
+function saveCool(){
+  localStorage.setItem('shuiji_coolDay', cool.day);
+  localStorage.setItem('shuiji_coolAdds', cool.adds);
+  localStorage.setItem('shuiji_coolEnd',  cool.end);
+}
+function ensureCoolDay(){
+  if(cool.day !== todayStr()){ cool.day = todayStr(); cool.adds = 0; cool.end = 0; }
+}
+function inCooldown(){ return Date.now() < cool.end; }
+/* 每秒刷新按钮倒计时 */
+function updateCooldownUI(){
+  const btn = $('addBtn'), mic = $('micBtn');
+  const left = cool.end - Date.now();
+  if(left > 0){
+    btn.disabled = true; btn.textContent = '冷却 ' + Math.ceil(left/1000) + 's'; btn.classList.add('cooldown');
+    mic.disabled = true;
+  } else {
+    if(btn.disabled){
+      btn.disabled = false; btn.textContent = '＋'; btn.classList.remove('cooldown');
+      mic.disabled = false;
+    }
+  }
+}
+/* 触发冷却：当日连续添加超3次且当日未完成任务 → 暂停1分钟 */
+function triggerCooldown(){
+  cool.end = Date.now() + 60000;
+  saveCool();
+  toast('先稳住，做完再想新的');
+  updateCooldownUI();
+}
+
+/* ========================= 今日任务 ========================= */
+function getActiveToday(){
+  return getAll('tasks').then(list => list.filter(t =>
+    t.date === todayStr() && !t.completed && !t.delayed));
+}
+function getCompletedToday(){
+  return getAll('tasks').then(list => list.filter(t => t.date === todayStr() && t.completed));
+}
+/* 昨日重现：过去 3-7 天未被完成的旧任务（最多3条） */
+function getOldTasks(){
+  return getAll('tasks').then(list => {
+    const from = new Date(); from.setDate(from.getDate() - 7);
+    const to   = new Date(); to.setDate(to.getDate() - 1);
+    return list.filter(t => !t.completed && !t.delayed &&
+      t.date >= todayStr(from) && t.date <= todayStr(to)).slice(0, 3);
+  });
+}
+
+async function refreshToday(){
+  await migrateDelayed();
+  await renderTaskList();
+  await refreshCounts();
+  await renderHabits();
+  updateSoftReminder();
+}
+/* 延时任务跨天迁移：delayed 且日期已过 → 今天重新出现 */
+async function migrateDelayed(){
+  const list = await getAll('tasks');
+  const t = todayStr();
+  const pend = list.filter(x => x.delayed && x.date < t);
+  for(const x of pend){ x.date = t; x.delayed = false; await put('tasks', x); }
+}
+
+async function renderTaskList(){
+  const list = await getActiveToday();
+  const wrap = $('taskList');
+  wrap.innerHTML = '';
+  $('emptyState').classList.toggle('hidden', list.length > 0);
+  if(list.length === 0){ wrap.appendChild($('emptyState')); return; }
+  for(const t of list){
+    const card = document.createElement('div');
+    card.className = 'task-card';
+    card.dataset.id = t.id;
+    card.innerHTML =
+      '<span class="task-dot ' + t.category + '"></span>' +
+      '<span class="task-text">' + esc(t.text) + '</span>';
+    wrap.appendChild(card);
+    bindCard(card);
+  }
+}
+
+/* ---------- 任务卡片触摸：左滑完成 / 右滑延期 / 点按编辑 ---------- */
+function bindCard(card){
+  let startX = 0, startY = 0, startT = 0, dx = 0, swiping = false, moved = false;
+  card.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY; startT = Date.now();
+    dx = 0; swiping = false; moved = false;
+  }, {passive:true});
+  card.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    if(!swiping && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)){ swiping = true; card.classList.add('swiping'); }
+    if(swiping){
+      card.style.transform = 'translateX(' + dx + 'px)';
+      card.style.opacity = String(1 - Math.min(Math.abs(dx) / 240, 0.5));
+    }
+  }, {passive:true});
+  card.addEventListener('touchend', e => {
+    card.classList.remove('swiping');
+    if(swiping){
+      card.style.transform = ''; card.style.opacity = '';
+      if(dx < -80) completeTask(card.dataset.id);          // 左滑 → 完成
+      else if(dx > 80) delayTask(card.dataset.id);          // 右滑 → 延期
+    } else if(!moved && Date.now() - startT < 450 && !e.target.closest('.inline-input')){
+      startEdit(card.dataset.id);                           // 点按 → 编辑
+    }
+  }, {passive:true});
+}
+
+/* 左滑完成 → “叮” 音效 + 卡片淡出 */
+async function completeTask(id){
+  const t = await getById('tasks', id);
+  if(!t || t.completed) return;
+  t.completed = true; t.completedAt = new Date().toISOString();
+  await put('tasks', t);
+  ding();
+  ensureCoolDay(); cool.adds = 0; saveCool();          // 完成任务 → 冷却计数清零
+  const card = document.querySelector('.task-card[data-id="' + id + '"]');
+  if(card) card.classList.add('done-out');
+  setTimeout(() => refreshToday(), 320);
+  updateSoftReminder();
+}
+
+/* 右滑延期 → 卡片变灰，次日重新出现 */
+async function delayTask(id){
+  const t = await getById('tasks', id);
+  if(!t) return;
+  t.delayed = true;
+  await put('tasks', t);
+  const card = document.querySelector('.task-card[data-id="' + id + '"]');
+  if(card) card.classList.add('delayed');
+  toast('已延期到明天');
+  refreshCounts();
+}
+
+/* 点按 → inline 编辑 */
+async function startEdit(id){
+  const card = document.querySelector('.task-card[data-id="' + id + '"]');
+  const title = card.querySelector('.task-text');
+  const cur = title.textContent;
+  const input = document.createElement('input');
+  input.className = 'inline-input';
+  input.value = cur;
+  title.replaceWith(input);
+  input.focus(); input.select();
+  let done = false;
+  const commit = async () => {
+    if(done) return; done = true;
+    const v = input.value.trim();
+    if(v && v !== cur){
+      const t = await getById('tasks', id);
+      if(t){ t.text = v; await put('tasks', t); }
+    }
+    refreshToday();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if(e.key === 'Enter') input.blur();
+    if(e.key === 'Escape'){ done = true; input.blur(); }
+  });
+}
+
+/* ---------- 顶部计数：今日完成 X/Y ---------- */
+async function refreshCounts(){
+  const [completed, total] = await Promise.all([
+    getAll('tasks').then(l => l.filter(t => t.date === todayStr() && t.completed).length),
+    getAll('tasks').then(l => l.filter(t => t.date === todayStr()).length)
+  ]);
+  $('doneCount').textContent = '今日完成 ' + completed + '/' + total;
+
+  /* 彩蛋：今日全部完成 → 显示“今日圆满 🌊”2秒 */
+  if(completed === total && total > 0) showPerfectBanner();
+}
+
+/* ---------- 彩蛋：今日圆满 🌊 ---------- */
+let perfectTimer = null;
+function showPerfectBanner(){
+  const b = $('perfectBanner');
+  b.classList.remove('hidden');
+  clearTimeout(perfectTimer);
+  perfectTimer = setTimeout(() => b.classList.add('hidden'), 2000);
+}
+
+/* ---------- 添加任务（入口：+ 按钮 / 语音填入后回车） ---------- */
+async function handleAdd(){
+  const input = $('taskInput');
+  const text = input.value.trim();
+  if(!text){ toast('写点什么吧'); return; }
+  ensureCoolDay();
+  if(inCooldown()){ updateCooldownUI(); return; }        // 冷却期内禁止添加
+  const active = await getActiveToday();
+  if(active.length >= 3){ toast('水满则溢，先完成再做新的吧'); return; }   // 最多3个
+  await add('tasks', {
+    text, category: detectCategory(text),
+    completed: false, date: todayStr(), delayed: false,
+    createdAt: new Date().toISOString()
+  });
+  const doneToday = (await getCompletedToday()).length;
+  if(doneToday === 0){                                   // 当日尚无完成 → 计入冷却
+    cool.adds++;
+    if(cool.adds > 3) triggerCooldown();
+    saveCool();
+  }
+  input.value = '';
+  await refreshToday();
+  $('oldPanel').classList.add('hidden');                 // 添加后收起昨日面板
+}
+
+/* ========================= 昨日重现（下拉触发） ========================= */
+async function openOldPanel(){
+  const list = await getOldTasks();
+  const panel = $('oldPanel');
+  if(list.length === 0){ toast('没有可召回的旧任务'); return; }
+  const box = $('oldList');
+  box.innerHTML = '';
+  for(const t of list){
+    const row = document.createElement('div');
+    row.className = 'old-task';
+    row.innerHTML = '<span class="old-dot" style="background:' + catColor(t.category) + '"></span>' + esc(t.text);
+    row.onclick = () => recallTask(t);
+    box.appendChild(row);
+  }
+  panel.classList.remove('hidden');
+}
+function catColor(c){ return c === 'do' ? '#4FC3F7' : c === 'talk' ? '#FFA726' : '#90A4AE'; }
+
+async function recallTask(t){
+  const ok = await confirmBox('召回此任务？\n「' + t.text + '」');
+  if(!ok) return;
+  const active = await getActiveToday();
+  if(active.length >= 3){ toast('今日已满，无法召回'); return; }
+  await add('tasks', {
+    text: t.text, category: t.category,
+    completed: false, date: todayStr(), delayed: false,
+    createdAt: new Date().toISOString()
+  });
+  toast('已召回「' + t.text + '」');
+  $('oldPanel').classList.add('hidden');
+  refreshToday();
+}
+
+/* ========================= 下拉刷新手势 ========================= */
+const pull = { startY:0, d:0, pulling:false };
+function initPull(){
+  const main = $('main');
+  const hint = $('pullHint');
+  main.addEventListener('touchstart', e => {
+    pull.startY = e.touches[0].clientY; pull.d = 0; pull.pulling = false;
+  }, {passive:true});
+  main.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    const dy = t.clientY - pull.startY;
+    if(dy <= 0 || main.scrollTop > 0) return;
+    if(e.target.closest('.task-card') || e.target.closest('.eat-card')) return;  // 卡片手势独立
+    pull.pulling = true; pull.d = dy;
+    if(e.cancelable) e.preventDefault();                 // 阻止浏览器下拉刷新
+    if(isView('today')){
+      hint.classList.add('visible');
+      hint.style.transform = 'translateY(' + Math.min(dy * 0.35, 40) + 'px)';
+      hint.textContent = dy > 70 ? '松开召唤昨日' : '↓ 下拉召唤昨日';
+    }
+  }, {passive:false});
+  main.addEventListener('touchend', () => {
+    hint.classList.remove('visible'); hint.style.transform = '';
+    if(pull.pulling && pull.d > 70){
+      if(isView('today')) openOldPanel();
+      else if(isView('eat')) locate(true);               // 吃啥页下拉 → 重新定位+搜索
+    }
+    pull.pulling = false;
+  }, {passive:true});
+}
+
+/* ========================= 微习惯签到 ========================= */
+function streakFrom(all, type){
+  const dates = new Set(all.filter(h => h.type === type).map(h => h.date));
+  const d = new Date(); let n = 0;
+  while(dates.has(todayStr(d))){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+async function renderHabits(){
+  const all = await getAll('habits');
+  const t = todayStr();
+  const done = new Set(all.filter(h => h.date === t).map(h => h.type));
+  document.querySelectorAll('.habit-btn').forEach(b =>
+    b.classList.toggle('active', done.has(b.dataset.type)));
+  const max = Math.max(streakFrom(all, 'drink'), streakFrom(all, 'stretch'));
+  $('streakLine').textContent = '已连续坚持 ' + max + ' 天';
+}
+async function checkHabit(type){
+  const all = await getAll('habits');
+  if(all.some(h => h.date === todayStr() && h.type === type)){ toast('今天已经签到啦'); return; }
+  await add('habits', { date: todayStr(), type });
+  blub();                                                 // “咕嘟”水滴声
+  await renderHabits();
+  const s = streakFrom(all.concat([{date:todayStr(),type}]), type);
+  if(s === 7){                                           // 彩蛋：连签7天
+    showModal('🎯', '水养了七天，你稳了 🎯', [{label:'收下', value:1, primary:true}]);
+  }
+}
+
+/* ========================= 情绪签到 ========================= */
+async function recordMood(mood){
+  await add('moods', { date: new Date().toISOString(), mood });
+  const em = mood === 'happy' ? '😊' : mood === 'neutral' ? '😣' : '😫';
+  toast('已记录今日心情 ' + em);
+}
+
+/* ========================= 回顾页 ========================= */
+async function renderReview(){
+  const t = todayStr();
+  // 本周一作为范围起点
+  const now = new Date();
+  const dow = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() + (dow === 0 ? -6 : 1 - dow));
+  const monStr = todayStr(mon);
+
+  const done = (await getAll('tasks')).filter(x => x.completed && x.date >= monStr && x.date <= t)
+    .sort((a, b) => b.date < a.date ? -1 : b.date > a.date ? 1 : (b.completedAt||'').localeCompare(a.completedAt||''));
+  const groups = {};
+  done.forEach(x => (groups[x.date] = groups[x.date] || []).push(x));
+
+  const box = $('reviewList');
+  if(!done.length){ box.innerHTML = '<div class="empty">本周还没有完成任务</div>'; }
+  else {
+    box.innerHTML = Object.keys(groups).sort().reverse().map(ds =>
+      '<div class="rev-group"><div class="rev-date">' + fmtDate(ds) + '</div>' +
+      groups[ds].map(x =>
+        '<div class="rev-item"><span class="rev-cat" style="background:' + catColor(x.category) + '"></span>' +
+        '<span class="rev-check">✓</span>' + esc(x.text) + '</div>'
+      ).join('') + '</div>'
+    ).join('');
+  }
+  renderMoodHeatmap();
+}
+/* 情绪热力图：满 7 条记录才出现，显示本周每天状态分布 */
+async function renderMoodHeatmap(){
+  const all = await getAll('moods');
+  const wrap = $('moodHeatmap');
+  if(all.length < 7){ wrap.classList.add('hidden'); return; }
+  const map = {};
+  all.forEach(m => map[m.date.slice(0,10)] = m.mood);
+  const now = new Date();
+  const dow = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() + (dow === 0 ? -6 : 1 - dow));
+  let html = '';
+  for(let i = 0; i < 7; i++){
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    const ds = todayStr(d);
+    const mood = map[ds];
+    const icon = mood === 'happy' ? '😊' : mood === 'neutral' ? '😣' : mood === 'bad' ? '😫' : '·';
+    html += '<div class="heat-cell ' + (mood || 'none') + '">' + icon + '</div>';
+  }
+  $('heatGrid').innerHTML = html;
+  wrap.classList.remove('hidden');
+}
+
+/* ========================= 柔和提醒（18:00 后有未完成任务） ========================= */
+async function updateSoftReminder(){
+  const on = localStorage.getItem('shuiji_softReminder') === '1';
+  const el = $('softReminder');
+  if(!on){ el.classList.add('hidden'); return; }
+  const h = new Date().getHours();
+  const left = (await getAll('tasks')).filter(t => t.date === todayStr() && !t.completed).length;
+  if(h >= 18 && left > 0) el.classList.remove('hidden');
+  else el.classList.add('hidden');
+}
+
+/* ========================= 语音输入（Web Speech API） ========================= */
+function setupSpeech(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ $('micBtn').classList.add('hidden'); return; }  // 不支持则隐藏
+  $('micBtn').classList.remove('hidden');
+  $('micBtn').onclick = () => {
+    try {
+      const r = new SR();
+      r.lang = 'zh-CN'; r.interimResults = false; r.maxAlternatives = 1;
+      r.onresult = e => {
+        const text = e.results[0][0].transcript;
+        $('taskInput').value = text;                       // 自动填入输入框
+        toast('已识别，点 ＋ 添加');
+        r.stop();
+      };
+      r.onerror = () => toast('语音识别失败，请重试');
+      r.start();
+      toast('请说话…');
+    } catch(e){ toast('语音不可用'); }
+  };
+}
+
+/* ========================= 吃啥 · 定位 ========================= */
+let eat = { key:'', city:'已定位', loc:null, list:[], visited:new Set() };
+
+function fetchJSON(url){
+  return fetch(url).then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+}
+function getCurrentPosition(){
+  return new Promise((res, rej) => {
+    if(!navigator.geolocation){ rej('no geo'); return; }
+    navigator.geolocation.getCurrentPosition(
+      p => res({ lng: p.coords.longitude, lat: p.coords.latitude }),
+      e => rej(e),
+      { enableHighAccuracy:true, timeout:8000, maximumAge:10000 }
+    );
+  });
+}
+/* 获取城市名（降级接口，无需 Key） */
+async function getCityName(){
+  try {
+    const j = await fetchJSON('https://geo.kamero.ai/api/geo');
+    return j.city || j.cityName || (j.location && j.location.city) || '已定位';
+  } catch(e){ return '已定位'; }
+}
+
+async function locate(manual){
+  const line = $('locLine');
+  line.innerHTML = '正在定位… <span class="spinner"></span>';
+  eat.key = localStorage.getItem('shuiji_amapKey') || '';
+  let coords = null;
+  try {
+    coords = await getCurrentPosition();                   // 优先：精确经纬度
+  } catch(e) { /* 降级到 kamero */ }
+  if(!coords){
+    try {
+      const j = await fetchJSON('https://geo.kamero.ai/api/geo');
+      coords = { lng: j.longitude || j.lng || (j.location && j.location.lng),
+                 lat: j.latitude  || j.lat || (j.location && j.location.lat) };
+      eat.city = j.city || j.cityName || '已定位';
+    } catch(e){}
+  }
+  if(!coords || coords.lng == null){ line.textContent = '定位失败，请检查网络或开启定位权限'; return; }
+  eat.loc = coords;
+  if(!eat.city) eat.city = await getCityName();
+  line.innerHTML = '📍 当前城市：' + esc(eat.city);
+  if(!eat.key){ $('eatList').innerHTML = '<div class="empty">请在「设置」页填写高德 API Key</div>'; return; }
+  await searchRestaurants();
+}
+
+/* ========================= 吃啥 · 高德周边搜索 ========================= */
+async function searchRestaurants(){
+  const box = $('eatList');
+  box.innerHTML = '<div class="loc-line">正在搜索附近美食… <span class="spinner"></span></div>';
+  const url = 'https://restapi.amap.com/v3/place/around?key=' + eat.key +
+    '&location=' + eat.loc.lng + ',' + eat.loc.lat +
+    '&radius=1000&types=050000&offset=6&output=json';
+  try {
+    const j = await fetchJSON(url);
+    if(String(j.status) !== '1') throw new Error(j.info || '接口返回错误');
+    const pois = (j.pois || []).map(p => {
+      const b = p.biz_ext || {};
+      return {
+        name: p.name || '未知名', address: p.address || '', tel: p.tel || '',
+        rating: parseFloat(b.rating) || 0,
+        cost: parseFloat(b.cost) || 0,
+        openTime: b.open_time || '',
+        distance: parseFloat(p.distance) || 0
+      };
+    });
+    eat.visited = await loadVisited();
+    eat.list = pois.filter(x => !eat.visited.has(x.name)); // 过滤去过的
+    renderEats();
+    if(!eat.list.length && pois.length){ box.innerHTML = '<div class="empty">附近的都去过啦，换个地方吃 🎉</div>'; }
+  } catch(e) {
+    box.innerHTML = '<div class="empty">搜索失败，请检查 Key 与网络</div>';
+  }
+}
+
+/* 排序（评分降序）+ 渲染卡片 */
+function renderEats(){
+  const box = $('eatList');
+  const list = eat.list.slice().sort((a, b) => (b.rating - a.rating) || (a.distance - b.distance));
+  box.innerHTML = list.map(r =>
+    '<div class="eat-card" data-name="' + esc(r.name) + '">' +
+      '<div class="eat-head">' +
+        '<span class="eat-name">' + esc(r.name) + '</span>' +
+        '<button class="visited-chip" data-name="' + esc(r.name) + '">去过</button>' +
+      '</div>' +
+      '<div class="eat-sub">⭐ ' + (r.rating || '—') + ' · 距离 ' + fmtDist(r.distance) + '</div>' +
+      '<div class="eat-sub">' + (r.cost ? '人均 ¥' + r.cost : '人均 —') + '</div>' +
+    '</div>'
+  ).join('') || '<div class="empty">附近暂无餐厅</div>';
+
+  /* 卡片点击 → 详情弹窗 */
+  box.querySelectorAll('.eat-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const r = eat.list.find(x => x.name === card.dataset.name);
+      if(r) showRestaurantDetail(r);
+    });
+  });
+  /* “去过” → 记录，不再推荐 */
+  box.querySelectorAll('.visited-chip').forEach(chip => {
+    chip.addEventListener('click', async e => {
+      e.stopPropagation();
+      const r = eat.list.find(x => x.name === chip.dataset.name);
+      if(r) await markVisited(r);
+    });
+  });
+}
+
+function showRestaurantDetail(r){
+  showModal(r.name,
+    '<div class="eat-detail">' +
+      '<div>⭐ 评分 ' + (r.rating || '—') + ' · 人均 ' + (r.cost ? '¥' + r.cost : '—') + '</div>' +
+      '<div>📍 ' + esc(r.address || '暂无地址') + '</div>' +
+      (r.tel ? '<div>📞 ' + esc(r.tel) + '</div>' : '') +
+      '<div>🕐 ' + esc(r.openTime || '暂无营业时间') + '</div>' +
+    '</div>',
+    [{label:'去过，不推了', value:'visited'}, {label:'关闭', value:'close'}]
+  ).then(v => { if(v === 'visited') markVisited(r); });
+}
+
+/* ---------- 去过的店 → IndexedDB(eats)，保留最近30条 ---------- */
+async function loadVisited(){
+  const all = await getAll('eats');
+  return new Set(all.filter(x => x.visited).map(x => x.restaurantName));
+}
+async function markVisited(r){
+  await add('eats', { date: new Date().toISOString(), restaurantName: r.name, address: r.address || '', rating: r.rating || 0, visited: true });
+  await pruneEats(30);
+  eat.visited.add(r.name);
+  eat.list = eat.list.filter(x => x.name !== r.name);
+  toast('已记录，下次不再推荐');
+  renderEats();
+}
+async function pruneEats(max){
+  const all = (await getAll('eats')).sort((a, b) => (a.date < b.date ? 1 : -1)); // 新的在前
+  const excess = all.slice(max);
+  for(const x of excess) await del('eats', x.id);
+}
+
+/* ---------- 摇一摇：随机推荐 1 家 ---------- */
+function pickRandom(){
+  const list = eat.list;
+  if(!list.length){ toast('列表为空，先去搜索附近美食'); return; }
+  const r = list[Math.floor(Math.random() * list.length)];
+  showModal('今天吃这家？',
+    '<div class="eat-detail">' +
+      '<div class="ed-name">' + esc(r.name) + '</div>' +
+      '<div>⭐ ' + (r.rating || '—') + ' · 人均 ' + (r.cost ? '¥' + r.cost : '—') + '</div>' +
+      (r.tel ? '<div>📞 ' + esc(r.tel) + '</div>' : '') +
+      '<div>🕐 ' + esc(r.openTime || '暂无营业时间') + '</div>' +
+    '</div>',
+    [{label:'就它了', value:'ok', primary:true}, {label:'换一家', value:'again'}, {label:'算了', value:'close'}]
+  ).then(v => { if(v === 'again') pickRandom(); });
+}
+/* 摇一摇手势（陀螺仪） */
+let lastShake = 0;
+function initShake(){
+  window.addEventListener('devicemotion', e => {
+    const a = e.accelerationIncludingGravity;
+    if(!a) return;
+    const mag = Math.abs(a.x) + Math.abs(a.y) + Math.abs(a.z);
+    const now = Date.now();
+    if(mag > 28 && now - lastShake > 1500 && isView('eat') && eat.list.length){
+      lastShake = now;
+      pickRandom();
+    }
+  });
+}
+
+/* ========================= 设置 ========================= */
+function loadSettings(){
+  const key = localStorage.getItem('shuiji_amapKey') || '';
+  $('amapKeyInput').value = key;
+  eat.key = key;
+  $('softReminderToggle').checked = localStorage.getItem('shuiji_softReminder') === '1';
+}
+async function exportData(){
+  const all = {
+    exportedAt: new Date().toISOString(),
+    tasks:  await getAll('tasks'),
+    habits: await getAll('habits'),
+    moods:  await getAll('moods'),
+    eats:   await getAll('eats'),
+    settings: {
+      amapKey: localStorage.getItem('shuiji_amapKey') || '',
+      softReminder: localStorage.getItem('shuiji_softReminder') === '1'
+    }
+  };
+  const blob = new Blob([JSON.stringify(all, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'shuiji-backup-' + todayStr() + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('已导出 JSON');
+}
+async function clearAll(){
+  const ok = await confirmBox('确定清空所有数据吗？\n此操作不可恢复，建议先导出备份。');
+  if(!ok) return;
+  await Promise.all([clearStore('tasks'), clearStore('habits'), clearStore('moods'), clearStore('eats')]);
+  localStorage.removeItem('shuiji_coolDay'); localStorage.removeItem('shuiji_coolAdds'); localStorage.removeItem('shuiji_coolEnd');
+  toast('已清空所有数据');
+  refreshToday();
+  renderReview();
+}
+
+/* ========================= 底部导航切换 ========================= */
+function isView(name){ return $('view-' + name).classList.contains('active'); }
+function switchTab(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $('view-' + name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
+  $('oldPanel').classList.add('hidden');
+  if(name === 'review') renderReview();
+  if(name === 'eat' && !eat.loc) locate();
+}
+
+/* ========================= PWA：Service Worker 注册（占位） ========================= */
+function registerSW(){
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(() => {/* 无文件也不影响 */});
+  }
+}
+
+/* ========================= 初始化 ========================= */
+async function init(){
+  loadCool();
+  await openDB();
+  $('waterPhrase').textContent = phraseOfDay();
+  setupSpeech();
+  loadSettings();
+  await refreshToday();
+
+  /* 事件绑定 */
+  $('addBtn').addEventListener('click', handleAdd);
+  $('taskInput').addEventListener('keydown', e => { if(e.key === 'Enter') handleAdd(); });
+  document.querySelectorAll('.mood-emoji').forEach(el => {
+    el.addEventListener('click', () => recordMood(el.dataset.mood));
+  });
+  document.querySelectorAll('.habit-btn').forEach(b => {
+    b.addEventListener('click', () => checkHabit(b.dataset.type));
+  });
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => switchTab(t.dataset.view));
+  });
+  $('oldClose').addEventListener('click', () => $('oldPanel').classList.add('hidden'));
+  $('shakeBtn').addEventListener('click', pickRandom);
+  $('refreshEatBtn').addEventListener('click', () => locate(true));
+  $('amapKeyInput').addEventListener('change', e => {
+    localStorage.setItem('shuiji_amapKey', e.target.value.trim());
+    eat.key = e.target.value.trim();
+    if(isView('eat')) locate(true);
+    toast('Key 已保存');
+  });
+  $('softReminderToggle').addEventListener('change', e => {
+    localStorage.setItem('shuiji_softReminder', e.target.checked ? '1' : '0');
+    updateSoftReminder();
+  });
+  $('exportBtn').addEventListener('click', exportData);
+  $('clearBtn').addEventListener('click', clearAll);
+
+  initPull();
+  initShake();
+  registerSW();
+
+  /* 定时刷新：冷却倒计时 + 柔和提醒（18:00 判断） */
+  setInterval(updateCooldownUI, 1000);
+  setInterval(updateSoftReminder, 60000);
+  updateCooldownUI();
+}
+init();
+</script>
+</body>
+</html>
