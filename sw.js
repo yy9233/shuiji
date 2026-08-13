@@ -2,7 +2,7 @@
  * 策略：同源静态资源缓存优先 + 运行期缓存；跨域（高德 / kamero）一律走网络不缓存。
  * 注意：Service Worker 仅在 HTTPS（或 localhost）下生效。
  */
-const CACHE = 'shuiji-v6';
+const CACHE = 'shuiji-v7';
 const ASSETS = [
   './',
   './index.html',

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light">
 <meta name="theme-color" content="#1A2A3A">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,6 +17,7 @@
 <style>
   /* ================= 基础 ================= */
   :root{
+    color-scheme: light;   /* 禁止手机深色模式自动反色 */
     --bg:#E7F3EA;          /* 浅绿清新 · 主背景 */
     --card:#FFFFFF;        /* 白色卡片 */
     --text:#21402C;        /* 深绿黑文字 */
@@ -105,6 +107,10 @@
   .main{flex:1;overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch;padding:6px 18px 90px;}
   .view{display:none;}
   .view.active{display:block;}
+  .widget-topbar{display:flex;align-items:center;gap:10px;margin:-6px -18px 14px;padding:14px 18px 12px;position:sticky;top:0;background:linear-gradient(180deg,var(--bg) 60%,rgba(231,243,234,0.9));z-index:5;backdrop-filter:blur(6px);}
+  .widget-back{background:var(--accentSoft);color:#2E8B57;border-radius:999px;padding:5px 14px;font-size:14px;flex-shrink:0;}
+  .widget-title{flex:1;font-weight:700;color:var(--text);font-size:16px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .widget-topbar-sp{width:52px;flex-shrink:0;}
 
   /* ================= 输入区域 ================= */
   .input-row{display:flex;gap:8px;margin-bottom:14px;}
@@ -400,6 +406,9 @@
   .w-book{font-size:13px;color:var(--sub);background:rgba(33,64,44,0.06);border-radius:999px;padding:5px 12px;border:1px solid transparent;}
   .w-book.sel{color:#2E8B57;background:var(--accentSoft);border-color:rgba(46,139,87,0.3);}
   .w-book-add{color:var(--sub);border-style:dashed;border-color:var(--line);}
+  .w-citys{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;}
+  .w-city{font-size:12px;color:var(--sub);background:rgba(33,64,44,0.06);border-radius:999px;padding:4px 11px;border:1px solid transparent;}
+  .w-city.sel{color:#2E8B57;background:var(--accentSoft);border-color:rgba(46,139,87,0.3);}
   .w-del{color:var(--sub);padding:2px 8px;font-size:14px;flex-shrink:0;}
   .w-del:active{color:#E57368;}
   .w-add{display:flex;gap:8px;margin-top:10px;align-items:center;}
@@ -700,6 +709,10 @@
         <input id="amapKeyInput" type="text" placeholder="填入 Web 服务 Key" autocomplete="off">
       </div>
       <div class="setting-row">
+        <label>DeepSeek API Key</label>
+        <input id="dsKeyInput" type="password" placeholder="用于 AI 每日书单（platform.deepseek.com 免费领取）" autocomplete="off">
+      </div>
+      <div class="setting-row">
         <label>柔和提醒</label>
         <input type="checkbox" class="switch" id="softReminderToggle">
       </div>
@@ -722,8 +735,13 @@
       <div class="about">水机 · 个人工作台 V3<br>极简 · 补水 · 零认知负担</div>
     </section>
 
-    <!-- 小组件占位（视频风格菜单，纯导航） -->
+    <!-- 小组件视图：顶栏返回 + 内容 -->
     <section class="view" id="view-widget">
+      <div class="widget-topbar">
+        <button class="widget-back" id="widgetBack">‹ 返回</button>
+        <div class="widget-title" id="widgetTitle">小组件</div>
+        <span class="widget-topbar-sp"></span>
+      </div>
       <div id="widgetBox"></div>
     </section>
 
@@ -1516,6 +1534,39 @@ function setupSpeech(){
 
 /* ========================= 吃啥 · 定位 ========================= */
 let eat = { key:'', city:'已定位', loc:null, list:[], visited:new Set() };
+/* 免 Key 本地菜单：不接高德时的「吃啥」随机选项 */
+const LOCAL_FOODS = [
+  { name:'🍚 家常小炒', tip:'米饭 + 一荤两素，20 分钟搞定' },
+  { name:'🍜 兰州拉面', tip:'汤头清，热乎管饱' },
+  { name:'🥟 饺子', tip:'玉米鲜肉，一人份正好' },
+  { name:'🍲 麻辣烫', tip:'少麻少辣，蔬菜多拿' },
+  { name:'🥗 轻食沙拉', tip:'鸡胸 + 油醋汁，减脂友好' },
+  { name:'🍛 黄焖鸡米饭', tip:'鸡肉入味，配米饭刚好' },
+  { name:'🍝 意大利面', tip:'番茄肉酱，在家也能做' },
+  { name:'🍱 日式便当', tip:'照烧鸡肉，清爽不腻' },
+  { name:'🥘 番茄鸡蛋盖饭', tip:'国民家常，开胃' },
+  { name:'🍔 汉堡套餐', tip:'偶尔放纵一下' },
+  { name:'🌯 卷饼 / 三明治', tip:'快，边走边吃' },
+  { name:'🍤 扬州炒饭', tip:'虾仁 + 火腿，喷香' },
+  { name:'🍢 关东煮', tip:'暖胃，汤也好喝' },
+  { name:'🥣 皮蛋瘦肉粥 + 油条', tip:'清淡养胃' },
+  { name:'🍗 烤鸡腿 + 时蔬', tip:'蛋白质到位' },
+  { name:'🥪 全麦三明治', tip:'鸡蛋 + 牛油果，轻负担' },
+  { name:'🍜 螺蛳粉', tip:'加个炸蛋更香' },
+  { name:'🍚 石锅拌饭', tip:'蔬菜齐全，微辣开胃' },
+  { name:'🍥 酸菜鱼', tip:'酸辣下饭' },
+  { name:'🌶 小炒黄牛肉', tip:'下饭神器' },
+  { name:'🍲 番茄牛腩汤', tip:'软烂入味' },
+  { name:'🥗 鸡胸沙拉碗', tip:'低卡高蛋白' },
+  { name:'🍛 咖喱鸡肉饭', tip:'香浓，配米饭绝配' },
+  { name:'🍜 葱油拌面', tip:'简单快手' },
+  { name:'🥟 煎饺 + 豆浆', tip:'早晚餐都行' },
+  { name:'🍚 广式烧腊饭', tip:'叉烧 / 烧鸭都香' },
+  { name:'🍲 砂锅粥', tip:'鲜虾粥，暖胃' },
+  { name:'🌮 墨西哥塔可', tip:'换个口味' },
+  { name:'🍱 轻食外卖', tip:'选个 400-500 卡的套餐' },
+  { name:'🍜 豚骨拉面', tip:'溏心蛋是灵魂' }
+];
 
 function fetchJSON(url){
   return fetch(url).then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
@@ -1556,8 +1607,21 @@ async function checkLocConsent(){
 
 async function locate(manual){
   const line = $('locLine');
-  line.innerHTML = '正在定位… <span class="spinner"></span>';
   eat.key = localStorage.getItem('shuiji_amapKey') || '';
+  if(!eat.key){                                          // 无高德 Key → 本地菜单（免 Key，无需定位）
+    eat.visited = await loadVisited();
+    line.innerHTML = '📍 本地菜单（未接高德 · 随机推荐家常味）';
+    eat.city = '本地菜单';
+    eat.list = LOCAL_FOODS.map(f => ({ name: f.name, tip: f.tip, rating: 5, distance: 0, cost: 0, local: true })).filter(f => !eat.visited.has(f.name));
+    if(!eat.list.length){
+      line.textContent = '家常菜都尝过啦，换点别的 🎉（设置页「清空所有数据」可重置）';
+      $('eatList').innerHTML = '';
+      return;
+    }
+    renderEats();
+    return;
+  }
+  line.innerHTML = '正在定位… <span class="spinner"></span>';
   const consent = await checkLocConsent();
   if(consent === 'no'){                                 // 拒绝 → 停用吃啥
     line.textContent = '已关闭定位，「吃啥」不可用（设置页可重新开启）';
@@ -1580,7 +1644,6 @@ async function locate(manual){
   eat.loc = coords;
   if(!eat.city) eat.city = await getCityName();
   line.innerHTML = '📍 当前城市：' + esc(eat.city);
-  if(!eat.key){ $('eatList').innerHTML = '<div class="empty">请在「设置」页填写高德 API Key</div>'; return; }
   await searchRestaurants();
 }
 
@@ -1623,9 +1686,11 @@ function renderEats(){
         '<span class="eat-name">' + esc(r.name) + '</span>' +
         '<button class="visited-chip" data-name="' + esc(r.name) + '">去过</button>' +
       '</div>' +
-      '<div class="eat-sub">⭐ ' + (r.rating || '—') + ' · 距离 ' + fmtDist(r.distance) + '</div>' +
-      '<div class="eat-sub">' + (r.cost ? '人均 ¥' + r.cost : '人均 —') + '</div>' +
-    '</div>'
+      (r.local
+        ? '<div class="eat-sub">💡 ' + esc(r.tip) + '</div>'
+        : '<div class="eat-sub">⭐ ' + (r.rating || '—') + ' · 距离 ' + fmtDist(r.distance) + '</div>' +
+          '<div class="eat-sub">' + (r.cost ? '人均 ¥' + r.cost : '人均 —') + '</div>')
+    + '</div>'
   ).join('') || '<div class="empty">附近暂无餐厅</div>';
 
   /* 卡片点击 → 详情弹窗 */
@@ -1647,13 +1712,15 @@ function renderEats(){
 
 function showRestaurantDetail(r){
   showModal(r.name,
-    '<div class="eat-detail">' +
-      '<div>⭐ 评分 ' + (r.rating || '—') + ' · 人均 ' + (r.cost ? '¥' + r.cost : '—') + '</div>' +
-      '<div>📍 ' + esc(r.address || '暂无地址') + '</div>' +
-      (r.tel ? '<div>📞 ' + esc(r.tel) + '</div>' : '') +
-      '<div>🕐 ' + esc(r.openTime || '暂无营业时间') + '</div>' +
-    '</div>',
-    [{label:'去过，不推了', value:'visited'}, {label:'关闭', value:'close'}]
+    r.local
+      ? '<div class="eat-detail"><div>💡 ' + esc(r.tip) + '</div></div>'
+      : '<div class="eat-detail">' +
+        '<div>⭐ 评分 ' + (r.rating || '—') + ' · 人均 ' + (r.cost ? '¥' + r.cost : '—') + '</div>' +
+        '<div>📍 ' + esc(r.address || '暂无地址') + '</div>' +
+        (r.tel ? '<div>📞 ' + esc(r.tel) + '</div>' : '') +
+        '<div>🕐 ' + esc(r.openTime || '暂无营业时间') + '</div>' +
+      '</div>',
+    [{label:'吃过，不推了', value:'visited'}, {label:'关闭', value:'close'}]
   ).then(v => { if(v === 'visited') markVisited(r); });
 }
 
@@ -1684,10 +1751,12 @@ function pickRandom(){
   showModal('今天吃这家？',
     '<div class="eat-detail">' +
       '<div class="ed-name">' + esc(r.name) + '</div>' +
-      '<div>⭐ ' + (r.rating || '—') + ' · 人均 ' + (r.cost ? '¥' + r.cost : '—') + '</div>' +
-      (r.tel ? '<div>📞 ' + esc(r.tel) + '</div>' : '') +
-      '<div>🕐 ' + esc(r.openTime || '暂无营业时间') + '</div>' +
-    '</div>',
+      (r.local
+        ? '<div>💡 ' + esc(r.tip) + '</div>'
+        : '<div>⭐ ' + (r.rating || '—') + ' · 人均 ' + (r.cost ? '¥' + r.cost : '—') + '</div>' +
+          (r.tel ? '<div>📞 ' + esc(r.tel) + '</div>' : '') +
+          '<div>🕐 ' + esc(r.openTime || '暂无营业时间') + '</div>')
+    + '</div>',
     [{label:'就它了', value:'ok', primary:true}, {label:'换一家', value:'again'}, {label:'算了', value:'close'}]
   ).then(v => { if(v === 'again') pickRandom(); });
 }
@@ -1711,6 +1780,7 @@ function loadSettings(){
   const key = localStorage.getItem('shuiji_amapKey') || '';
   $('amapKeyInput').value = key;
   eat.key = key;
+  $('dsKeyInput').value = localStorage.getItem('shuiji_ds_key') || '';
   $('softReminderToggle').checked = localStorage.getItem('shuiji_softReminder') === '1';
 }
 async function exportData(){
@@ -1860,6 +1930,7 @@ function openWidget(name){
   $('view-widget').classList.add('active');
   document.querySelectorAll('.drawer-item').forEach(t => t.classList.toggle('active', t.dataset.widget === name));
   curWidget = name;
+  const wt = $('widgetTitle'); if(wt) wt.textContent = name;
   const w = WIDGETS[name];
   if(w){ $('widgetBox').innerHTML = w.render(); if(w.after) w.after(); }
   else {
@@ -1936,12 +2007,80 @@ WIDGETS['每日计划'] = {
 };
 
 /* ---------- 天气 ---------- */
+const COMMON_CITIES = [
+  {name:'北京',lat:39.9042,lon:116.4074},{name:'上海',lat:31.2304,lon:121.4737},
+  {name:'广州',lat:23.1291,lon:113.2644},{name:'深圳',lat:22.5431,lon:114.0579},
+  {name:'杭州',lat:30.2741,lon:120.1551},{name:'成都',lat:30.5728,lon:104.0668},
+  {name:'武汉',lat:30.5928,lon:114.3055},{name:'南京',lat:32.0603,lon:118.7969},
+  {name:'重庆',lat:29.563,lon:106.5516},{name:'西安',lat:34.3416,lon:108.9398},
+  {name:'长沙',lat:28.2282,lon:112.9388},{name:'天津',lat:39.3434,lon:117.3616},
+  {name:'苏州',lat:31.2989,lon:120.5853},{name:'青岛',lat:36.0671,lon:120.3826},
+  {name:'昆明',lat:25.0389,lon:102.7183},{name:'贵阳',lat:26.6477,lon:106.6302},
+  {name:'哈尔滨',lat:45.8038,lon:126.5349},{name:'沈阳',lat:41.8057,lon:123.4315}
+];
+function wxCity(){ try{ return JSON.parse(localStorage.getItem('shuiji_w_city') || 'null'); }catch(e){ return null; } }
+function wxCode(c){
+  const M = {
+    0:'☀️ 晴',1:'🌤 晴间多云',2:'⛅ 多云',3:'☁️ 阴',
+    45:'🌫 雾',48:'🌫 雾凇',51:'🌦 毛毛雨',53:'🌦 毛毛雨',55:'🌧 毛毛雨',
+    61:'🌧 小雨',63:'🌧 中雨',65:'🌧 大雨',66:'🌧 冻雨',67:'🌧 冻雨',
+    71:'🌨 小雪',73:'🌨 中雪',75:'❄️ 大雪',77:'🌨 雪粒',
+    80:'🌦 阵雨',81:'🌦 阵雨',82:'⛈ 强阵雨',85:'🌨 阵雪',86:'🌨 阵雪',
+    95:'⛈ 雷雨',96:'⛈ 雷雨冰雹',99:'⛈ 强雷雨'
+  };
+  return M[c] || '🌡 ' + c;
+}
+async function wxSearch(name){
+  try{
+    const j = await fetchJSON('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(name) + '&count=5&language=zh');
+    const all = j.results || [];
+    if(!all.length) return null;
+    const r = all.find(x => /中|CN/.test(String(x.country || '') + String(x.country_code || ''))) || all[0];
+    const nm = String(r.name || name).replace(/(市|县|区)$/, '');
+    return { name: nm, lat: r.latitude, lon: r.longitude };
+  }catch(e){ return null; }
+}
 WIDGETS['天气'] = {
   render(){
-    return '<div class="w-card" id="wWeather"><div class="w-card-h"><div class="w-card-t">🌤️ 天气</div><div class="w-streak" id="wCity">定位中…</div></div><div id="wWx"><div class="w-empty">加载中…</div></div></div>';
+    const c = wxCity();
+    return '<div class="w-card" id="wWeather"><div class="w-card-h"><div class="w-card-t">🌤️ 天气</div><div class="w-streak" id="wCity">' + (c ? esc(c.name) : '加载中…') + '</div></div>' +
+      '<div class="w-add" style="margin-top:2px"><input id="w-city" type="text" placeholder="输入城市名搜索，如 拉萨" value="' + (c ? esc(c.name) : '') + '" autocomplete="off"><button class="w-btn" data-wact="wx-set">☑ 切换</button></div>' +
+      '<div class="w-citys">' + COMMON_CITIES.map(x => '<button class="w-city' + (c && c.name === x.name ? ' sel' : '') + '" data-wact="wx-pick" data-name="' + x.name + '" data-lat="' + x.lat + '" data-lon="' + x.lon + '">' + x.name + '</button>').join('') + '</div>' +
+      '<div id="wWx"><div class="w-empty">加载中…</div></div></div>';
   },
   after(){ loadWeather(); },
-  acts: {}
+  acts: {
+    'wx-pick': async b => {
+      localStorage.setItem('shuiji_w_city', JSON.stringify({ name: b.dataset.name, lat: parseFloat(b.dataset.lat), lon: parseFloat(b.dataset.lon) }));
+      openWidget(curWidget);
+    },
+    'wx-set': async () => {
+      const name = ($('w-city').value || '').trim();
+      if(!name){ toast('输入城市名'); return; }
+      const found = await wxSearch(name);
+      if(!found){ toast('没找到「' + name + '」，换个写法试试'); return; }
+      localStorage.setItem('shuiji_w_city', JSON.stringify(found));
+      toast('已切换到 ' + found.name);
+      openWidget(curWidget);
+    },
+    'wx-loc': async () => {
+      const key = (localStorage.getItem('shuiji_amapKey') || '').trim();
+      if(!key){ toast('「当前位置」需要高德 Key（设置页填写，定位免费）'); return; }
+      const consent = localStorage.getItem('shuiji_loc_consent');
+      if(consent === 'no'){ toast('你之前拒绝过定位，去设置页重新开启'); return; }
+      if(!consent) await checkLocConsent();
+      try{
+        const loc = await getCurrentPosition();
+        const geo = await fetchJSON('https://restapi.amap.com/v3/geocode/regeo?location=' + loc.lng + ',' + loc.lat + '&key=' + encodeURIComponent(key)).catch(() => null);
+        const comp = geo && geo.regeocode && geo.regeocode.addressComponent;
+        const nm = comp && comp.city && comp.city !== '[]' ? comp.city : (comp && comp.province);
+        const cityName = nm && nm !== '[]' ? nm : '当前位置';
+        localStorage.setItem('shuiji_w_city', JSON.stringify({ name: cityName, lat: loc.lat, lon: loc.lng }));
+        toast('已定位到 ' + cityName);
+      }catch(e){ toast('定位失败，换个城市吧'); }
+      openWidget(curWidget);
+    }
+  }
 };
 function wearAdvice(temp){
   const t = parseFloat(temp);
@@ -1966,53 +2105,48 @@ function fitAdvice(temp){
 }
 async function loadWeather(){
   try {
-    const city = await getCityName().catch(() => '当前位置');
-    if(curWidget !== '天气') return;   /* 用户已切走 → 不写入 */
-    $('wCity').textContent = city;
-    const key = (localStorage.getItem('shuiji_amapKey') || '').trim();
-    const consent = localStorage.getItem('shuiji_loc_consent');
-    if(key && consent !== 'no'){
-      const loc = await getCurrentPosition().catch(() => null);
-      if(curWidget !== '天气') return;
-      if(loc){
-        const geo = await fetchJSON('https://restapi.amap.com/v3/geocode/regeo?location=' + loc.lng + ',' + loc.lat + '&key=' + encodeURIComponent(key)).catch(() => null);
-        if(curWidget !== '天气') return;
-        const adcode = geo && geo.regeocode && geo.regeocode.addressComponent ? geo.regeocode.addressComponent.adcode : null;
-        if(adcode){
-          const wx = await fetchJSON('https://restapi.amap.com/v3/weather/weatherInfo?city=' + adcode + '&key=' + encodeURIComponent(key) + '&extensions=all').catch(() => null);
-          if(curWidget !== '天气') return;
-          if(wx && wx.lives && wx.lives[0]){
-            const L = wx.lives[0];
-            $('wCity').textContent = L.province + ' ' + L.city;
-            localStorage.setItem('shuiji_w_tmp', L.temperature);
-            const casts = (wx.forecasts && wx.forecasts[0] && wx.forecasts[0].casts) || [];
-            $('wWx').innerHTML =
-              '<div class="w-big">' + L.temperature + '°C</div>' +
-              '<div class="w-sub">' + L.weather + ' · ' + L.winddirection + '风 ' + L.windpower + '级 · 湿度 ' + L.humidity + '%</div>' +
-              '<div class="w-sub" style="color:#2E8B57;font-size:14px">' + wearAdvice(L.temperature) + '</div>' +
-              casts.slice(0, 3).map(c => '<div class="w-row"><span class="w-row-t">' + fmtW(c.date) + '</span><span class="w-row-s">' + c.dayweather + ' / ' + c.nightweather + '</span><span class="w-row-s">' + c.daytemp + '°/' + c.nighttemp + '°</span></div>').join('');
-            return;
-          }
-        }
+    let c = wxCity();
+    /* 首次打开：有定位许可 + 高德 Key → 尝试定位当前城市；否则默认北京 */
+    if(!c){
+      const key = (localStorage.getItem('shuiji_amapKey') || '').trim();
+      const consent = localStorage.getItem('shuiji_loc_consent');
+      if(key && consent === 'ok'){
+        try{
+          const loc = await getCurrentPosition();
+          const geo = await fetchJSON('https://restapi.amap.com/v3/geocode/regeo?location=' + loc.lng + ',' + loc.lat + '&key=' + encodeURIComponent(key)).catch(() => null);
+          const comp = geo && geo.regeocode && geo.regeocode.addressComponent;
+          const nm = comp && comp.city && comp.city !== '[]' ? comp.city : (comp && comp.province);
+          if(nm && nm !== '[]') c = { name: nm, lat: loc.lat, lon: loc.lng };
+        }catch(e){}
       }
+      if(!c) c = { name: '北京', lat: 39.9042, lon: 116.4074 };
+      localStorage.setItem('shuiji_w_city', JSON.stringify(c));
     }
-    /* 无 Key / 定位失败 → 尝试 wttr.in（免 Key） */
-    const w = await fetchJSON('https://wttr.in/?format=j1&lang=zh').catch(() => null);
     if(curWidget !== '天气') return;
-    if(w && w.current_condition && w.current_condition[0]){
-      const c = w.current_condition[0];
-      localStorage.setItem('shuiji_w_tmp', c.temp_C);
-      const desc = (c.lang_zh && c.lang_zh[0] && c.lang_zh[0].value) || (c.weatherDesc && c.weatherDesc[0] && c.weatherDesc[0].value) || '晴';
-      $('wWx').innerHTML =
-        '<div class="w-big">' + c.temp_C + '°C</div>' +
-        '<div class="w-sub">' + desc + ' · 体感 ' + c.FeelsLikeC + '° · 湿度 ' + c.humidity + '%</div>' +
-        '<div class="w-sub" style="color:#2E8B57;font-size:14px">' + wearAdvice(c.temp_C) + '</div>' +
-        (w.weather || []).slice(0, 3).map(d => '<div class="w-row"><span class="w-row-t">' + fmtW(d.date) + '</span><span class="w-row-s">' + d.mintempC + '° ~ ' + d.maxtempC + '°</span></div>').join('');
-      return;
-    }
-    throw new Error('no weather');
+    $('wCity').textContent = c.name;
+    /* Open-Meteo 免 Key 天气：实时 + 未来 4 天 */
+    const myCity = wxCity();
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + c.lat + '&longitude=' + c.lon +
+      '&current=temperature_2m,relative_humidity_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=4&timezone=auto';
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 12000);
+    let j;
+    try{ j = await fetch(url, { signal: ctl.signal }).then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }); }
+    finally{ clearTimeout(to); }
+    if(curWidget !== '天气') return;
+    const nowC = wxCity();
+    if(!myCity || !nowC || nowC.name !== myCity.name || nowC.lat !== myCity.lat) return;  /* 请求期间用户换了城市，丢弃旧结果 */
+    const temp = j.current && j.current.temperature_2m;
+    if(temp == null) throw new Error('no temp');
+    localStorage.setItem('shuiji_w_tmp', temp);
+    const hum = j.current.relative_humidity_2m;
+    $('wWx').innerHTML =
+      '<div class="w-big">' + Math.round(temp) + '°C</div>' +
+      '<div class="w-sub">' + wxCode(j.current.weather_code) + ' · 湿度 ' + (hum == null ? '-' : hum) + '%</div>' +
+      '<div class="w-sub" style="color:#2E8B57;font-size:14px">' + wearAdvice(temp) + '</div>' +
+      (j.daily ? j.daily.time.slice(0, 4).map((d, i) => '<div class="w-row"><span class="w-row-t">' + fmtW(d) + '</span><span class="w-row-s">' + wxCode(j.daily.weather_code[i]) + '</span><span class="w-row-s">' + j.daily.temperature_2m_min[i] + '°~' + j.daily.temperature_2m_max[i] + '°</span></div>').join('') : '');
   } catch(e){
-    $('wWx').innerHTML = '<div class="w-empty">暂时获取不到天气<br><span style="font-size:12px">可在「设置」填入高德 Key 后重试</span></div>';
+    if(curWidget !== '天气' || !document.getElementById('wWx')) return;
+    $('wWx').innerHTML = '<div class="w-empty">暂时获取不到天气<br><span style="font-size:12px">检查网络后，在上方换个城市重试</span></div>';
   }
 }
 
@@ -2075,7 +2209,25 @@ function planView(p){
     '<div class="w-row"><span class="w-row-t">饮水建议</span><span class="w-row-s">约 ' + water + ' L/天</span></div>' +
     '<div class="w-row"><span class="w-row-t">运动方案</span><span class="w-row-s">每周 3-5 次有氧 + 2 次力量</span></div>' +
     '<div class="w-note" style="margin-top:6px">安全减重每周 0.5-1kg，配合打卡记录更有效。数据仅存本地。</div>' +
+    todayFitAdvice(p, protein, water) +
     '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-edit">重新定制</button></div>';
+}
+/* 今日运动+饮食建议：结合天气温度 + 计划参数，每天打开都不一样 */
+function todayFitAdvice(p, protein, water){
+  const tmp = parseFloat(localStorage.getItem('shuiji_w_tmp'));
+  const haveWx = !isNaN(tmp);
+  let sport, note;
+  if(!haveWx){ sport = '🏃 每周 3-5 次有氧 + 2 次力量，打开「天气」页更新温度后建议更准'; note = '按计划坚持，配合体重记录看趋势。'; }
+  else if(tmp >= 30){ sport = '💦 天热：游泳 / 室内拉伸 / 傍晚快走 30-40 分钟'; note = '避开 11-15 点暴晒时段，随时补水分。'; }
+  else if(tmp >= 22){ sport = '🏃 今天适合：慢跑 / 跳绳 30 分钟'; note = '晨练或傍晚都行，运动前后拉伸。'; }
+  else if(tmp >= 15){ sport = '🌤 体感舒适：户外快走 / 骑行 40 分钟正合适'; note = '强度拉满的黄金温度，把握住。'; }
+  else if(tmp >= 8){ sport = '🧣 天凉：室内力量 / 瑜伽 / 跳绳 30 分钟'; note = '外出运动记得带件外套。'; }
+  else { sport = '❄️ 天冷：室内 HIIT / 力量训练 / 拉伸 30 分钟'; note = '优先居家训练，注意保暖防着凉。'; }
+  const diet = '蛋白质 ≥ ' + protein + 'g · 主食减半换粗粮 · 多蔬菜少油盐 · 喝水约 ' + water + 'L';
+  return '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">📅 今日建议' + (haveWx ? '（' + Math.round(tmp) + '°C）' : '') + '</div>' +
+    '<div class="w-row"><span class="w-row-t">🏋️ 运动</span><span class="w-row-s">' + sport + '</span></div>' +
+    '<div class="w-row"><span class="w-row-t">🍚 饮食</span><span class="w-row-s">' + diet + '</span></div>' +
+    '<div class="w-note" style="margin-top:6px">' + note + '</div></div>';
 }
 function planForm(p){
   p = p || {};
@@ -2419,6 +2571,55 @@ WIDGETS['表达能力'] = {
 };
 
 /* ---------- 读书推荐 ---------- */
+/* AI 每日书单：DeepSeek（用户在设置页自配 Key，只存本地） */
+function parseDsBooks(content){
+  const m = content.match(/\[[\s\S]*\]/);
+  if(!m) return [];
+  try{
+    const arr = JSON.parse(m[0]);
+    return arr.filter(x => x && x.title).map(x => ({ title: String(x.title).trim(), author: x.author ? String(x.author).trim() : '', why: x.why ? String(x.why).trim() : '' }));
+  }catch(e){ return []; }
+}
+async function dsBookRec(){
+  const key = (localStorage.getItem('shuiji_ds_key') || '').trim();
+  const out = document.getElementById('w-ds-out');
+  if(!key){
+    if(out) out.innerHTML = '<div class="w-empty">先去「设置」页填 DeepSeek API Key<br><span style="font-size:12px">platform.deepseek.com 可免费领取</span></div>';
+    else toast('先去设置页填 DeepSeek Key');
+    return;
+  }
+  if(out) out.innerHTML = '<div class="w-empty">AI 思考中… <span class="spinner"></span></div>';
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 25000);
+  try{
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: '你是资深阅读推荐人。用简体中文，推荐 3 本适合现在读的好书，题材尽量多样。严格只输出 JSON 数组，不要任何其他文字或代码标记，格式：[{"title":"书名","author":"作者","why":"20字内一句话推荐理由"}]' },
+          { role: 'user', content: '今天是 ' + todayStr() + '，请推荐 3 本今天适合读的书。' }
+        ],
+        max_tokens: 400,
+        temperature: 1.0
+      }),
+      signal: ctl.signal
+    });
+    const j = await res.json();
+    if(!res.ok) throw new Error('HTTP ' + res.status + (j.error && j.error.message ? ' ' + j.error.message : ''));
+    const content = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+    const books = parseDsBooks(content);
+    if(!books.length) throw new Error('AI 返回格式不对，再试一次');
+    const l = wget('ds_books');
+    l.unshift({ date: todayStr(), books });
+    wset('ds_books', l);
+    openWidget(curWidget);
+    toast('今日书单已生成');
+  }catch(e){
+    if(!document.getElementById('w-ds-out')) return;
+    out.innerHTML = '<div class="w-empty">AI 调用失败：' + esc(String(e.message || e)).slice(0, 40) + '<br><span style="font-size:12px">检查 Key / 网络后重试</span></div>';
+  } finally { clearTimeout(to); }
+}
 WIDGETS['读书推荐'] = {
   render(){
     const books = wget('bk_books');
@@ -2427,15 +2628,31 @@ WIDGETS['读书推荐'] = {
     const today = reads.find(x => x.date === t);
     const reading = books.filter(x => x.status === 'doing').length;
     const done = books.filter(x => x.status === 'done').length;
+    const ds = wget('ds_books');
+    const dsToday = ds.length && ds[0].date === t ? ds[0] : null;
     return wCard('📚 我的书单',
       books.length ? books.map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.title) + '</b>' + (x.author ? ' · ' + esc(x.author) : '') + '</span><button class="w-tag' + (x.status === 'done' ? ' done' : '') + '" data-wact="bk-cycle" data-id="' + x.id + '">' + (x.status === 'doing' ? '在读' : '读完') + '</button><button class="w-del" data-wact="bk-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">书单还空着，加一本</div>',
       '<div class="w-streak">在读 <b>' + reading + '</b> · 读完 <b>' + done + '</b></div>') +
+      wCard('✨ AI 每日书单',
+        dsToday
+          ? dsToday.books.map((bk, i) => '<div class="w-row"><span class="w-row-t"><b>' + esc(bk.title) + '</b>' + (bk.author ? ' · ' + esc(bk.author) : '') + '<div style="font-size:12px;color:var(--sub);margin-top:2px">' + esc(bk.why) + '</div></span><button class="w-tag" data-wact="bk-ds-add" data-title="' + esc(bk.title).replace(/"/g, '&quot;') + '" data-author="' + esc(bk.author || '').replace(/"/g, '&quot;') + '">收藏</button></div>').join('')
+            + '<div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="bk-ds">🔄 换一批</button></div>'
+          : '<div id="w-ds-out"><div class="w-empty">AI 每天为你推荐 3 本书</div></div><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="bk-ds">✨ 生成今日书单</button></div>',
+        '<div class="w-streak">DeepSeek 生成 · 数据只存本地</div>') +
       wAdd('书名', 'bk-add', '<input id="w-author" type="text" placeholder="作者" style="width:90px" autocomplete="off">') +
       wCard('⏱ 今日读书',
         today ? '<div class="w-row"><span class="w-row-t">今日已读 <b style="color:#2E8B57">' + today.minutes + '</b> 分钟</span></div>' : wMin('bk-check', '打卡'),
         '<div class="w-streak">连续 <b>' + calcStreak(reads.map(x => x.date)) + '</b> 天</div>');
   },
   acts: {
+    'bk-ds': async () => { await dsBookRec(); },
+    'bk-ds-add': async b => {
+      const t = b.dataset.title || ''; if(!t){ toast('无书名'); return; }
+      const l = wget('bk_books');
+      if(l.some(x => x.title === t)){ toast('已在书单里'); return; }
+      l.unshift({ id: Date.now(), title: t, author: b.dataset.author || '', status: 'doing' });
+      wset('bk_books', l); toast('已收藏到书单'); openWidget(curWidget);
+    },
     'bk-add': async () => {
       const t = ($('w-input').value || '').trim(); if(!t){ toast('填个书名'); return; }
       const l = wget('bk_books'); l.unshift({ id: Date.now(), title: t, author: ($('w-author').value || '').trim(), status: 'doing' });
@@ -2556,7 +2773,10 @@ async function loadNews(){
   box.innerHTML = '<div class="w-empty">加载中…</div>';
   try{
     const url = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://sspai.com/feed');
-    const res = await fetch(url);
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 12000);
+    let res;
+    try{ res = await fetch(url, { signal: ctl.signal }); }
+    finally{ clearTimeout(to); }
     if(!res.ok) throw new Error('feed ' + res.status);
     const j = await res.json();
     if(curWidget !== '新闻资讯' || !document.getElementById('w-news-feed')) return;
@@ -2570,7 +2790,7 @@ async function loadNews(){
     }).join('') + '<div class="w-note">少数派 RSS（免 Key）· 点标题读原文，★ 收藏进今日读报。</div>';
   }catch(e){
     if(curWidget !== '新闻资讯' || !document.getElementById('w-news-feed')) return;
-    box.innerHTML = '<div class="w-empty">暂时拉不到实时新闻（网络/接口限制）</div>';
+    box.innerHTML = '<div class="w-empty">暂时拉不到实时新闻（网络/接口限制）</div><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="news-retry">重试</button></div>';
   }
 }
 WIDGETS['新闻资讯'] = {
@@ -2589,6 +2809,7 @@ WIDGETS['新闻资讯'] = {
   },
   after(){ loadNews(); },
   acts: {
+    'news-retry': async () => { loadNews(); },
     'news-add': async () => {
       const t = ($('w-input').value || '').trim(); if(!t){ toast('写个标题'); return; }
       const l = wget('news'); l.push({ id: Date.now(), date: todayStr(), title: t, source: ($('w-source').value || '').trim(), read: false });
@@ -2691,6 +2912,7 @@ async function init(){
   });
   $('menuBtn').addEventListener('click', openDrawer);
   $('drawerMask').addEventListener('click', closeDrawer);
+  $('widgetBack').addEventListener('click', () => { curWidget = null; switchTab('today'); });
   document.querySelectorAll('.drawer-item').forEach(it => {
     it.addEventListener('click', () => {
       closeDrawer();
@@ -2715,6 +2937,10 @@ async function init(){
     eat.key = e.target.value.trim();
     if(isView('eat')) locate(true);
     toast('Key 已保存');
+  });
+  $('dsKeyInput').addEventListener('change', e => {
+    localStorage.setItem('shuiji_ds_key', e.target.value.trim());
+    toast('DeepSeek Key 已保存');
   });
   $('softReminderToggle').addEventListener('change', e => {
     localStorage.setItem('shuiji_softReminder', e.target.checked ? '1' : '0');
