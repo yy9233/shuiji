@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>水机 · 个人工作台</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💧</text></svg>">
 <!-- PWA：安装到桌面 / 添加到主屏幕 -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-title" content="水机">
@@ -15,19 +16,22 @@
 <style>
   /* ================= 基础 ================= */
   :root{
-    --bg:#1A2A3A;
-    --card:rgba(255,255,255,0.08);
-    --text:#FFFFFF;
-    --sub:#B0BEC5;
-    --accent:#4FC3F7;
-    --do:#4FC3F7;        /* 动手类 蓝 */
-    --talk:#FFA726;      /* 沟通类 橙 */
-    --wait:#90A4AE;      /* 等待类 灰 */
+    --bg:#E7F3EA;          /* 浅绿清新 · 主背景 */
+    --card:#FFFFFF;        /* 白色卡片 */
+    --text:#21402C;        /* 深绿黑文字 */
+    --sub:#6E8B79;         /* 柔和灰绿 */
+    --accent:#3EA463;      /* 清新绿 */
+    --accentSoft:rgba(62,164,99,0.14);
+    --do:#3EA463;          /* 动手类 绿 */
+    --talk:#F2A33C;        /* 沟通类 橙 */
+    --wait:#8FA696;        /* 等待类 灰绿 */
+    --line:rgba(33,64,44,0.10);
+    --shadow:0 1px 3px rgba(33,64,44,0.06), 0 4px 14px rgba(33,64,44,0.05);
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
-    background:#141f2b;
+    background:#D8E8DB;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
     color:var(--text);
     font-size:16px;
@@ -45,21 +49,30 @@
     height:100vh;
     height:100dvh;
     margin:0 auto;
-    background:var(--bg);
+    background:
+      linear-gradient(180deg, #F2FAF4 0%, #E7F3EA 100%);
     display:flex;
     flex-direction:column;
     overflow:hidden;
-    box-shadow:0 0 40px rgba(0,0,0,0.5);
+    box-shadow:0 0 40px rgba(33,64,44,0.18);
   }
 
   /* ================= 顶部栏 ================= */
   .topbar{
-    display:flex;align-items:center;justify-content:space-between;
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
     padding:16px 18px 10px;
     flex-shrink:0;
   }
-  .top-title{font-size:20px;font-weight:700;letter-spacing:1px;}
-  .top-right{display:flex;align-items:center;gap:10px;}
+  .menu-btn{
+    position:absolute;left:16px;top:14px;
+    font-size:22px;color:var(--text);
+    padding:2px 6px;border-radius:10px;
+    transition:transform .1s ease, background .15s ease;
+  }
+  .menu-btn:active{transform:scale(.9);background:rgba(62,164,99,0.15);}
+  .top-title{font-size:20px;font-weight:700;letter-spacing:1px;color:#2E8B57;}
+  .top-right{display:flex;align-items:center;gap:10px;position:absolute;right:16px;top:14px;}
   .done-count{color:var(--sub);font-size:13px;white-space:nowrap;}
   .mood-emoji{
     font-size:18px;opacity:0.8;
@@ -78,13 +91,13 @@
     flex-shrink:0;
   }
   .perfect-banner{
-    background:rgba(79,195,247,0.15);
-    color:var(--accent);
+    background:rgba(62,164,99,0.12);
+    color:#2E8B57;
     animation:bannerIn .35s ease;
   }
   .soft-reminder{
-    background:rgba(255,167,38,0.12);
-    color:var(--talk);
+    background:rgba(242,163,60,0.14);
+    color:#B97A18;
   }
   @keyframes bannerIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
 
@@ -98,18 +111,20 @@
   .input-row input{
     flex:1;min-width:0;
     background:var(--card);
-    border:1px solid rgba(255,255,255,0.06);
+    border:1px solid var(--line);
     border-radius:16px;
     padding:12px 16px;
     font-size:16px;color:var(--text);
+    box-shadow:var(--shadow);
     outline:none;
   }
   .input-row input::placeholder{color:var(--sub);opacity:.8;}
-  .input-row input:focus{border-color:rgba(79,195,247,0.5);}
+  .input-row input:focus{border-color:rgba(62,164,99,0.5);}
   .add-btn,.mic-btn{
     width:48px;height:48px;border-radius:16px;flex-shrink:0;
     background:var(--card);
     font-size:22px;
+    box-shadow:var(--shadow);
     transition:background .15s ease, transform .1s ease;
   }
   .add-btn{color:var(--accent);font-weight:700;}
@@ -128,6 +143,7 @@
   .pull-hint.visible{opacity:1;}
   .old-panel{
     background:var(--card);border-radius:16px;padding:12px;margin-bottom:14px;
+    box-shadow:var(--shadow);
   }
   .old-title{color:var(--sub);font-size:13px;margin-bottom:8px;}
   .old-task{
@@ -136,7 +152,7 @@
     display:flex;align-items:center;gap:10px;
     font-size:15px;
   }
-  .old-task:active{background:rgba(255,255,255,0.06);}
+  .old-task:active{background:rgba(33,64,44,0.06);}
   .old-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .old-close{text-align:center;color:var(--sub);font-size:12px;margin-top:6px;padding:4px;}
 
@@ -146,25 +162,42 @@
     display:flex;align-items:center;gap:12px;
     background:var(--card);
     border-radius:16px;
-    padding:16px;
+    padding:14px 16px;
     margin-bottom:12px;
     touch-action:pan-y;                 /* 保留纵向滚动，横向滑动交给 JS */
     user-select:none;
+    box-shadow:var(--shadow);
     transition:box-shadow .15s ease;
     will-change:transform;
   }
-  .task-card:active{box-shadow:0 0 0 2px rgba(79,195,247,0.25);}
+  .task-card:active{box-shadow:0 0 0 2px rgba(62,164,99,0.25);}
   .task-card.swiping{transition:none;}
+  /* 左侧勾选框：点一下完成 */
+  .task-check{
+    width:24px;height:24px;border-radius:50%;flex-shrink:0;
+    border:2px solid var(--sub);background:transparent;
+    position:relative;margin-right:-2px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .task-check::after{
+    content:'';position:absolute;left:6px;top:2px;width:7px;height:12px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+    opacity:0;transition:opacity .15s ease;
+  }
+  .task-check:active{border-color:var(--accent);background:var(--accent);}
+  .task-check:active::after{opacity:1;}
+  .task-card.checking .task-check{border-color:var(--accent);background:var(--accent);}
+  .task-card.checking .task-check::after{opacity:1;}
   .task-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
   .task-dot.do{background:var(--do);}
   .task-dot.talk{background:var(--talk);}
   .task-dot.wait{background:var(--wait);}
   .task-text{flex:1;font-size:17px;word-break:break-word;}
-  .task-card.delayed{opacity:.4;}
+  .task-card.delayed{opacity:.45;}
   .task-card.done-out{transition:transform .3s ease, opacity .3s ease;transform:translateX(-60px);opacity:0;}
   .inline-input{
-    flex:1;background:rgba(79,195,247,0.12);
-    border:1px solid rgba(79,195,247,0.5);border-radius:10px;
+    flex:1;background:rgba(62,164,99,0.10);
+    border:1px solid rgba(62,164,99,0.5);border-radius:10px;
     padding:6px 10px;font-size:16px;color:var(--text);outline:none;min-width:0;
   }
   .empty{color:var(--sub);opacity:.7;text-align:center;padding:34px 0;font-size:15px;}
@@ -172,40 +205,239 @@
 
   /* ================= 每日水语 ================= */
   .water-phrase{
-    text-align:center;color:var(--text);opacity:.5;
+    text-align:center;color:var(--text);opacity:.55;
     font-size:14px;margin:18px 0 14px;letter-spacing:1px;
   }
 
   /* ================= 微习惯签到 ================= */
   .habits{text-align:center;margin-top:4px;}
   .streak-line{color:var(--sub);font-size:14px;margin-bottom:12px;}
-  .habit-row{display:flex;justify-content:center;gap:40px;}
+  .habit-row{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;max-width:340px;margin:0 auto;}
   .habit-btn{
     display:flex;flex-direction:column;align-items:center;gap:4px;
     font-size:26px;
-    filter:grayscale(1) opacity(.6);
+    filter:grayscale(1) opacity(.55);
     transition:filter .2s ease, transform .1s ease;
   }
   .habit-btn:active{transform:scale(.9);}
   .habit-btn.active{filter:none;}
   .habit-label{font-size:12px;color:var(--sub);}
 
-  /* ================= 底部导航 ================= */
-  .tabbar{
-    position:absolute;left:0;right:0;bottom:0;
-    display:flex;
-    background:rgba(20,31,43,0.95);
-    backdrop-filter:blur(8px);
-    border-top:1px solid rgba(255,255,255,0.06);
-    padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+  /* ================= 番茄钟 ================= */
+  .focus-box{position:relative;width:150px;height:150px;margin:10px auto 4px;}
+  .focus-ring{width:100%;height:100%;transform:rotate(-90deg);}
+  .ring-bg{fill:none;stroke:rgba(33,64,44,0.10);stroke-width:8;}
+  .ring-fg{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:326.7;transition:stroke-dashoffset .5s linear;}
+  .focus-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .focus-time{font-size:26px;font-weight:700;letter-spacing:1px;}
+  .focus-actions{display:flex;gap:6px;margin-top:6px;}
+  .focus-actions button{font-size:12px;color:var(--sub);background:var(--card);box-shadow:var(--shadow);padding:4px 12px;border-radius:999px;}
+  .focus-actions button:active{background:var(--accentSoft);color:var(--accent);}
+
+  /* ================= 任务优先级 ================= */
+  .task-star{font-size:16px;flex-shrink:0;padding:2px 4px;opacity:.45;transition:opacity .15s ease, transform .1s ease;}
+  .task-star.on{opacity:1;}
+  .task-star:active{transform:scale(1.3);}
+  .task-card.important{background:#EFF8F1;box-shadow:inset 0 0 0 1px rgba(62,164,99,0.25), var(--shadow);}
+
+  /* ================= 回顾统计 ================= */
+  .stat-card{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .stat-row{display:flex;justify-content:space-between;color:var(--sub);font-size:14px;margin-bottom:8px;}
+  .stat-bar{height:8px;border-radius:999px;background:rgba(33,64,44,0.08);overflow:hidden;}
+  .stat-fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .4s ease;}
+  .mini-cal{display:flex;gap:6px;margin-top:8px;}
+  .cal-cell{flex:1;text-align:center;font-size:12px;color:var(--sub);background:rgba(33,64,44,0.05);border-radius:8px;padding:8px 0;}
+  .cal-cell.has{background:var(--accentSoft);color:#2E8B57;font-weight:600;}
+  .cal-cell.future{opacity:.3;}
+
+  /* ================= 设置 · 微习惯管理 ================= */
+  .setting-block{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .setting-label{font-size:15px;margin-bottom:10px;}
+  .def-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:15px;}
+  .def-row:last-child{border-bottom:none;}
+  .def-del{color:var(--sub);padding:2px 8px;font-size:14px;}
+  .def-del:active{color:#E57368;}
+  .habit-add-row{display:flex;gap:8px;margin-top:10px;}
+  .habit-add-row input{background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px;color:var(--text);outline:none;}
+  .habit-add-row input:first-child{width:52px;}
+  .habit-add-row input:nth-child(2){flex:1;min-width:0;}
+  .habit-add-row button{background:var(--accentSoft);color:#2E8B57;border-radius:12px;padding:8px 14px;font-size:14px;}
+
+  /* ================= 左侧抽屉导航（覆盖式滑出） ================= */
+  .drawer-mask{
+    position:absolute;inset:0;z-index:70;
+    background:rgba(33,64,44,0.35);
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .drawer-mask.show{opacity:1;pointer-events:auto;}
+  .drawer{
+    position:absolute;left:0;top:0;bottom:0;z-index:80;
+    width:40%;min-width:150px;max-width:200px;
+    background:var(--card);
+    box-shadow:6px 0 28px rgba(33,64,44,0.18);
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    display:flex;flex-direction:column;
+    overflow-y:auto;
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{
+    padding:22px 18px 12px;
+    font-size:17px;font-weight:700;color:#2E8B57;
+    border-bottom:1px solid var(--line);
     flex-shrink:0;
   }
-  .tab{
-    flex:1;text-align:center;padding:6px 0;
-    color:var(--sub);font-size:14px;
-    transition:color .15s ease;
+  .drawer-menu{padding:10px 12px 24px;}
+  .drawer-group{
+    font-size:12px;color:var(--sub);
+    padding:14px 6px 6px;
   }
-  .tab.active{color:var(--accent);font-weight:600;}
+  .drawer-item{
+    display:flex;align-items:center;gap:12px;
+    width:100%;text-align:left;
+    padding:13px 10px;border-radius:12px;
+    font-size:15px;color:var(--text);
+    margin-bottom:4px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .drawer-item span{font-size:19px;flex-shrink:0;}
+  .drawer-item:active{background:var(--accentSoft);}
+  .drawer-item.active{background:var(--accentSoft);color:#2E8B57;font-weight:600;}
+
+  /* ================= 日历复盘组件 ================= */
+  .cal-card{
+    background:var(--card);border-radius:16px;
+    padding:14px 14px 12px;margin-top:18px;
+    box-shadow:var(--shadow);
+  }
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cal-title{font-size:16px;font-weight:700;}
+  .cal-nav{
+    width:30px;height:30px;border-radius:10px;
+    background:var(--accentSoft);color:#2E8B57;font-size:18px;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .cal-nav:active{transform:scale(.9);background:rgba(62,164,99,0.3);}
+  .cal-week{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;color:var(--sub);margin-bottom:4px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .cal-day{
+    position:relative;text-align:center;
+    padding:9px 0;border-radius:10px;
+    font-size:14px;color:var(--text);
+    transition:background .12s ease;
+  }
+  .cal-day:active{background:var(--accentSoft);}
+  .cal-day.other{color:var(--sub);opacity:.45;}
+  .cal-day.today{font-weight:700;}
+  .cal-day.has::after{
+    content:'';position:absolute;left:50%;bottom:3px;
+    transform:translateX(-50%);
+    width:5px;height:5px;border-radius:50%;
+    background:var(--accent);
+  }
+  /* 选中日期：黄色高亮边框 */
+  .cal-day.selected{
+    background:rgba(245,197,24,0.18);
+    box-shadow:inset 0 0 0 2px #F5C518;
+    font-weight:700;color:#8a6d0b;
+  }
+  .cal-foot{text-align:center;color:var(--sub);font-size:12px;margin-top:8px;}
+
+  /* ================= 右下角悬浮按钮 ================= */
+  .fab{
+    position:absolute;right:18px;bottom:24px;z-index:50;
+    background:linear-gradient(135deg,#FFD54F,#F5C518);
+    color:#6b5200;font-size:14px;font-weight:600;
+    padding:13px 18px;border-radius:999px;
+    box-shadow:0 6px 20px rgba(245,197,24,0.4);
+    transition:transform .12s ease, box-shadow .15s ease;
+  }
+  .fab:active{transform:scale(.94);box-shadow:0 3px 10px rgba(245,197,24,0.3);}
+
+  /* ================= 首页：欢迎语 + 今日进度 ================= */
+  .today-hero{margin:2px 0 14px;}
+  .hero-date{font-size:21px;font-weight:800;color:var(--text);letter-spacing:.5px;}
+  .hero-line{font-size:13px;color:var(--sub);margin-top:5px;}
+  .today-progress{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s ease;}
+  .today-progress:active{transform:scale(.99);}
+  .tp-head{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700;margin-bottom:9px;}
+  .tp-num{color:#2E8B57;font-size:17px;font-weight:800;}
+  .tp-arrow{color:var(--sub);font-size:15px;margin-left:4px;}
+  .tp-bar{height:10px;border-radius:99px;background:rgba(33,64,44,0.08);overflow:hidden;}
+  .tp-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#7BC79A,#3EA463);width:0;transition:width .4s ease;}
+  .tp-sub{font-size:12px;color:var(--sub);margin-top:6px;}
+
+  /* ================= 小组件占位 ================= */
+  .widget-placeholder{
+    background:var(--card);border-radius:16px;
+    padding:40px 24px;text-align:center;
+    box-shadow:var(--shadow);margin-top:12px;
+  }
+  .widget-placeholder .wp-emoji{font-size:42px;margin-bottom:12px;}
+  .widget-placeholder .wp-name{font-size:18px;font-weight:700;margin-bottom:6px;}
+  .widget-placeholder .wp-tip{color:var(--sub);font-size:13px;}
+
+  /* ================= 小组件通用 ================= */
+  .w-card{background:var(--card);border-radius:16px;padding:14px 16px;margin-top:12px;box-shadow:var(--shadow);}
+  .w-card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;}
+  .w-card-t{font-size:15px;font-weight:700;color:var(--text);}
+  .w-streak{font-size:12.5px;color:var(--sub);flex-shrink:0;}
+  .w-streak b{color:#2E8B57;}
+  .w-empty{color:var(--sub);opacity:.75;text-align:center;padding:16px 0;font-size:13px;}
+  .w-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:15px;}
+  .w-row:last-child{border-bottom:none;}
+  .w-row.done .w-row-t{text-decoration:line-through;opacity:.5;}
+  .w-row-t{flex:1;min-width:0;word-break:break-word;}
+  .w-row-t a{color:inherit;text-decoration:none;display:block;}
+  .w-row-s{color:var(--sub);font-size:12px;flex-shrink:0;}
+  .w-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--sub);flex-shrink:0;background:transparent;position:relative;transition:all .15s ease;}
+  .w-check.on{border-color:var(--accent);background:var(--accent);}
+  .w-check.on::after{content:'';position:absolute;left:5px;top:1px;width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);}
+  .w-tag{font-size:12px;color:var(--sub);background:rgba(33,64,44,0.06);border-radius:999px;padding:3px 9px;flex-shrink:0;}
+  .w-tag.done{color:#2E8B57;background:var(--accentSoft);}
+  .w-books{display:flex;flex-wrap:wrap;gap:6px;}
+  .w-book{font-size:13px;color:var(--sub);background:rgba(33,64,44,0.06);border-radius:999px;padding:5px 12px;border:1px solid transparent;}
+  .w-book.sel{color:#2E8B57;background:var(--accentSoft);border-color:rgba(46,139,87,0.3);}
+  .w-book-add{color:var(--sub);border-style:dashed;border-color:var(--line);}
+  .w-del{color:var(--sub);padding:2px 8px;font-size:14px;flex-shrink:0;}
+  .w-del:active{color:#E57368;}
+  .w-add{display:flex;gap:8px;margin-top:10px;align-items:center;}
+  .w-add input,.w-add select{background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px;color:var(--text);outline:none;min-width:0;}
+  .w-add input[type="text"]{flex:1;}
+  .w-add button{background:var(--accentSoft);color:#2E8B57;border-radius:12px;padding:8px 14px;font-size:14px;flex-shrink:0;}
+  .w-btn{background:var(--accentSoft);color:#2E8B57;border-radius:12px;padding:8px 14px;font-size:14px;border:none;cursor:pointer;}
+  .w-btn:active{background:rgba(62,164,99,0.3);}
+  .w-min{width:76px;}
+  .w-stat{display:flex;gap:10px;margin-bottom:10px;}
+  .w-stat div{flex:1;background:rgba(62,164,99,0.08);border-radius:12px;padding:10px;text-align:center;}
+  .w-stat b{display:block;font-size:20px;color:#2E8B57;}
+  .w-stat span{font-size:12px;color:var(--sub);}
+  .w-chart{display:flex;align-items:flex-end;gap:5px;height:60px;margin-top:6px;}
+  .w-bar{flex:1;background:var(--accent);border-radius:5px 5px 0 0;min-width:8px;position:relative;}
+  .w-bar small{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:10px;color:var(--sub);}
+  .w-flip{border:1px dashed rgba(62,164,99,0.4);border-radius:14px;padding:18px;text-align:center;margin:6px 0;}
+  .w-flip .wf-word{font-size:24px;font-weight:700;margin-bottom:6px;word-break:break-word;}
+  .w-flip .wf-def{color:var(--sub);font-size:14px;min-height:20px;}
+  .w-emoji-pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .w-emoji-pick button{font-size:20px;padding:8px 10px;border-radius:12px;background:rgba(33,64,44,0.05);border:none;cursor:pointer;}
+  .w-emoji-pick button.sel{background:var(--accentSoft);box-shadow:inset 0 0 0 2px var(--accent);}
+  .w-note{color:var(--sub);font-size:13px;line-height:1.7;}
+  .w-big{font-size:34px;font-weight:700;color:#2E8B57;text-align:center;margin:6px 0 2px;}
+  .w-sub{text-align:center;color:var(--sub);font-size:14px;margin-bottom:8px;}
+  /* 目标进度条 */
+  .w-goal{background:rgba(62,164,99,0.07);border-radius:12px;padding:10px 12px;margin-bottom:10px;}
+  .w-goal-t{font-size:13px;color:var(--text);margin-bottom:6px;}
+  .w-goal-t b{color:#2E8B57;}
+  .w-goal-bar{height:8px;border-radius:99px;background:rgba(33,64,44,0.08);overflow:hidden;margin-bottom:8px;}
+  .w-goal-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#7BC79A,#3EA463);transition:width .3s ease;}
+  .w-goal-row{display:flex;gap:6px;align-items:center;}
+  .w-goal-row .w-goal-input{width:64px;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:10px;padding:5px 8px;font-size:13px;color:var(--text);outline:none;}
+  .w-goal-row .w-btn{padding:5px 10px;font-size:12px;}
+  .w-pl{font-size:12px;color:var(--sub);margin-right:2px;line-height:32px;}
+  .w-add select{background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:13px;color:var(--text);outline:none;max-width:46%;}
+  .w-chart-small{height:44px;margin:6px 0;}
+  .w-note a{color:#2E8B57;}
 
   /* ================= 回顾页 ================= */
   .view-title{font-size:18px;font-weight:700;margin:12px 0 14px;}
@@ -213,13 +445,13 @@
   .heat-grid{display:flex;gap:8px;margin-bottom:6px;}
   .heat-cell{
     flex:1;min-height:38px;border-radius:10px;
-    background:rgba(255,255,255,0.06);
+    background:rgba(33,64,44,0.06);
     display:flex;align-items:center;justify-content:center;
     font-size:15px;
   }
-  .heat-cell.happy{background:rgba(79,195,247,0.4);}
-  .heat-cell.neutral{background:rgba(144,164,174,0.35);}
-  .heat-cell.bad{background:rgba(255,167,38,0.45);}
+  .heat-cell.happy{background:rgba(62,164,99,0.35);}
+  .heat-cell.neutral{background:rgba(143,166,150,0.35);}
+  .heat-cell.bad{background:rgba(242,163,60,0.4);}
   .heat-legend{display:flex;gap:14px;color:var(--sub);font-size:12px;margin-top:6px;}
   .rev-group{margin-bottom:18px;}
   .rev-date{color:var(--sub);font-size:13px;margin-bottom:8px;}
@@ -227,6 +459,7 @@
     display:flex;align-items:center;gap:10px;
     background:var(--card);border-radius:14px;
     padding:12px 14px;margin-bottom:8px;font-size:15px;
+    box-shadow:var(--shadow);
   }
   .rev-check{color:var(--accent);font-size:14px;}
   .rev-cat{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -239,7 +472,7 @@
   }
   .spinner{
     width:16px;height:16px;border-radius:50%;
-    border:2px solid rgba(255,255,255,0.15);
+    border:2px solid rgba(33,64,44,0.15);
     border-top-color:var(--accent);
     animation:spin .7s linear infinite;
     display:inline-block;
@@ -249,25 +482,27 @@
   .eat-actions button{
     flex:1;padding:11px 0;border-radius:14px;background:var(--card);
     color:var(--text);font-size:15px;
+    box-shadow:var(--shadow);
     transition:background .15s ease, transform .1s ease;
   }
   .eat-actions button:active{transform:scale(.96);}
-  .eat-actions .primary{background:rgba(79,195,247,0.18);color:var(--accent);}
+  .eat-actions .primary{background:var(--accentSoft);color:#2E8B57;}
   .eat-card{
     background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;
     touch-action:pan-y;
+    box-shadow:var(--shadow);
     transition:box-shadow .15s ease;
   }
-  .eat-card:active{box-shadow:0 0 0 2px rgba(79,195,247,0.25);}
+  .eat-card:active{box-shadow:0 0 0 2px rgba(62,164,99,0.25);}
   .eat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .eat-name{font-size:16px;font-weight:600;flex:1;}
   .visited-chip{
     flex-shrink:0;font-size:12px;color:var(--sub);
-    background:rgba(255,255,255,0.08);border-radius:999px;
+    background:rgba(33,64,44,0.06);border-radius:999px;
     padding:4px 10px;
     transition:background .15s ease;
   }
-  .visited-chip:active{background:rgba(79,195,247,0.3);color:var(--accent);}
+  .visited-chip:active{background:rgba(62,164,99,0.3);color:var(--accent);}
   .eat-sub{color:var(--sub);font-size:14px;margin-top:4px;}
   .eat-detail div{margin:4px 0;color:var(--sub);font-size:14px;}
   .eat-detail .ed-name{color:var(--text);font-size:17px;font-weight:600;margin-bottom:6px;}
@@ -279,11 +514,11 @@
   }
   .setting-row label{font-size:15px;}
   .setting-row input[type="text"]{
-    flex:1;min-width:0;background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.08);border-radius:12px;
+    flex:1;min-width:0;background:rgba(33,64,44,0.05);
+    border:1px solid var(--line);border-radius:12px;
     padding:8px 12px;font-size:14px;color:var(--text);outline:none;
   }
-  .switch{appearance:none;width:46px;height:26px;border-radius:999px;background:rgba(255,255,255,0.15);position:relative;transition:background .2s ease;flex-shrink:0;}
+  .switch{appearance:none;width:46px;height:26px;border-radius:999px;background:rgba(33,64,44,0.15);position:relative;transition:background .2s ease;flex-shrink:0;}
   .switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s ease;}
   .switch:checked{background:var(--accent);}
   .switch:checked::after{transform:translateX(20px);}
@@ -293,19 +528,23 @@
     transition:background .15s ease, transform .1s ease;
   }
   .setting-btn:active{transform:scale(.98);}
-  .setting-btn.danger{background:rgba(255,107,107,0.12);color:#FF8A80;}
+  .setting-btn.danger{background:rgba(229,115,104,0.12);color:#E57368;}
+  .privacy-text{font-size:13px;color:var(--sub);line-height:1.7;margin-bottom:12px;}
+  .privacy-btn{width:100%;padding:10px;border-radius:12px;background:rgba(33,64,44,0.05);font-size:13px;color:var(--sub);}
+  .privacy-btn:active{background:rgba(62,164,99,0.2);color:var(--accent);}
   .about{text-align:center;color:var(--sub);font-size:12px;opacity:.6;margin-top:22px;}
 
   /* ================= 弹窗 ================= */
   .modal-mask{
     position:absolute;inset:0;z-index:40;
-    background:rgba(10,16,22,0.6);
+    background:rgba(33,64,44,0.45);
     display:flex;align-items:center;justify-content:center;
     padding:28px;
   }
   .modal{
     width:100%;max-width:360px;
-    background:#22364a;border-radius:20px;padding:22px;
+    background:#FFFFFF;border-radius:20px;padding:22px;
+    box-shadow:0 12px 40px rgba(33,64,44,0.25);
     animation:modalIn .2s ease;
   }
   @keyframes modalIn{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
@@ -313,23 +552,23 @@
   .modal-body{color:var(--sub);font-size:15px;margin-bottom:18px;}
   .modal-actions{display:flex;gap:10px;}
   .modal-btn{
-    flex:1;padding:12px 0;border-radius:14px;background:var(--card);
+    flex:1;padding:12px 0;border-radius:14px;background:#EFF4F0;
     font-size:15px;transition:background .15s ease;
   }
-  .modal-btn.primary{background:rgba(79,195,247,0.2);color:var(--accent);}
-  .modal-btn:active{background:rgba(79,195,247,0.25);}
+  .modal-btn.primary{background:var(--accentSoft);color:#2E8B57;}
+  .modal-btn:active{background:rgba(62,164,99,0.25);}
 
   /* ================= Toast ================= */
   #toast{
     position:absolute;left:50%;bottom:96px;z-index:60;
     transform:translateX(-50%) translateY(10px);
-    background:rgba(20,31,43,0.95);
-    color:var(--text);font-size:14px;
+    background:rgba(33,64,44,0.94);
+    color:#FFFFFF;font-size:14px;
     padding:10px 18px;border-radius:999px;
     opacity:0;pointer-events:none;
     transition:opacity .25s ease, transform .25s ease;
     white-space:nowrap;max-width:90%;
-    box-shadow:0 6px 24px rgba(0,0,0,0.4);
+    box-shadow:0 6px 24px rgba(33,64,44,0.35);
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
@@ -339,7 +578,8 @@
 
   <!-- 顶部栏 -->
   <header class="topbar">
-    <div class="top-title">工作台</div>
+    <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
+    <div class="top-title">💧 工作台</div>
     <div class="top-right">
       <span class="mood-emoji" data-mood="happy" title="开心">😊</span>
       <span class="mood-emoji" data-mood="neutral" title="一般">😣</span>
@@ -357,6 +597,15 @@
 
     <!-- 今日 -->
     <section class="view active" id="view-today">
+      <div class="today-hero">
+        <div class="hero-date" id="heroDate"></div>
+        <div class="hero-line" id="heroLine"></div>
+      </div>
+      <div class="today-progress" id="todayProgress">
+        <div class="tp-head"><span>今日进度</span><span><span class="tp-num" id="tpNum">0%</span><span class="tp-arrow">›</span></span></div>
+        <div class="tp-bar"><div class="tp-fill" id="tpFill"></div></div>
+        <div class="tp-sub" id="tpSub"></div>
+      </div>
       <div class="input-row">
         <input id="taskInput" placeholder="添加待办…" autocomplete="off" enterkeyhint="done">
         <button class="add-btn" id="addBtn" title="添加">＋</button>
@@ -375,24 +624,53 @@
         <div class="empty" id="emptyState">还没有待办事项，添加一个开始今天吧</div>
       </div>
 
+      <!-- 番茄钟 -->
+      <div class="focus-box" id="focusBox">
+        <svg class="focus-ring" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"/>
+        </svg>
+        <div class="focus-center">
+          <div class="focus-time" id="focusTime">25:00</div>
+          <div class="focus-actions">
+            <button id="focusBtn">开始专注</button>
+            <button id="focusReset">重置</button>
+          </div>
+        </div>
+      </div>
+
       <div class="water-phrase" id="waterPhrase"></div>
 
       <div class="habits">
-        <div class="streak-line" id="streakLine">已连续坚持 0 天</div>
-        <div class="habit-row">
-          <button class="habit-btn" data-type="drink">
-            <span>💧</span><span class="habit-label">喝水</span>
-          </button>
-          <button class="habit-btn" data-type="stretch">
-            <span>🧘</span><span class="habit-label">拉伸</span>
-          </button>
+        <div class="streak-line" id="streakLine">今日打卡 0/0 · 已连续坚持 0 天</div>
+        <div class="habit-row" id="habitRow"></div>
+      </div>
+
+      <!-- 日历复盘组件：月份切换 + 选中黄色高亮 -->
+      <div class="cal-card" id="calCard">
+        <div class="cal-head">
+          <button class="cal-nav" id="calPrev" aria-label="上个月">‹</button>
+          <div class="cal-title" id="calTitle">2026年8月</div>
+          <button class="cal-nav" id="calNext" aria-label="下个月">›</button>
         </div>
+        <div class="cal-week"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-foot" id="calFoot">点日期查看当天 · 有绿点表示那天完成了任务</div>
       </div>
     </section>
 
     <!-- 回顾 -->
     <section class="view" id="view-review">
       <div class="view-title">回顾</div>
+      <div class="stat-card">
+        <div class="stat-row"><span>本周任务完成率</span><span id="statRateText">0/0 · 0%</span></div>
+        <div class="stat-bar"><div class="stat-fill" id="statRateFill"></div></div>
+        <div class="stat-row" style="margin-top:10px"><span>本周专注</span><span id="statFocusText">0 次</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-row"><span>本周打卡日历</span></div>
+        <div class="mini-cal" id="miniCal"></div>
+      </div>
       <div class="mood-heatmap hidden" id="moodHeatmap">
         <div class="view-sub">情绪热力图 · 本周</div>
         <div class="heat-grid" id="heatGrid"></div>
@@ -425,20 +703,60 @@
         <label>柔和提醒</label>
         <input type="checkbox" class="switch" id="softReminderToggle">
       </div>
+      <div class="setting-block">
+        <div class="setting-label">微习惯管理</div>
+        <div id="habitDefList"></div>
+        <div class="habit-add-row">
+          <input id="habitNewEmoji" placeholder="表情" maxlength="2">
+          <input id="habitNewName" placeholder="习惯名称">
+          <button id="habitAddBtn">添加</button>
+        </div>
+      </div>
       <button class="setting-btn" id="exportBtn">导出数据（JSON）</button>
       <button class="setting-btn danger" id="clearBtn">清空所有数据</button>
+      <div class="setting-block">
+        <div class="setting-label">🔒 隐私说明</div>
+        <div class="privacy-text">所有数据（任务、习惯、心情、记录）只保存在<b>本设备浏览器</b>中，不会上传到任何服务器。「吃啥」搜索时，你的位置会发送给<b>高德地图</b>，仅用于查找附近餐厅；语音输入时，声音会发送给浏览器自带的识别服务。</div>
+        <button class="privacy-btn" id="resetLocConsentBtn">重新询问定位许可</button>
+      </div>
       <div class="about">水机 · 个人工作台 V3<br>极简 · 补水 · 零认知负担</div>
+    </section>
+
+    <!-- 小组件占位（视频风格菜单，纯导航） -->
+    <section class="view" id="view-widget">
+      <div id="widgetBox"></div>
     </section>
 
   </main>
 
-  <!-- 底部导航 -->
-  <nav class="tabbar">
-    <button class="tab active" data-view="today">今日</button>
-    <button class="tab" data-view="review">回顾</button>
-    <button class="tab" data-view="eat">吃啥</button>
-    <button class="tab" data-view="settings">设置</button>
-  </nav>
+  <!-- 左侧抽屉导航（覆盖式滑出，约 40% 宽） -->
+  <div class="drawer-mask" id="drawerMask"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head">💧 水机 · 工作台</div>
+    <div class="drawer-menu">
+      <div class="drawer-group">核心</div>
+      <button class="drawer-item active" data-view="today"><span>📋</span>今日任务</button>
+      <button class="drawer-item" data-view="review"><span>📊</span>回顾统计</button>
+      <button class="drawer-item" data-view="eat"><span>🍜</span>吃啥</button>
+      <button class="drawer-item" data-view="settings"><span>⚙️</span>设置</button>
+      <div class="drawer-group">小组件</div>
+      <button class="drawer-item" data-widget="每日计划"><span>📅</span>每日计划</button>
+      <button class="drawer-item" data-widget="天气"><span>🌤️</span>天气</button>
+      <button class="drawer-item" data-widget="练字打卡"><span>✍️</span>练字打卡</button>
+      <button class="drawer-item" data-widget="减肥运动"><span>🏃</span>减肥运动</button>
+      <button class="drawer-item" data-widget="英语学习"><span>📖</span>英语学习</button>
+      <button class="drawer-item" data-widget="播客精选"><span>🎧</span>播客精选</button>
+      <button class="drawer-item" data-widget="表达能力"><span>🗣️</span>表达能力</button>
+      <button class="drawer-item" data-widget="读书推荐"><span>📚</span>读书推荐</button>
+      <button class="drawer-item" data-widget="妆容穿搭"><span>💄</span>妆容穿搭</button>
+      <button class="drawer-item" data-widget="爆款二创"><span>🎬</span>爆款二创</button>
+      <button class="drawer-item" data-widget="AI 学习"><span>🤖</span>AI 学习</button>
+      <button class="drawer-item" data-widget="新闻资讯"><span>📰</span>新闻资讯</button>
+    </div>
+  </aside>
+
+  <!-- 右下角悬浮：保存复盘（金色圆角） -->
+  <button class="fab" id="saveReviewBtn" aria-label="保存复盘">💾 保存复盘</button>
 
   <!-- 弹窗 -->
   <div class="modal-mask hidden" id="modalMask">
@@ -464,6 +782,7 @@
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function todayStr(d){ d = d || new Date(); const p = n => String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function yesterdayStr(){ const d = new Date(); d.setDate(d.getDate() - 1); return todayStr(d); }
 const WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
 function fmtDate(s){ // 'YYYY-MM-DD' → '8月13日 周四'
   const d = new Date(s + 'T00:00:00');
@@ -555,13 +874,14 @@ function phraseOfDay(){
 let db = null;
 function openDB(){
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('shuiji', 1);
+    const req = indexedDB.open('shuiji', 2);
     req.onupgradeneeded = e => {
       const d = e.target.result;
       if(!d.objectStoreNames.contains('tasks'))  d.createObjectStore('tasks',  {keyPath:'id', autoIncrement:true});
       if(!d.objectStoreNames.contains('habits')) d.createObjectStore('habits', {keyPath:'id', autoIncrement:true});
       if(!d.objectStoreNames.contains('moods'))  d.createObjectStore('moods',  {keyPath:'id', autoIncrement:true});
       if(!d.objectStoreNames.contains('eats'))   d.createObjectStore('eats',   {keyPath:'id', autoIncrement:true});
+      if(!d.objectStoreNames.contains('focus'))  d.createObjectStore('focus',  {keyPath:'id', autoIncrement:true});
     };
     req.onsuccess = e => { db = e.target.result; resolve(db); };
     req.onerror = e => reject(e);
@@ -572,7 +892,9 @@ function getAll(store){
     r.onsuccess = () => res(r.result); r.onerror = rej; });
 }
 function getById(store, id){
-  return new Promise((res, rej) => { const r = db.transaction(store).objectStore(store).get(id);
+  /* dataset 取出的 id 是字符串，而 autoIncrement 的 key 是数字——IndexedDB 严格区分类型 */
+  const key = (typeof id === 'number') ? id : Number(id);
+  return new Promise((res, rej) => { const r = db.transaction(store).objectStore(store).get(key);
     r.onsuccess = () => res(r.result); r.onerror = rej; });
 }
 function add(store, val){
@@ -584,7 +906,8 @@ function put(store, val){
     r.onsuccess = () => res(r.result); r.onerror = rej; });
 }
 function del(store, id){
-  return new Promise((res, rej) => { const r = db.transaction(store,'readwrite').objectStore(store).delete(id);
+  const key = (typeof id === 'number') ? id : Number(id);
+  return new Promise((res, rej) => { const r = db.transaction(store,'readwrite').objectStore(store).delete(key);
     r.onsuccess = () => res(); r.onerror = rej; });
 }
 function clearStore(store){
@@ -658,10 +981,46 @@ function getOldTasks(){
 
 async function refreshToday(){
   await migrateDelayed();
+  renderTodayHero();
   await renderTaskList();
   await refreshCounts();
   await renderHabits();
+  await renderTodayProgress();
+  await renderCalendar();
   updateSoftReminder();
+}
+/* 首页：欢迎语 + 日期 + 今日关键词 */
+function renderTodayHero(){
+  const now = new Date();
+  const h = now.getHours();
+  let greet = '晚上好';
+  if(h < 6) greet = '夜深了';
+  else if(h < 9) greet = '早上好';
+  else if(h < 12) greet = '上午好';
+  else if(h < 14) greet = '中午好';
+  else if(h < 18) greet = '下午好';
+  const week = ['日','一','二','三','四','五','六'][now.getDay()];
+  const hd = $('heroDate'), hl = $('heroLine');
+  if(hd) hd.textContent = greet + ' · ' + (now.getMonth()+1) + '月' + now.getDate() + '日 周' + week;
+  if(hl) hl.textContent = '🌊 ' + phraseOfDay();
+}
+/* 首页：今日整体进度 = 任务完成数 + 习惯打卡数 */
+async function renderTodayProgress(){
+  const t = todayStr();
+  const all = await getAll('tasks');
+  const doneTasks = all.filter(x => x.date === t && x.completed).length;
+  const active = await getActiveToday();
+  const taskTotal = doneTasks + active.length;
+  const defs = loadHabitDefs();
+  const habits = await getAll('habits');
+  const doneHabits = new Set(habits.filter(h => h.date === t).map(h => h.type)).size;
+  const habitTotal = defs.length;
+  const done = doneTasks + doneHabits, total = taskTotal + habitTotal;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const num = $('tpNum'), fill = $('tpFill'), sub = $('tpSub');
+  if(num) num.textContent = pct + '%';
+  if(fill) fill.style.width = pct + '%';
+  if(sub) sub.textContent = '任务 ' + doneTasks + '/' + taskTotal + ' · 习惯 ' + doneHabits + '/' + habitTotal;
 }
 /* 延时任务跨天迁移：delayed 且日期已过 → 今天重新出现 */
 async function migrateDelayed(){
@@ -673,20 +1032,35 @@ async function migrateDelayed(){
 
 async function renderTaskList(){
   const list = await getActiveToday();
+  /* 优先级：重要任务排前面，其余按创建时间 */
+  list.sort((a, b) => ((b.important ? 1 : 0) - (a.important ? 1 : 0)) ||
+    ((a.createdAt || '').localeCompare(b.createdAt || '')));
   const wrap = $('taskList');
-  wrap.innerHTML = '';
-  $('emptyState').classList.toggle('hidden', list.length > 0);
-  if(list.length === 0){ wrap.appendChild($('emptyState')); return; }
+  const empty = $('emptyState');
+  /* 只移除已渲染的卡片；#emptyState 是列表的常驻元素，不能被 innerHTML 清掉 */
+  wrap.querySelectorAll('.task-card').forEach(c => c.remove());
+  empty.classList.toggle('hidden', list.length > 0);
+  if(list.length === 0) return;
   for(const t of list){
     const card = document.createElement('div');
-    card.className = 'task-card';
+    card.className = 'task-card' + (t.important ? ' important' : '');
     card.dataset.id = t.id;
     card.innerHTML =
+      '<button class="task-check" aria-label="完成"></button>' +
       '<span class="task-dot ' + t.category + '"></span>' +
-      '<span class="task-text">' + esc(t.text) + '</span>';
-    wrap.appendChild(card);
+      '<span class="task-text">' + esc(t.text) + '</span>' +
+      '<button class="task-star' + (t.important ? ' on' : '') + '">' + (t.important ? '⭐' : '☆') + '</button>';
+    wrap.insertBefore(card, empty);
     bindCard(card);
   }
+}
+/* 点星标切换优先级 */
+async function togglePriority(id){
+  const t = await getById('tasks', id);
+  if(!t) return;
+  t.important = !t.important;
+  await put('tasks', t);
+  renderTaskList();
 }
 
 /* ---------- 任务卡片触摸：左滑完成 / 右滑延期 / 点按编辑 ---------- */
@@ -714,9 +1088,19 @@ function bindCard(card){
       if(dx < -80) completeTask(card.dataset.id);          // 左滑 → 完成
       else if(dx > 80) delayTask(card.dataset.id);          // 右滑 → 延期
     } else if(!moved && Date.now() - startT < 450 && !e.target.closest('.inline-input')){
-      startEdit(card.dataset.id);                           // 点按 → 编辑
+      if(e.target.closest('.task-check') || e.target.closest('.task-star')) return;  // 交给 click 处理
+      startEdit(card.dataset.id);                                       // 点按正文 → 编辑
     }
   }, {passive:true});
+  /* 勾选框 → 完成；星标 → 优先级。用 click：手机点按和鼠标点击都能触发 */
+  card.querySelector('.task-check').addEventListener('click', e => {
+    e.stopPropagation();
+    completeTask(card.dataset.id);
+  });
+  card.querySelector('.task-star').addEventListener('click', e => {
+    e.stopPropagation();
+    togglePriority(card.dataset.id);
+  });
 }
 
 /* 左滑完成 → “叮” 音效 + 卡片淡出 */
@@ -728,7 +1112,7 @@ async function completeTask(id){
   ding();
   ensureCoolDay(); cool.adds = 0; saveCool();          // 完成任务 → 冷却计数清零
   const card = document.querySelector('.task-card[data-id="' + id + '"]');
-  if(card) card.classList.add('done-out');
+  if(card){ card.classList.add('checking'); card.classList.add('done-out'); }  // 勾选反馈 + 滑出
   setTimeout(() => refreshToday(), 320);
   updateSoftReminder();
 }
@@ -804,7 +1188,7 @@ async function handleAdd(){
   if(active.length >= 3){ toast('水满则溢，先完成再做新的吧'); return; }   // 最多3个
   await add('tasks', {
     text, category: detectCategory(text),
-    completed: false, date: todayStr(), delayed: false,
+    completed: false, date: todayStr(), delayed: false, important: false,
     createdAt: new Date().toISOString()
   });
   const doneToday = (await getCompletedToday()).length;
@@ -834,7 +1218,7 @@ async function openOldPanel(){
   }
   panel.classList.remove('hidden');
 }
-function catColor(c){ return c === 'do' ? '#4FC3F7' : c === 'talk' ? '#FFA726' : '#90A4AE'; }
+function catColor(c){ return c === 'do' ? '#3EA463' : c === 'talk' ? '#F2A33C' : '#8FA696'; }
 
 async function recallTask(t){
   const ok = await confirmBox('召回此任务？\n「' + t.text + '」');
@@ -843,7 +1227,7 @@ async function recallTask(t){
   if(active.length >= 3){ toast('今日已满，无法召回'); return; }
   await add('tasks', {
     text: t.text, category: t.category,
-    completed: false, date: todayStr(), delayed: false,
+    completed: false, date: todayStr(), delayed: false, important: !!t.important,
     createdAt: new Date().toISOString()
   });
   toast('已召回「' + t.text + '」');
@@ -882,6 +1266,58 @@ function initPull(){
   }, {passive:true});
 }
 
+/* ========================= 番茄钟专注计时 ========================= */
+const POMO_DUR = 25 * 60;                       // 25 分钟
+let pomo = { end:0, remaining:POMO_DUR, running:false };
+function loadPomo(){
+  const e = parseInt(localStorage.getItem('shuiji_pomo_end') || '0', 10);
+  const r = parseInt(localStorage.getItem('shuiji_pomo_remaining') || String(POMO_DUR), 10);
+  pomo.running = localStorage.getItem('shuiji_pomo_running') === '1';
+  pomo.remaining = isNaN(r) ? POMO_DUR : r;
+  pomo.end = e;
+  if(pomo.running && pomo.end && Date.now() >= pomo.end){   // 离开期间已到点 → 补一次完成
+    pomo.running = false; pomo.remaining = POMO_DUR; pomo.end = 0; savePomo(); completeFocus();
+  }
+}
+function savePomo(){
+  localStorage.setItem('shuiji_pomo_end', String(pomo.end));
+  localStorage.setItem('shuiji_pomo_remaining', String(pomo.remaining));
+  localStorage.setItem('shuiji_pomo_running', pomo.running ? '1' : '0');
+}
+function pomoStart(){
+  if(pomo.running) return;
+  pomo.end = Date.now() + pomo.remaining * 1000;
+  pomo.running = true; savePomo(); renderPomo();
+}
+function pomoPause(){
+  if(!pomo.running) return;
+  pomo.remaining = Math.max(0, Math.round((pomo.end - Date.now()) / 1000));
+  pomo.running = false; savePomo(); renderPomo();
+}
+function pomoReset(){
+  pomo.running = false; pomo.remaining = POMO_DUR; pomo.end = 0; savePomo(); renderPomo();
+}
+function pomoTick(){
+  if(!pomo.running) return;
+  if(Date.now() >= pomo.end){ pomo.running = false; pomo.remaining = POMO_DUR; pomo.end = 0; savePomo(); renderPomo(); completeFocus(); }
+  else renderPomo();
+}
+function renderPomo(){
+  const total = POMO_DUR;
+  const left = pomo.running ? Math.max(0, Math.round((pomo.end - Date.now()) / 1000)) : pomo.remaining;
+  $('focusTime').textContent = String(Math.floor(left/60)).padStart(2,'0') + ':' + String(left%60).padStart(2,'0');
+  const C = 2 * Math.PI * 52;
+  $('ringFg').style.strokeDashoffset = String(C * (1 - left / total));
+  $('focusBtn').textContent = pomo.running ? '暂停' : (left < total ? '继续' : '开始专注');
+}
+/* 专注完成 → 和弦音 + 记录到 IndexedDB(focus) */
+async function completeFocus(){
+  await add('focus', { date: todayStr(), duration: POMO_DUR, completedAt: new Date().toISOString() });
+  playTone(659,0.16,0.2); playTone(784,0.16,0.2,0.16); playTone(1046,0.35,0.2,0.32);
+  toast('专注完成 🌊');
+  if(isView('review')) renderReview();
+}
+
 /* ========================= 微习惯签到 ========================= */
 function streakFrom(all, type){
   const dates = new Set(all.filter(h => h.type === type).map(h => h.date));
@@ -889,14 +1325,66 @@ function streakFrom(all, type){
   while(dates.has(todayStr(d))){ n++; d.setDate(d.getDate() - 1); }
   return n;
 }
+/* 习惯定义（可自定义，存 localStorage） */
+function loadHabitDefs(){
+  const def = localStorage.getItem('shuiji_habit_defs');
+  if(def){ try{ const arr = JSON.parse(def); if(Array.isArray(arr) && arr.length) return arr; }catch(e){} }
+  const d = [
+    {type:'drink',   emoji:'💧', label:'喝水'},
+    {type:'stretch', emoji:'🧘', label:'拉伸'},
+    {type:'sleep',   emoji:'😴', label:'早睡'},
+    {type:'read',    emoji:'📚', label:'阅读'}
+  ];
+  localStorage.setItem('shuiji_habit_defs', JSON.stringify(d));
+  return d;
+}
+function saveHabitDefs(d){ localStorage.setItem('shuiji_habit_defs', JSON.stringify(d)); }
+
 async function renderHabits(){
+  const defs = loadHabitDefs();
   const all = await getAll('habits');
   const t = todayStr();
   const done = new Set(all.filter(h => h.date === t).map(h => h.type));
-  document.querySelectorAll('.habit-btn').forEach(b =>
-    b.classList.toggle('active', done.has(b.dataset.type)));
-  const max = Math.max(streakFrom(all, 'drink'), streakFrom(all, 'stretch'));
-  $('streakLine').textContent = '已连续坚持 ' + max + ' 天';
+  const row = $('habitRow');
+  row.innerHTML = defs.map(h =>
+    '<button class="habit-btn' + (done.has(h.type) ? ' active' : '') + '" data-type="' + esc(h.type) + '">' +
+      '<span>' + h.emoji + '</span><span class="habit-label">' + esc(h.label) + '</span>' +
+    '</button>'
+  ).join('');
+  row.querySelectorAll('.habit-btn').forEach(b => b.addEventListener('click', () => checkHabit(b.dataset.type)));
+  const doneCount = defs.filter(h => done.has(h.type)).length;
+  let best = 0;
+  defs.forEach(h => { const s = streakFrom(all, h.type); if(s > best) best = s; });
+  $('streakLine').textContent = '今日打卡 ' + doneCount + '/' + defs.length + ' · 已连续坚持 ' + best + ' 天';
+}
+
+/* 设置页：习惯列表管理 */
+function renderHabitDefList(){
+  const defs = loadHabitDefs();
+  $('habitDefList').innerHTML = defs.map((h, i) =>
+    '<div class="def-row"><span>' + esc(h.emoji) + ' ' + esc(h.label) + '</span>' +
+    '<button class="def-del" data-i="' + i + '">✕</button></div>'
+  ).join('') || '<div class="empty" style="padding:10px">还没有习惯</div>';
+  $('habitDefList').querySelectorAll('.def-del').forEach(b =>
+    b.onclick = () => removeHabit(parseInt(b.dataset.i, 10)));
+}
+function addHabit(){
+  const em = $('habitNewEmoji').value.trim() || '✨';
+  const nm = $('habitNewName').value.trim();
+  if(!nm){ toast('填个习惯名称'); return; }
+  const defs = loadHabitDefs();
+  if(defs.length >= 8){ toast('最多 8 个习惯'); return; }
+  defs.push({ type: 'h' + Date.now(), emoji: em.slice(0,2), label: nm.slice(0,6) });
+  saveHabitDefs(defs);
+  $('habitNewEmoji').value = ''; $('habitNewName').value = '';
+  renderHabitDefList(); renderHabits();
+  toast('已添加习惯');
+}
+function removeHabit(i){
+  const defs = loadHabitDefs();
+  defs.splice(i, 1);
+  saveHabitDefs(defs);
+  renderHabitDefList(); renderHabits();
 }
 async function checkHabit(type){
   const all = await getAll('habits');
@@ -942,6 +1430,7 @@ async function renderReview(){
       ).join('') + '</div>'
     ).join('');
   }
+  renderWeekStats(monStr, t);
   renderMoodHeatmap();
 }
 /* 情绪热力图：满 7 条记录才出现，显示本周每天状态分布 */
@@ -964,6 +1453,32 @@ async function renderMoodHeatmap(){
   }
   $('heatGrid').innerHTML = html;
   wrap.classList.remove('hidden');
+}
+/* 每周统计：任务完成率 + 专注次数 + 打卡日历 */
+async function renderWeekStats(monStr, today){
+  const allTasks = await getAll('tasks');
+  const weekTasks = allTasks.filter(x => x.date >= monStr && x.date <= today);
+  const total = weekTasks.length, done = weekTasks.filter(x => x.completed).length;
+  const rate = total ? Math.round(done / total * 100) : 0;
+  $('statRateText').textContent = done + '/' + total + ' · ' + rate + '%';
+  $('statRateFill').style.width = rate + '%';
+
+  const focus = await getAll('focus');
+  const fw = focus.filter(f => f.date >= monStr && f.date <= today);
+  const fMin = Math.round(fw.reduce((s, f) => s + (f.duration || 0), 0) / 60);
+  $('statFocusText').textContent = fw.length + ' 次 · ' + fMin + ' 分钟';
+
+  const habits = await getAll('habits');
+  const base = new Date(monStr + 'T00:00:00');
+  let cal = '';
+  for(let i = 0; i < 7; i++){
+    const d = new Date(base); d.setDate(base.getDate() + i);
+    const ds = todayStr(d);
+    const n = habits.filter(h => h.date === ds).length;
+    cal += '<div class="cal-cell' + (n ? ' has' : '') + (ds > today ? ' future' : '') + '" title="' + ds + '">' +
+      (n ? n : '·') + '</div>';
+  }
+  $('miniCal').innerHTML = cal;
 }
 
 /* ========================= 柔和提醒（18:00 后有未完成任务） ========================= */
@@ -1023,15 +1538,37 @@ async function getCityName(){
   } catch(e){ return '已定位'; }
 }
 
+/* 定位许可：首次使用吃啥前征得同意，选择存本地 */
+async function checkLocConsent(){
+  const c = localStorage.getItem('shuiji_loc_consent');
+  if(c) return c;                                       // 'ok' | 'coarse' | 'no'
+  const v = await showModal('定位许可',
+    '「吃啥」需要把当前位置发送给<b>高德地图</b>，用于搜索附近餐厅。<br>' +
+    '<span style="font-size:13px">你的数据仅存于本设备，定位只用于此功能。</span>',
+    [
+      {label:'允许精确', value:'ok', primary:true},
+      {label:'仅用粗略', value:'coarse'},
+      {label:'不用此功能', value:'no'}
+    ]);
+  localStorage.setItem('shuiji_loc_consent', v);
+  return v;
+}
+
 async function locate(manual){
   const line = $('locLine');
   line.innerHTML = '正在定位… <span class="spinner"></span>';
   eat.key = localStorage.getItem('shuiji_amapKey') || '';
+  const consent = await checkLocConsent();
+  if(consent === 'no'){                                 // 拒绝 → 停用吃啥
+    line.textContent = '已关闭定位，「吃啥」不可用（设置页可重新开启）';
+    $('eatList').innerHTML = '';
+    return;
+  }
   let coords = null;
-  try {
-    coords = await getCurrentPosition();                   // 优先：精确经纬度
-  } catch(e) { /* 降级到 kamero */ }
-  if(!coords){
+  if(consent === 'ok'){                                 // 允许精确 → 用 GPS
+    try { coords = await getCurrentPosition(); } catch(e) { /* 失败则降级 */ }
+  }
+  if(!coords){                                          // 粗略 / GPS失败 → kamero
     try {
       const j = await fetchJSON('https://geo.kamero.ai/api/geo');
       coords = { lng: j.longitude || j.lng || (j.location && j.location.lng),
@@ -1183,9 +1720,11 @@ async function exportData(){
     habits: await getAll('habits'),
     moods:  await getAll('moods'),
     eats:   await getAll('eats'),
+    focus:  await getAll('focus'),
     settings: {
       amapKey: localStorage.getItem('shuiji_amapKey') || '',
-      softReminder: localStorage.getItem('shuiji_softReminder') === '1'
+      softReminder: localStorage.getItem('shuiji_softReminder') === '1',
+      habitDefs: loadHabitDefs()
     }
   };
   const blob = new Blob([JSON.stringify(all, null, 2)], { type:'application/json' });
@@ -1199,8 +1738,9 @@ async function exportData(){
 async function clearAll(){
   const ok = await confirmBox('确定清空所有数据吗？\n此操作不可恢复，建议先导出备份。');
   if(!ok) return;
-  await Promise.all([clearStore('tasks'), clearStore('habits'), clearStore('moods'), clearStore('eats')]);
+  await Promise.all([clearStore('tasks'), clearStore('habits'), clearStore('moods'), clearStore('eats'), clearStore('focus')]);
   localStorage.removeItem('shuiji_coolDay'); localStorage.removeItem('shuiji_coolAdds'); localStorage.removeItem('shuiji_coolEnd');
+  localStorage.removeItem('shuiji_pomo_end'); localStorage.removeItem('shuiji_pomo_remaining'); localStorage.removeItem('shuiji_pomo_running');
   toast('已清空所有数据');
   refreshToday();
   renderReview();
@@ -1211,10 +1751,911 @@ function isView(name){ return $('view-' + name).classList.contains('active'); }
 function switchTab(name){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   $('view-' + name).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
+  document.querySelectorAll('.drawer-item').forEach(t => t.classList.toggle('active', t.dataset.view === name));
   $('oldPanel').classList.add('hidden');
   if(name === 'review') renderReview();
   if(name === 'eat' && !eat.loc) locate();
+}
+/* ================= 小组件系统（真实功能） ================= */
+/* 通用数据存取：每个组件一套 localStorage JSON，key 前缀 shuiji_w_ */
+function wget(k){ try{ return JSON.parse(localStorage.getItem('shuiji_w_' + k) || '[]'); }catch(e){ return []; } }
+function wset(k, v){ localStorage.setItem('shuiji_w_' + k, JSON.stringify(v)); }
+function calcStreak(dates){
+  const s = new Set(dates), d = new Date(); let n = 0;
+  while(s.has(todayStr(d))){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function weekStartStr(){ const d = new Date(); d.setDate(d.getDate() - d.getDay()); return todayStr(d); }
+function fmtW(d){ const x = new Date(d + 'T00:00:00'); return (x.getMonth()+1) + '月' + x.getDate() + '日'; }
+function wCard(t, inner, right){
+  return '<div class="w-card"><div class="w-card-h"><div class="w-card-t">' + t + '</div>' + (right || '') + '</div>' + inner + '</div>';
+}
+function wAdd(ph, act, extra){
+  return '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">添加</div><div class="w-add">' + (extra || '') + '<input id="w-input" type="text" placeholder="' + ph + '" autocomplete="off"><button class="w-btn" data-wact="' + act + '">＋</button></div></div>';
+}
+function wMin(act, label){
+  return '<div class="w-add"><span style="align-self:center;color:var(--sub);font-size:14px">⏱</span><input id="w-min" type="number" class="w-min" value="15" min="1" max="600"><button class="w-btn" data-wact="' + act + '">' + label + '</button></div>';
+}
+function wMinNote(act, label){
+  return wMin(act, label) + '<div class="w-add" style="margin-top:8px"><input id="w-note" type="text" placeholder="备注（可选）" autocomplete="off"></div>';
+}
+/* 近 7 天柱状图 */
+function chartCard(items, getVal){
+  const days = []; const d0 = new Date(); d0.setDate(d0.getDate() - 6);
+  for(let i = 0; i < 7; i++){ const dd = new Date(d0); dd.setDate(d0.getDate() + i); days.push(todayStr(dd)); }
+  const t = todayStr();
+  const vals = days.map(x => items.filter(it => it.date === x).reduce((s, it) => s + getVal(it), 0));
+  const max = Math.max(1, ...vals);
+  return '<div class="w-card"><div class="w-card-t" style="margin-bottom:6px">近 7 天</div><div class="w-chart">' +
+    vals.map(v => '<div class="w-bar" style="height:' + Math.max(6, Math.round(v / max * 100)) + '%"><small>' + (v || '') + '</small></div>').join('') +
+    '</div><div style="display:flex;gap:5px;margin-top:4px;font-size:10px;color:var(--sub)">' +
+    days.map(x => '<div style="flex:1;text-align:center">' + (x === t ? '今' : String(new Date(x + 'T00:00:00').getDate())) + '</div>').join('') + '</div></div>';
+}
+/* 今日目标进度条（通用）：shuiji_wg_<gkey> 存目标值 */
+function goalCard(gkey, todayVal, unit, defGoal){
+  let g = parseInt(localStorage.getItem('shuiji_wg_' + gkey), 10) || defGoal;
+  const pct = Math.max(0, Math.min(100, Math.round(todayVal / (g || 1) * 100)));
+  return '<div class="w-goal"><div class="w-goal-t">今日目标 <b>' + todayVal + '</b> / ' + g + ' ' + unit + ' · ' + pct + '%</div>' +
+    '<div class="w-goal-bar"><div class="w-goal-fill" style="width:' + pct + '%"></div></div>' +
+    '<div class="w-goal-row"><input type="number" class="w-goal-input" value="' + g + '" min="1" autocomplete="off"><button class="w-btn" data-wact="goal-set" data-gkey="' + gkey + '">设目标</button></div></div>';
+}
+/* 练字字帖库：按一年第几天轮换 */
+const LESSONS = [
+  { title:'《春晓》孟浩然', chars:'春眠不觉晓处处闻啼鸟' },
+  { title:'《静夜思》李白', chars:'床前明月光疑是地上霜' },
+  { title:'《登鹳雀楼》王之涣', chars:'白日依山尽黄河入海流' },
+  { title:'《江雪》柳宗元', chars:'千山鸟飞绝万径人踪灭' },
+  { title:'《咏柳》贺知章', chars:'碧玉妆成一树高万条垂下绿丝绦' },
+  { title:'《望庐山瀑布》李白', chars:'飞流直下三千尺疑是银河落九天' },
+  { title:'《枫桥夜泊》张继', chars:'月落乌啼霜满天江枫渔火对愁眠' },
+  { title:'《元日》王安石', chars:'爆竹声中一岁除春风送暖入屠苏' },
+  { title:'《题西林壁》苏轼', chars:'不识庐山真面目只缘身在此山中' },
+  { title:'《游子吟》孟郊', chars:'慈母手中线游子身上衣' }
+];
+function handwritingLesson(){
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const doy = Math.floor((now - start) / 864e5);
+  const l = LESSONS[doy % LESSONS.length];
+  return { title: l.title, chars: l.chars, n: l.chars.length };
+}
+/* 表达：经典辩题灵感 */
+const DEBATES = ['「钱和理想，哪个更重要？」','「朋友之间该不该谈钱？」','「996 是福是祸？」','「AI 会取代人类吗？」','「该不该相信网上的陌生人？」','「工作和生活，边界在哪里？」','「孩子该不该玩手机？」','「留在大城市还是小城市？」','「自律重要还是自由重要？」','「努力和选择，哪个更重要？」','「要不要听父母的安排？」','「内卷真的无法避免吗？」','「该不该为了爱好放弃稳定？」','「科技让生活变得更好了吗？」','「成功是不是唯一的评价标准？」','「真话和善良，哪个优先？」'];
+/* 减肥：体重近 7 次迷你柱状图 */
+function weightSpark(ws){
+  const vals = ws.slice(-7);
+  const min = Math.min.apply(null, vals.map(x => x.weight));
+  const max = Math.max.apply(null, vals.map(x => x.weight));
+  const span = Math.max(0.5, max - min);
+  return '<div class="w-chart w-chart-small">' + vals.map(x => '<div class="w-bar" style="height:' + Math.max(8, Math.round((x.weight - min) / span * 100)) + '%"><small></small></div>').join('') + '</div>';
+}
+function fmtDelta(d){ const s = d >= 0 ? '+' : ''; return s + (d).toFixed(1) + ' kg'; }
+/* AI 日报：Hacker News 公开接口（免 Key、CORS 友好） */
+async function loadAINews(){
+  const box = document.getElementById('w-ai-news');
+  if(!box) return;
+  box.innerHTML = '<div class="w-empty">加载中…</div>';
+  try {
+    const data = await fetchJSON('https://hn.algolia.com/api/v1/search?query=artificial%20intelligence&tags=story&hitsPerPage=5').catch(() => null);
+    if(curWidget !== 'AI 学习' || !document.getElementById('w-ai-news')) return;
+    if(!data || !data.hits || !data.hits.length) throw new Error('no news');
+    box.innerHTML = data.hits.slice(0, 5).map(h => {
+      const m = h.url ? (h.url.match(/^https?:\/\/([^\/]+)/) || []) : [];
+      const host = m[1] || 'news.ycombinator.com';
+      const href = h.url || ('https://news.ycombinator.com/item?id=' + h.objectID);
+      return '<a class="w-row" style="text-decoration:none;color:inherit;display:flex" href="' + esc(href) + '" target="_blank" rel="noopener">' +
+        '<span class="w-row-t">' + esc(h.title) + '</span>' +
+        '<span class="w-row-s">' + esc(host) + ' · ▲' + (h.points || 0) + '</span></a>';
+    }).join('') + '<div class="w-note" style="margin-top:6px">来源 Hacker News · 实时更新 · 点标题打开</div>';
+  } catch(e){
+    if(curWidget !== 'AI 学习') return;
+    box.innerHTML = '<div class="w-empty">暂时拉不到 AI 新闻（网络/接口限制）<br><span style="font-size:12px">稍后点「刷新」重试</span></div>';
+  }
+}
+
+let curWidget = null;
+
+function openWidget(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $('view-widget').classList.add('active');
+  document.querySelectorAll('.drawer-item').forEach(t => t.classList.toggle('active', t.dataset.widget === name));
+  curWidget = name;
+  const w = WIDGETS[name];
+  if(w){ $('widgetBox').innerHTML = w.render(); if(w.after) w.after(); }
+  else {
+    $('widgetBox').innerHTML = '<div class="widget-placeholder"><div class="wp-emoji">✨</div><div class="wp-name">' + esc(name) + '</div><div class="wp-tip">未知组件</div></div>';
+  }
+}
+/* 组件内按钮事件委托：data-wact → 当前组件的动作 */
+$('widgetBox').addEventListener('click', async e => {
+  const b = e.target.closest('[data-wact]');
+  if(!b) return;
+  if(b.dataset.wact === 'goal-set'){
+    const inp = b.parentElement.querySelector('.w-goal-input');
+    const v = parseInt((inp && inp.value) || '', 10);
+    if(v > 0){ localStorage.setItem('shuiji_wg_' + b.dataset.gkey, v); toast('目标已设为 ' + v); }
+    if(curWidget) openWidget(curWidget);
+    return;
+  }
+  if(!curWidget || !WIDGETS[curWidget] || !WIDGETS[curWidget].acts) return;
+  const fn = WIDGETS[curWidget].acts[b.dataset.wact];
+  if(fn) await fn(b);
+});
+/* 首页今日进度卡 → 跳今日计划 */
+const tpCard = $('todayProgress');
+if(tpCard) tpCard.addEventListener('click', () => openWidget('每日计划'));
+
+const WIDGETS = {};
+
+/* ---------- 每日计划 ---------- */
+WIDGETS['每日计划'] = {
+  render(){
+    const t = todayStr();
+    const items = wget('dailyplan').filter(x => x.date === t);
+    const done = items.filter(x => x.done).length;
+    const yLeft = wget('dailyplan').filter(x => x.date === yesterdayStr() && !x.done)
+      .filter(yi => !items.some(x => x.text === yi.text && x.section === yi.section)).length;
+    const secs = [['morning','上午'],['afternoon','下午'],['evening','晚上']];
+    const html = secs.map(([k, label]) => {
+      const list = items.filter(x => x.section === k);
+      return '<div style="font-size:13px;color:var(--sub);margin:8px 0 4px">' + label + '</div>' +
+        (list.length ? list.map(x => '<div class="w-row' + (x.done ? ' done' : '') + '"><button class="w-check' + (x.done ? ' on' : '') + '" data-wact="plan-toggle" data-id="' + x.id + '"></button><span class="w-row-t">' + esc(x.text) + '</span><button class="w-del" data-wact="plan-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">暂无，在下方添加</div>');
+    }).join('');
+    return wCard('📅 今日计划', html + (yLeft ? '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-backfill">📥 补昨日未完成 ' + yLeft + ' 项</button></div>' : ''), '<div class="w-streak">已完成 <b>' + done + '</b>/<b>' + items.length + '</b> · 剩 <b>' + (items.length - done) + '</b></div>') +
+      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">添加计划</div><div class="w-add"><select id="w-section"><option value="morning">上午</option><option value="afternoon">下午</option><option value="evening">晚上</option></select><input id="w-input" type="text" placeholder="计划事项…" autocomplete="off"><button class="w-btn" data-wact="plan-add">＋</button></div></div>';
+  },
+  acts: {
+    'plan-add': async () => {
+      const v = ($('w-input').value || '').trim(); if(!v){ toast('写点内容'); return; }
+      const l = wget('dailyplan');
+      l.push({ id: Date.now(), date: todayStr(), section: $('w-section').value, text: v, done: false });
+      wset('dailyplan', l); openWidget(curWidget);
+    },
+    'plan-toggle': async b => {
+      const l = wget('dailyplan'); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.done = !x.done; wset('dailyplan', l); } openWidget(curWidget);
+    },
+    'plan-del': async b => {
+      wset('dailyplan', wget('dailyplan').filter(i => i.id != b.dataset.id)); openWidget(curWidget);
+    },
+    'plan-backfill': async () => {
+      const t = todayStr(), y = yesterdayStr();
+      const l = wget('dailyplan');
+      const yItems = wget('dailyplan').filter(x => x.date === y && !x.done);
+      let n = 0;
+      for(const it of yItems){
+        if(l.some(x => x.date === t && x.section === it.section && x.text === it.text)) continue;
+        l.push({ id: Date.now() + n, date: t, section: it.section, text: it.text, done: false });
+        n++;
+      }
+      wset('dailyplan', l);
+      toast(n ? '已补 ' + n + ' 项到今日' : '昨天没有未完成的');
+      openWidget(curWidget);
+    }
+  }
+};
+
+/* ---------- 天气 ---------- */
+WIDGETS['天气'] = {
+  render(){
+    return '<div class="w-card" id="wWeather"><div class="w-card-h"><div class="w-card-t">🌤️ 天气</div><div class="w-streak" id="wCity">定位中…</div></div><div id="wWx"><div class="w-empty">加载中…</div></div></div>';
+  },
+  after(){ loadWeather(); },
+  acts: {}
+};
+function wearAdvice(temp){
+  const t = parseFloat(temp);
+  if(isNaN(t)) return '';
+  if(t >= 30) return '🥵 短袖短裤，注意防晒补水';
+  if(t >= 24) return '👕 短袖或薄长袖，早晚微凉带件薄衫';
+  if(t >= 18) return '🧥 长袖 + 薄外套，正舒适';
+  if(t >= 12) return '🧣 风衣 / 卫衣，注意温差';
+  if(t >= 5) return '🧤 大衣 + 毛衣，保暖为主';
+  return '🧥 厚羽绒服，戴好围巾手套';
+}
+/* 妆容穿搭：按今天天气温度推荐风格 */
+function fitAdvice(temp){
+  const t = parseFloat(temp);
+  if(isNaN(t)) return '';
+  if(t >= 30) return '🥵 ' + t + '°C 高温 → 选 😌 休闲 / 🏃 运动，透气浅色系，备遮阳帽';
+  if(t >= 24) return '☀️ ' + t + '°C 温暖 → 😌 休闲 / 💼 通勤，衬衫或连衣裙正合适';
+  if(t >= 18) return '🌤️ ' + t + '°C 舒适 → 💼 通勤 / 🌹 约会，长袖 + 薄外套';
+  if(t >= 12) return '🍂 ' + t + '°C 微凉 → 💼 通勤，风衣 / 卫衣挡温差';
+  if(t >= 5) return '🧤 ' + t + '°C 冷 → ✨ 正式 / 💼 通勤，大衣 + 毛衣';
+  return '🥶 ' + t + '°C 严寒 → 厚羽绒服，围巾手套备好';
+}
+async function loadWeather(){
+  try {
+    const city = await getCityName().catch(() => '当前位置');
+    if(curWidget !== '天气') return;   /* 用户已切走 → 不写入 */
+    $('wCity').textContent = city;
+    const key = (localStorage.getItem('shuiji_amapKey') || '').trim();
+    const consent = localStorage.getItem('shuiji_loc_consent');
+    if(key && consent !== 'no'){
+      const loc = await getCurrentPosition().catch(() => null);
+      if(curWidget !== '天气') return;
+      if(loc){
+        const geo = await fetchJSON('https://restapi.amap.com/v3/geocode/regeo?location=' + loc.lng + ',' + loc.lat + '&key=' + encodeURIComponent(key)).catch(() => null);
+        if(curWidget !== '天气') return;
+        const adcode = geo && geo.regeocode && geo.regeocode.addressComponent ? geo.regeocode.addressComponent.adcode : null;
+        if(adcode){
+          const wx = await fetchJSON('https://restapi.amap.com/v3/weather/weatherInfo?city=' + adcode + '&key=' + encodeURIComponent(key) + '&extensions=all').catch(() => null);
+          if(curWidget !== '天气') return;
+          if(wx && wx.lives && wx.lives[0]){
+            const L = wx.lives[0];
+            $('wCity').textContent = L.province + ' ' + L.city;
+            localStorage.setItem('shuiji_w_tmp', L.temperature);
+            const casts = (wx.forecasts && wx.forecasts[0] && wx.forecasts[0].casts) || [];
+            $('wWx').innerHTML =
+              '<div class="w-big">' + L.temperature + '°C</div>' +
+              '<div class="w-sub">' + L.weather + ' · ' + L.winddirection + '风 ' + L.windpower + '级 · 湿度 ' + L.humidity + '%</div>' +
+              '<div class="w-sub" style="color:#2E8B57;font-size:14px">' + wearAdvice(L.temperature) + '</div>' +
+              casts.slice(0, 3).map(c => '<div class="w-row"><span class="w-row-t">' + fmtW(c.date) + '</span><span class="w-row-s">' + c.dayweather + ' / ' + c.nightweather + '</span><span class="w-row-s">' + c.daytemp + '°/' + c.nighttemp + '°</span></div>').join('');
+            return;
+          }
+        }
+      }
+    }
+    /* 无 Key / 定位失败 → 尝试 wttr.in（免 Key） */
+    const w = await fetchJSON('https://wttr.in/?format=j1&lang=zh').catch(() => null);
+    if(curWidget !== '天气') return;
+    if(w && w.current_condition && w.current_condition[0]){
+      const c = w.current_condition[0];
+      localStorage.setItem('shuiji_w_tmp', c.temp_C);
+      const desc = (c.lang_zh && c.lang_zh[0] && c.lang_zh[0].value) || (c.weatherDesc && c.weatherDesc[0] && c.weatherDesc[0].value) || '晴';
+      $('wWx').innerHTML =
+        '<div class="w-big">' + c.temp_C + '°C</div>' +
+        '<div class="w-sub">' + desc + ' · 体感 ' + c.FeelsLikeC + '° · 湿度 ' + c.humidity + '%</div>' +
+        '<div class="w-sub" style="color:#2E8B57;font-size:14px">' + wearAdvice(c.temp_C) + '</div>' +
+        (w.weather || []).slice(0, 3).map(d => '<div class="w-row"><span class="w-row-t">' + fmtW(d.date) + '</span><span class="w-row-s">' + d.mintempC + '° ~ ' + d.maxtempC + '°</span></div>').join('');
+      return;
+    }
+    throw new Error('no weather');
+  } catch(e){
+    $('wWx').innerHTML = '<div class="w-empty">暂时获取不到天气<br><span style="font-size:12px">可在「设置」填入高德 Key 后重试</span></div>';
+  }
+}
+
+/* ---------- 练字打卡 ---------- */
+WIDGETS['练字打卡'] = {
+  render(){
+    const l = wget('hw');
+    const t = todayStr();
+    const today = l.find(x => x.date === t);
+    const recent = l.slice(-7).reverse();
+    const lesson = handwritingLesson();
+    return wCard('✍️ 练字打卡',
+      goalCard('hw', today ? today.minutes : 0, '分钟', 15) +
+      (today
+        ? '<div class="w-row"><span class="w-row-t">今日已练 <b style="color:#2E8B57">' + today.minutes + '</b> 分钟' + (today.note ? ' · ' + esc(today.note) : '') + '</span></div><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="hw-add">再记一次</button></div>'
+        : wMinNote('hw-add', '打卡')),
+      '<div class="w-streak">已连续坚持 <b>' + calcStreak(l.map(x => x.date)) + '</b> 天</div>') +
+      wCard('📖 今日字帖', '<div style="font-size:30px;font-weight:800;color:#2E8B57;letter-spacing:6px;text-align:center;margin:8px 0">' + lesson.chars + '</div><div style="text-align:center;font-size:14px;color:var(--text)">' + lesson.title + '</div><div style="text-align:center;font-size:12px;color:var(--sub);margin-top:4px">共 ' + lesson.n + ' 个字 · 静心写好每一笔</div>') +
+      wCard('📜 最近记录', recent.length ? recent.map(x => '<div class="w-row"><span class="w-row-t">' + fmtW(x.date) + '</span><span class="w-row-s">' + x.minutes + ' 分钟' + (x.note ? ' · ' + esc(x.note) : '') + '</span></div>').join('') : '<div class="w-empty">还没有记录</div>') +
+      chartCard(l, x => x.minutes);
+  },
+  acts: {
+    'hw-add': async () => {
+      const min = parseInt($('w-min').value || '15', 10);
+      const note = ($('w-note').value || '').trim();
+      const l = wget('hw'); const ex = l.find(x => x.date === todayStr());
+      if(ex){ ex.minutes = min; if(note) ex.note = note; } else l.push({ date: todayStr(), minutes: min, note });
+      wset('hw', l); openWidget(curWidget);
+    }
+  }
+};
+
+/* ---------- 减肥运动 ---------- */
+let planEdit = false;
+function loadProfile(){
+  try{ return JSON.parse(localStorage.getItem('shuiji_w_profile') || 'null'); }catch(e){ return null; }
+}
+/* 定制减肥计划：Mifflin-St Jeor 估算 BMR/TDEE */
+function planView(p){
+  const h = p.h / 100;
+  const bmi = p.w / (h * h);
+  const bmiCat = bmi < 18.5 ? '偏瘦' : bmi < 24 ? '正常' : bmi < 28 ? '超重' : '肥胖';
+  const bmr = 10 * p.w + 6.25 * p.h - 5 * p.age + (p.gender === 'male' ? 5 : -161);
+  const tdee = Math.round(bmr * p.activity);
+  const deficit = Math.max(350, Math.min(750, Math.round(tdee - 1200)));
+  const intake = Math.max(1200, tdee - deficit);
+  const weekly = deficit / 1100;               /* 每减1kg脂肪≈7700kcal */
+  const weeks = Math.max(1, Math.ceil((p.w - p.goal) / weekly));
+  const protein = Math.round(p.w * 1.4);
+  const water = Math.round(p.w * 0.03 * 10) / 10;
+  if(p.w <= p.goal){
+    return '<div class="w-empty">目标体重 ≤ 当前体重，保持现状 + 适量运动就好 💪</div>' +
+      '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-edit">重新定制</button></div>';
+  }
+  return '<div class="w-stat"><div><b>' + bmi.toFixed(1) + '</b><span>BMI · ' + bmiCat + '</span></div><div><b>' + intake + '</b><span>每日建议 kcal</span></div><div><b>' + weeks + '</b><span>约需 周</span></div></div>' +
+    '<div class="w-row"><span class="w-row-t">每日消耗（TDEE）</span><span class="w-row-s">' + tdee + ' kcal</span></div>' +
+    '<div class="w-row"><span class="w-row-t">热量缺口</span><span class="w-row-s">- ' + deficit + ' kcal/天</span></div>' +
+    '<div class="w-row"><span class="w-row-t">预计减重速度</span><span class="w-row-s">约 ' + weekly.toFixed(1) + ' kg/周</span></div>' +
+    '<div class="w-row"><span class="w-row-t">蛋白质建议</span><span class="w-row-s">≥ ' + protein + ' g/天</span></div>' +
+    '<div class="w-row"><span class="w-row-t">饮水建议</span><span class="w-row-s">约 ' + water + ' L/天</span></div>' +
+    '<div class="w-row"><span class="w-row-t">运动方案</span><span class="w-row-s">每周 3-5 次有氧 + 2 次力量</span></div>' +
+    '<div class="w-note" style="margin-top:6px">安全减重每周 0.5-1kg，配合打卡记录更有效。数据仅存本地。</div>' +
+    '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-edit">重新定制</button></div>';
+}
+function planForm(p){
+  p = p || {};
+  const sel = (id, opts, cur) => opts.map(o => '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>').join('');
+  return '<div class="w-add" style="flex-wrap:wrap"><label class="w-pl">身高 cm</label><input id="p-h" type="number" class="w-min" value="' + (p.h || 170) + '" min="100" max="230" autocomplete="off">' +
+    '<label class="w-pl">体重 kg</label><input id="p-w" type="number" class="w-min" value="' + (p.w || 60) + '" min="20" max="300" autocomplete="off">' +
+    '<label class="w-pl">目标 kg</label><input id="p-goal" type="number" class="w-min" value="' + (p.goal || 55) + '" min="20" max="300" autocomplete="off">' +
+    '<label class="w-pl">年龄</label><input id="p-age" type="number" class="w-min" value="' + (p.age || 25) + '" min="12" max="100" autocomplete="off"></div>' +
+    '<div class="w-add" style="margin-top:8px;flex-wrap:wrap"><select id="p-gender">' + sel('p-gender', [['male','男'],['female','女']], p.gender) + '</select>' +
+    '<select id="p-act">' + sel('p-act', [['1.2','久坐 · 办公为主'],['1.375','轻度 · 每周1-3次运动'],['1.55','中度 · 每周3-5次运动'],['1.725','高活动 · 几乎每天运动']], String(p.activity)) + '</select>' +
+    '<button class="w-btn" data-wact="plan-gen">生成我的计划</button></div>' +
+    '<div class="w-note" style="margin-top:6px">基于身高体重估算，只存本地，不会上传。</div>';
+}
+function planCardHtml(){
+  const p = loadProfile();
+  if(p && !planEdit) return planView(p);
+  return planForm(p);
+}
+/* 计划进度：目标体重 ↔ 每天体重记录实时联动 */
+function planProgressHtml(){
+  const p = loadProfile(); if(!p) return '';
+  const ws = wget('ex_w'); if(!ws.length) return '';
+  const latest = ws[ws.length - 1].weight, initial = ws[0].weight;
+  const goal = p.goal, remaining = latest - goal;
+  const bmr = 10 * p.w + 6.25 * p.h - 5 * p.age + (p.gender === 'male' ? 5 : -161);
+  const weekly = Math.max(0.2, Math.max(350, Math.min(750, Math.round(bmr * p.activity - 1200))) / 1100);
+  const weeks = remaining > 0 ? Math.max(1, Math.ceil(remaining / weekly)) : 0;
+  const lost = initial - latest;
+  let rows = '<div class="w-row"><span class="w-row-t">最新体重</span><span class="w-row-s">' + latest + ' kg</span></div>';
+  if(lost > 0.05) rows += '<div class="w-row"><span class="w-row-t">已减</span><span class="w-row-s" style="color:#2E8B57">-' + lost.toFixed(1) + ' kg</span></div>';
+  else if(lost < -0.05) rows += '<div class="w-row"><span class="w-row-t">较最初</span><span class="w-row-s">+' + (-lost).toFixed(1) + ' kg</span></div>';
+  if(remaining > 0) rows += '<div class="w-row"><span class="w-row-t">距目标体重</span><span class="w-row-s">还差 ' + remaining.toFixed(1) + ' kg</span></div>' +
+    '<div class="w-row"><span class="w-row-t">预计达标</span><span class="w-row-s">约 ' + weeks + ' 周（按计划坚持）</span></div>';
+  return wCard('📈 计划进度', rows + (remaining <= 0 ? '<div class="w-empty">🎉 已达到目标 ' + goal + 'kg，继续保持！</div>' : ''));
+}
+WIDGETS['减肥运动'] = {
+  render(){
+    const l = wget('ex');
+    const t = todayStr();
+    const todayItems = l.filter(x => x.date === t);
+    const todayMin = todayItems.reduce((s, x) => s + x.minutes, 0);
+    const week = l.filter(x => x.date >= weekStartStr());
+    const totalMin = week.reduce((s, x) => s + x.minutes, 0);
+    const totalKcal = week.reduce((s, x) => s + x.kcal, 0);
+    const ws = wget('ex_w');
+    const goalW = parseFloat(localStorage.getItem('shuiji_wg_weight') || '0');
+    const latest = ws.length ? ws[ws.length - 1].weight : null;
+    const delta = ws.length >= 2 ? ws[ws.length - 1].weight - ws[0].weight : null;
+    return wCard('🏃 减肥运动',
+      goalCard('ex', todayMin, '分钟', 20) +
+      (todayItems.length
+        ? todayItems.map(x => '<div class="w-row"><span class="w-row-t">' + esc(x.type) + '</span><span class="w-row-s">' + x.minutes + ' 分钟 · ~' + x.kcal + ' kcal</span><button class="w-del" data-wact="ex-del" data-id="' + x.id + '">✕</button></div>').join('')
+        : '<div class="w-empty">今天还没运动</div>'),
+      '<div class="w-streak">本周 <b>' + totalMin + '</b> 分钟 · <b>' + totalKcal + '</b> kcal</div>') +
+      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">记录运动</div><div class="w-add"><select id="w-type"><option>跑步</option><option>跳绳</option><option>深蹲</option><option>瑜伽</option><option>骑行</option><option>力量</option><option>快走</option></select><input id="w-min" type="number" class="w-min" value="20" min="1" max="600"><button class="w-btn" data-wact="ex-add">＋</button></div></div>' +
+      chartCard(l, x => x.minutes) +
+      wCard('⚖️ 体重管理' + (goalW ? ' · 目标 ' + goalW + 'kg' : ''),
+        '<div class="w-add"><input id="w-wt" type="number" class="w-min" step="0.1" placeholder="今日体重 kg" autocomplete="off"><button class="w-btn" data-wact="ex-wadd">记录</button></div>' +
+        (ws.length ? weightSpark(ws) + '<div class="w-row"><span class="w-row-t">最新 ' + latest + ' kg</span>' + (delta !== null ? '<span class="w-row-s">较最初 ' + fmtDelta(delta) + '</span>' : '') + '</div>' : '<div class="w-empty">还没有体重记录，先记一个</div>') +
+        '<div class="w-goal-row" style="margin-top:8px"><input type="number" id="w-wgoal" class="w-goal-input" step="0.1" value="' + (goalW || 60) + '" min="20" max="300" autocomplete="off"><button class="w-btn" data-wact="ex-wgoal">设目标体重</button></div>') +
+      wCard('📋 定制减肥计划', planCardHtml()) +
+      planProgressHtml();
+  },
+  acts: {
+    'ex-add': async () => {
+      const type = $('w-type').value;
+      const min = parseInt($('w-min').value || '20', 10);
+      const kcal = Math.round(min * (type === '跑步' || type === '跳绳' ? 10 : type === '骑行' ? 8 : type === '快走' ? 5 : type === '瑜伽' ? 3 : 6));
+      const l = wget('ex'); l.push({ id: Date.now(), date: todayStr(), type, minutes: min, kcal });
+      wset('ex', l); openWidget(curWidget);
+    },
+    'ex-del': async b => { wset('ex', wget('ex').filter(x => x.id != b.dataset.id)); openWidget(curWidget); },
+    'ex-wadd': async () => {
+      const v = parseFloat(($('w-wt').value || '').trim());
+      if(isNaN(v) || v <= 0){ toast('填个体重'); return; }
+      const ws = wget('ex_w'); const ex = ws.find(x => x.date === todayStr());
+      if(ex) ex.weight = v; else ws.push({ id: Date.now(), date: todayStr(), weight: v });
+      wset('ex_w', ws); openWidget(curWidget);
+    },
+    'ex-wgoal': async () => {
+      const v = parseFloat(($('w-wgoal').value || '').trim());
+      if(isNaN(v) || v <= 0){ toast('填个目标体重'); return; }
+      localStorage.setItem('shuiji_wg_weight', v);
+      toast('目标体重 ' + v + 'kg');
+      openWidget(curWidget);
+    },
+    'plan-gen': async () => {
+      const h = parseFloat(($('p-h').value || '').trim());
+      const w = parseFloat(($('p-w').value || '').trim());
+      const goal = parseFloat(($('p-goal').value || '').trim());
+      const age = parseInt(($('p-age').value || '').trim(), 10);
+      const gender = $('p-gender').value, activity = parseFloat($('p-act').value);
+      if(!h || !w || !goal || !age || h < 100 || h > 230 || w < 20 || age < 12){ toast('身高/体重/年龄填完整'); return; }
+      if(goal >= w){ toast('目标体重要小于当前体重'); return; }
+      localStorage.setItem('shuiji_w_profile', JSON.stringify({ h, w, goal, age, gender, activity }));
+      planEdit = false; openWidget(curWidget);
+    },
+    'plan-edit': async () => { planEdit = true; openWidget(curWidget); }
+  }
+};
+
+/* ---------- 英语学习（多词书） ---------- */
+let revIdx = 0, revShown = false;
+/* 艾宾浩斯遗忘曲线：加入后第 1/3/7/14/30 天到期复习 */
+function ebbingDue(d){
+  const ms = new Date(todayStr() + 'T00:00:00') - new Date(String(d || '') + 'T00:00:00');
+  return [1, 3, 7, 14, 30].includes(Math.floor(ms / 86400000));
+}
+/* 词书管理：每本书独立词表/背词量/复习队列 */
+const BUILTIN_BOOKS = {
+  cet46: { name: '四六级', file: 'cet46.txt', label: '四六级核心 1642 词' },
+  cet4:  { name: '四级',   file: 'cet4.txt',  label: '四级全表 3069 词' }
+};
+function getBooks(){
+  try{
+    const b = JSON.parse(localStorage.getItem('shuiji_w_books') || 'null');
+    if(Array.isArray(b) && b.length) return b;
+  }catch(e){}
+  /* 首次使用：旧版单一词表迁移进「四级」词书 */
+  const old = wget('en_words');
+  if(old.length) localStorage.setItem('shuiji_w_en_words_cet4', JSON.stringify(old));
+  const books = [ { id: 'cet46', name: '四六级' }, { id: 'cet4', name: '四级' } ];
+  localStorage.setItem('shuiji_w_books', JSON.stringify(books));
+  if(!localStorage.getItem('shuiji_w_curbook')) localStorage.setItem('shuiji_w_curbook', 'cet46');
+  return books;
+}
+function curBook(){ return localStorage.getItem('shuiji_w_curbook') || 'cet46'; }
+function curBookName(){ const b = getBooks().find(x => x.id === curBook()); return b ? b.name : '词书'; }
+function bookWords(id){ return wget('en_words_' + id); }
+function saveBookWords(id, list){ wset('en_words_' + id, list); }
+function bookQuota(id){ return parseInt(localStorage.getItem('shuiji_wg_en_quota_' + id) || '10', 10); }
+function enRevPool(){ const words = bookWords(curBook()); const due = words.filter(w => !w.known && ebbingDue(w.date)); return due.length ? due : words; }
+function bookSwitcherHtml(){
+  return '<div class="w-books">' + getBooks().map(b =>
+    '<button class="w-book' + (b.id === curBook() ? ' sel' : '') + '" data-wact="book-switch" data-id="' + b.id + '">' + esc(b.name) + '</button>'
+  ).join('') + '<button class="w-book w-book-add" data-wact="book-add">＋ 新词书</button></div>' +
+    '<div class="w-add" id="bookNewRow" style="display:none;margin-top:8px"><input id="w-bookname" type="text" placeholder="新词书名称" autocomplete="off"><button class="w-btn" data-wact="book-create">创建</button></div>';
+}
+async function importInto(id){
+  const meta = BUILTIN_BOOKS[id];
+  let text;
+  try{
+    const res = await fetch(meta.file);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    text = await res.text();
+  }catch(e){
+    toast('找不到 ' + meta.file + '（请确认已上传到同目录）'); return;
+  }
+  const l = bookWords(id);
+  /* 跨所有词书去重，一个词只进一本书 */
+  const seen = new Set();
+  getBooks().forEach(b => bookWords(b.id).forEach(w => seen.add(w.word.toLowerCase())));
+  let n = 0;
+  text.split(/\r\n|\r|\n/).forEach((line, i) => {
+    line = line.trim(); if(!line) return;
+    const m = line.match(/^([^\s\t]+)[\s\t]+(.+)$/);
+    const word = m ? m[1] : line;
+    const def = m ? m[2].trim() : '';
+    const wl = word.toLowerCase();
+    if(seen.has(wl)) return;
+    seen.add(wl);
+    const d = new Date(); d.setDate(d.getDate() - (i % 90 + 1));  /* 分散到期，避免同一天全到期 */
+    l.push({ id: Date.now() * 100 + i, word, def: def || '—', known: false, date: todayStr(d) });
+    n++;
+  });
+  saveBookWords(id, l);
+  revIdx = 0; revShown = false;
+  toast('「' + meta.name + '」导入 ' + n + ' 个');
+  openWidget(curWidget);
+}
+WIDGETS['英语学习'] = {
+  render(){
+    const checks = wget('en_check');
+    const t = todayStr();
+    const today = checks.find(x => x.date === t);
+    const cb = curBook();
+    const words = bookWords(cb);
+    const todayCount = words.filter(w => w.date === t).length;
+    const quota = bookQuota(cb);
+    const dueCount = words.filter(w => !w.known && ebbingDue(w.date)).length;
+    const pool = enRevPool();
+    const rev = pool.length ? pool[revIdx % pool.length] : null;
+    return wCard('📚 词书', bookSwitcherHtml()) +
+      wCard('📖 今日英语 · ' + esc(curBookName()),
+      goalCard('en', today ? today.minutes : 0, '分钟', 30) +
+      (today
+        ? '<div class="w-row"><span class="w-row-t">已学 <b style="color:#2E8B57">' + today.minutes + '</b> 分钟 · 今日已背 <b style="color:#2E8B57">' + todayCount + '</b>/' + quota + ' 词</span></div>'
+        : wMin('en-check', '打卡')),
+      '<div class="w-streak">连续 <b>' + calcStreak(checks.map(x => x.date)) + '</b> 天</div>') +
+      wCard('📚 生词本（' + words.length + '）',
+        words.length ? words.slice(0, 20).map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.word) + '</b> · ' + esc(x.def) + '</span><button class="w-tag' + (x.known ? ' done' : '') + '" data-wact="en-toggle" data-id="' + x.id + '">' + (x.known ? '已掌握' : '复习') + '</button><button class="w-del" data-wact="en-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">这本书还没有生词，先加一个</div>') +
+      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">➕ 添加生词（加入「' + esc(curBookName()) + '」）</div><div class="w-add"><input id="w-input" type="text" placeholder="单词" autocomplete="off"><input id="w-def" type="text" placeholder="释义" style="width:90px" autocomplete="off"><button class="w-btn" data-wact="en-add">＋</button></div></div>' +
+      wCard('📥 导入词库（批量到当前词书）', '<textarea id="w-import" rows="4" placeholder="每行一个：单词 释义&#10;如：abandon 放弃&#10;abundant 丰富的" style="width:100%;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:14px;color:var(--text);resize:none;font-family:inherit;box-sizing:border-box"></textarea><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="en-import">导入词库</button></div>') +
+      wCard('🎯 每日背诵量', '<div class="w-goal-row"><input type="number" id="w-quota" class="w-goal-input" value="' + quota + '" min="1" max="100" autocomplete="off"><button class="w-btn" data-wact="en-quota">设置每天背 ' + quota + ' 个</button></div><div class="w-note" style="margin-top:6px">「' + esc(curBookName()) + '」每天背几个，添加生词自动计入进度。</div>') +
+      wCard('🎓 内置词库',
+        Object.keys(BUILTIN_BOOKS).map(k => '<div class="w-row"><span class="w-row-t">' + BUILTIN_BOOKS[k].label + '</span><button class="w-tag" data-wact="' + k + '-import">导入</button></div>').join('') +
+        '<div class="w-note" style="margin-top:6px">导入进对应词书，已存在自动跳过；数据只存本地。</div>') +
+      (rev ? wCard('🎴 复习卡片 · ' + esc(curBookName()) + (dueCount ? ' · 今日 ' + dueCount + ' 到期' : ''), '<div class="w-flip"><div class="wf-word">' + esc(rev.word) + '</div><div class="wf-def" id="wf-def">' + (revShown ? esc(rev.def) : '点下方查看释义') + '</div><div style="margin-top:10px;display:flex;gap:8px;justify-content:center"><button class="w-btn" data-wact="en-flip">查看释义</button><button class="w-btn" data-wact="en-known" data-id="' + rev.id + '">认识 ✓</button><button class="w-btn" data-wact="en-next">换一个</button></div></div>' + (dueCount ? '' : (words.length ? '<div class="w-note" style="margin-top:8px">今天没有到期的复习词，先随意复习一个</div>' : ''))) : '');
+  },
+  acts: {
+    'book-switch': async b => {
+      localStorage.setItem('shuiji_w_curbook', b.dataset.id); revIdx = 0; revShown = false; openWidget(curWidget);
+    },
+    'book-add': async () => {
+      const r = $('bookNewRow'); if(r) r.style.display = r.style.display === 'none' ? 'flex' : 'none';
+    },
+    'book-create': async () => {
+      const name = ($('w-bookname').value || '').trim();
+      if(!name){ toast('填个名字'); return; }
+      const books = getBooks();
+      if(books.some(b => b.name === name)){ toast('已有同名词书'); return; }
+      books.push({ id: 'bk' + Date.now(), name });
+      localStorage.setItem('shuiji_w_books', JSON.stringify(books));
+      localStorage.setItem('shuiji_w_curbook', books[books.length - 1].id);
+      revIdx = 0; revShown = false; openWidget(curWidget);
+    },
+    'en-check': async () => {
+      const min = parseInt($('w-min').value || '15', 10);
+      const l = wget('en_check'); const ex = l.find(x => x.date === todayStr());
+      if(ex) ex.minutes = min; else l.push({ date: todayStr(), minutes: min });
+      wset('en_check', l); openWidget(curWidget);
+    },
+    'en-add': async () => {
+      const w = ($('w-input').value || '').trim(); if(!w){ toast('填个单词'); return; }
+      const d = ($('w-def').value || '').trim();
+      const l = bookWords(curBook()); l.unshift({ id: Date.now(), word: w, def: d || '—', known: false, date: todayStr() });
+      saveBookWords(curBook(), l); openWidget(curWidget);
+    },
+    'en-import': async () => {
+      const raw = ($('w-import').value || '').trim();
+      if(!raw){ toast('先粘贴词库'); return; }
+      const l = bookWords(curBook());
+      let n = 0;
+      raw.split(/\r?\n/).forEach(line => {
+        line = line.trim();
+        if(!line) return;
+        const m = line.match(/^([^\s\t]+)[\s\t]+(.+)$/);
+        const word = m ? m[1] : line;
+        const def = m ? m[2].trim() : '';
+        if(l.some(x => x.word.toLowerCase() === word.toLowerCase())) return;
+        l.unshift({ id: Date.now() * 100 + (n++), word, def: def || '—', known: false, date: todayStr() });
+      });
+      saveBookWords(curBook(), l);
+      toast('导入 ' + n + ' 个生词');
+      openWidget(curWidget);
+    },
+    'en-quota': async () => {
+      const v = parseInt($('w-quota').value || '10', 10);
+      if(v > 0){ localStorage.setItem('shuiji_wg_en_quota_' + curBook(), v); toast('每天背 ' + v + ' 个'); }
+      openWidget(curWidget);
+    },
+    'cet46-import': async () => { await importInto('cet46'); },
+    'cet4-import': async () => { await importInto('cet4'); },
+    'en-toggle': async b => {
+      const l = bookWords(curBook()); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.known = !x.known; saveBookWords(curBook(), l); } openWidget(curWidget);
+    },
+    'en-del': async b => { saveBookWords(curBook(), bookWords(curBook()).filter(i => i.id != b.dataset.id)); openWidget(curWidget); },
+    'en-flip': async () => {
+      const pool = enRevPool(); const rev = pool[revIdx % pool.length];
+      if(rev){ $('wf-def').textContent = rev.def; revShown = true; }
+    },
+    'en-known': async b => {
+      const l = bookWords(curBook()); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.known = true; saveBookWords(curBook(), l); }
+      revIdx++; revShown = false; openWidget(curWidget);
+    },
+    'en-next': async () => { revIdx++; revShown = false; openWidget(curWidget); }
+  }
+};
+
+/* ---------- 播客精选 ---------- */
+WIDGETS['播客精选'] = {
+  render(){
+    const l = wget('pod');
+    const done = l.filter(x => x.status === 'done').length;
+    const stMap = { listen: '想听', doing: '在听', done: '已听完' };
+    const order = ['listen', 'doing', 'done'];
+    const html = order.map(st => {
+      const items = l.filter(x => x.status === st);
+      if(!items.length) return '';
+      return '<div style="font-size:13px;color:var(--sub);margin:8px 0 4px">' + stMap[st] + '（' + items.length + '）</div>' +
+        items.map(x => '<div class="w-row"><span class="w-row-t">' + esc(x.title) + (x.show ? ' <span class="w-row-s">' + esc(x.show) + '</span>' : '') + '</span><button class="w-tag" data-wact="pod-cycle" data-id="' + x.id + '">' + stMap[x.status] + '</button><button class="w-del" data-wact="pod-del" data-id="' + x.id + '">✕</button></div>').join('');
+    }).join('');
+    return wCard('🎧 播客精选', html || '<div class="w-empty">还没有想听的播客</div>', '<div class="w-streak">已听完 <b>' + done + '</b> 集</div>') +
+      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">加入想听</div><div class="w-add"><input id="w-input" type="text" placeholder="节目 / 单集标题" autocomplete="off"><input id="w-show" type="text" placeholder="平台" style="width:90px" autocomplete="off"><button class="w-btn" data-wact="pod-add">＋</button></div></div>';
+  },
+  acts: {
+    'pod-add': async () => {
+      const t = ($('w-input').value || '').trim(); if(!t){ toast('写个标题'); return; }
+      const l = wget('pod'); l.unshift({ id: Date.now(), title: t, show: ($('w-show').value || '').trim(), status: 'listen' });
+      wset('pod', l); openWidget(curWidget);
+    },
+    'pod-cycle': async b => {
+      const l = wget('pod'); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.status = { listen: 'doing', doing: 'done', done: 'listen' }[x.status]; wset('pod', l); } openWidget(curWidget);
+    },
+    'pod-del': async b => { wset('pod', wget('pod').filter(i => i.id != b.dataset.id)); openWidget(curWidget); }
+  }
+};
+
+/* ---------- 表达能力 ---------- */
+let topicIdx = 0;
+const TOPICS = ['描述你最近听到最打动你的一句话', '用30秒向别人推荐你最喜欢的一道菜', '用一个比喻描述你今天的感受', '复述一段你记得的电影台词', '介绍一个你擅长的技能给完全不懂的人', '用三个关键词讲一件今天的小事', '给一位朋友即兴想一个生日祝福', '说一个你最近的观点，并给一条理由', '用一分钟介绍你所在的城市', '即兴为一张想象中的照片配一段话', '描述一次你觉得很爽的体验', '向陌生人介绍你最近在用的一个 App', '讲一件你做过最勇敢的事', '用一句话让陌生人对你产生兴趣', '描述你理想的一天', '讲讲你最近一次帮助别人的经历', '如果明天是假期，你会怎么过', '用故事的方式讲你今天的通勤路上', '说说你最想感谢的一个人', '描述一种你特别喜欢的味道'];
+WIDGETS['表达能力'] = {
+  render(){
+    const l = wget('exp');
+    const t = todayStr();
+    const today = l.find(x => x.date === t);
+    if(!topicIdx) topicIdx = Math.floor(Math.random() * TOPICS.length);
+    const topic = TOPICS[topicIdx % TOPICS.length];
+    const debate = DEBATES[Math.floor(Math.random() * DEBATES.length)];
+    return wCard('🗣️ 表达能力',
+      goalCard('exp', today ? today.minutes : 0, '分钟', 10) +
+      (today ? '<div class="w-row"><span class="w-row-t">今日已练习 ' + today.minutes + ' 分钟</span></div>' : wMin('exp-check', '打卡练习')),
+      '<div class="w-streak">连续 <b>' + calcStreak(l.map(x => x.date)) + '</b> 天</div>') +
+      wCard('🎯 今日话题', '<div style="font-size:15px;line-height:1.7;min-height:20px">' + esc(topic) + '</div><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="exp-topic">换一个</button></div>') +
+      wCard('🎬 今日辩题', '<div style="font-size:15px;line-height:1.7">' + esc(debate) + '</div><div class="w-note" style="margin-top:6px">可以找一场对应的辩论赛看看，比如《奇葩说》《新国辩》，观察立论和反驳。</div>') +
+      wCard('📝 写作 / 文案摘抄',
+        '<textarea id="w-practice" rows="4" placeholder="自己写作，或摘抄喜欢的文案保存起来…" style="width:100%;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:14px;color:var(--text);resize:none;font-family:inherit;box-sizing:border-box">' + esc(today ? today.practice : '') + '</textarea>' +
+        '<div class="w-add" style="margin-top:8px"><input id="w-video" type="text" placeholder="辩论赛视频链接（可选）" autocomplete="off" style="flex:1"><button class="w-btn" data-wact="exp-save">保存</button></div>') +
+      (today && today.video ? '<div class="w-card"><div class="w-card-t" style="margin-bottom:6px">🎥 今日视频</div><a class="w-row" style="text-decoration:none;color:#2E8B57;display:flex" href="' + esc(today.video) + '" target="_blank" rel="noopener"><span class="w-row-t">' + esc(today.video) + '</span></a></div>' : '');
+  },
+  acts: {
+    'exp-check': async () => {
+      const min = parseInt($('w-min').value || '10', 10);
+      const l = wget('exp'); const ex = l.find(x => x.date === todayStr());
+      if(ex) ex.minutes = min; else l.push({ date: todayStr(), minutes: min, practice: '' });
+      wset('exp', l); openWidget(curWidget);
+    },
+    'exp-topic': async () => { topicIdx++; openWidget(curWidget); },
+    'exp-save': async () => {
+      const v = ($('w-practice').value || '').trim();
+      const vid = ($('w-video').value || '').trim();
+      const l = wget('exp'); const idx = l.findIndex(x => x.date === todayStr());
+      if(idx >= 0){ l[idx].practice = v; if(vid) l[idx].video = vid; }
+      else l.push({ date: todayStr(), minutes: 0, practice: v, video: vid });
+      wset('exp', l); toast('已保存'); openWidget(curWidget);
+    }
+  }
+};
+
+/* ---------- 读书推荐 ---------- */
+WIDGETS['读书推荐'] = {
+  render(){
+    const books = wget('bk_books');
+    const reads = wget('bk_read');
+    const t = todayStr();
+    const today = reads.find(x => x.date === t);
+    const reading = books.filter(x => x.status === 'doing').length;
+    const done = books.filter(x => x.status === 'done').length;
+    return wCard('📚 我的书单',
+      books.length ? books.map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.title) + '</b>' + (x.author ? ' · ' + esc(x.author) : '') + '</span><button class="w-tag' + (x.status === 'done' ? ' done' : '') + '" data-wact="bk-cycle" data-id="' + x.id + '">' + (x.status === 'doing' ? '在读' : '读完') + '</button><button class="w-del" data-wact="bk-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">书单还空着，加一本</div>',
+      '<div class="w-streak">在读 <b>' + reading + '</b> · 读完 <b>' + done + '</b></div>') +
+      wAdd('书名', 'bk-add', '<input id="w-author" type="text" placeholder="作者" style="width:90px" autocomplete="off">') +
+      wCard('⏱ 今日读书',
+        today ? '<div class="w-row"><span class="w-row-t">今日已读 <b style="color:#2E8B57">' + today.minutes + '</b> 分钟</span></div>' : wMin('bk-check', '打卡'),
+        '<div class="w-streak">连续 <b>' + calcStreak(reads.map(x => x.date)) + '</b> 天</div>');
+  },
+  acts: {
+    'bk-add': async () => {
+      const t = ($('w-input').value || '').trim(); if(!t){ toast('填个书名'); return; }
+      const l = wget('bk_books'); l.unshift({ id: Date.now(), title: t, author: ($('w-author').value || '').trim(), status: 'doing' });
+      wset('bk_books', l); openWidget(curWidget);
+    },
+    'bk-cycle': async b => {
+      const l = wget('bk_books'); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.status = x.status === 'doing' ? 'done' : 'doing'; wset('bk_books', l); } openWidget(curWidget);
+    },
+    'bk-del': async b => { wset('bk_books', wget('bk_books').filter(i => i.id != b.dataset.id)); openWidget(curWidget); },
+    'bk-check': async () => {
+      const min = parseInt($('w-min').value || '15', 10);
+      const l = wget('bk_read'); const ex = l.find(x => x.date === todayStr());
+      if(ex) ex.minutes = min; else l.push({ date: todayStr(), minutes: min });
+      wset('bk_read', l); openWidget(curWidget);
+    }
+  }
+};
+
+/* ---------- 妆容穿搭 ---------- */
+let fitStyle = 'relax';
+function fitName(k){ return { relax: '😌 休闲', work: '💼 通勤', date: '🌹 约会', sport: '🏃 运动', formal: '✨ 正式' }[k] || '😌 休闲'; }
+WIDGETS['妆容穿搭'] = {
+  render(){
+    const l = wget('fit');
+    const t = todayStr();
+    const today = l.find(x => x.date === t);
+    const styles = ['relax', 'work', 'date', 'sport', 'formal'];
+    const fitAdv = fitAdvice(localStorage.getItem('shuiji_w_tmp'));
+    return (fitAdv ? '<div class="w-card" style="background:rgba(62,164,99,0.06)"><div style="font-size:13px;color:#2E8B57">' + fitAdv + '</div></div>' : '') +
+      wCard('💄 妆容穿搭',
+      today ? '<div class="w-row"><span class="w-row-t">' + esc(today.style) + '</span>' + (today.note ? '<span class="w-row-s">' + esc(today.note) + '</span>' : '') + '</div>' : '<div class="w-empty">今天还没记录穿搭</div>',
+      '<div class="w-streak">连续 <b>' + calcStreak(l.map(x => x.date)) + '</b> 天</div>') +
+      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">记录今日穿搭</div><div class="w-emoji-pick">' + styles.map(k => '<button data-wact="fit-style" data-style="' + k + '" class="' + (fitStyle === k ? 'sel' : '') + '">' + fitName(k) + '</button>').join('') + '</div><div class="w-add"><input id="w-note" type="text" placeholder="细节备注（如：白衬衫+牛仔裤）" autocomplete="off"><button class="w-btn" data-wact="fit-save">保存</button></div></div>' +
+      wCard('📅 最近 7 天', l.slice(-7).reverse().map(x => '<div class="w-row"><span class="w-row-t">' + fmtW(x.date) + '</span><span class="w-row-s">' + esc(x.style) + (x.note ? ' · ' + esc(x.note) : '') + '</span></div>').join('') || '<div class="w-empty">暂无记录</div>');
+  },
+  acts: {
+    'fit-style': async b => { fitStyle = b.dataset.style; openWidget(curWidget); },
+    'fit-save': async () => {
+      const style = fitName(fitStyle);
+      const note = ($('w-note').value || '').trim();
+      const l = wget('fit'); const ex = l.find(x => x.date === todayStr());
+      if(ex){ ex.style = style; ex.note = note; } else l.push({ date: todayStr(), style, note });
+      wset('fit', l); toast('已记录今日穿搭'); openWidget(curWidget);
+    }
+  }
+};
+
+/* ---------- 爆款二创 ---------- */
+WIDGETS['爆款二创'] = {
+  render(){
+    const l = wget('cr');
+    const stMap = { draft: '草稿', ready: '待发布', published: '已发布', hot: '爆款🔥' };
+    const order = ['draft', 'ready', 'published', 'hot'];
+    const stat = order.map(st => '<div><b>' + l.filter(x => x.status === st).length + '</b><span>' + stMap[st] + '</span></div>').join('');
+    return wCard('🎬 爆款二创',
+      '<div class="w-stat">' + stat + '</div>' +
+      (l.length ? l.map(x => '<div class="w-row"><span class="w-row-t">' + esc(x.title) + (x.platform ? ' <span class="w-row-s">' + esc(x.platform) + '</span>' : '') + '</span><button class="w-tag' + (x.status === 'hot' ? ' done' : '') + '" data-wact="cr-cycle" data-id="' + x.id + '">' + stMap[x.status] + '</button><button class="w-del" data-wact="cr-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">还没有创作记录</div>')) +
+      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">记录作品</div><div class="w-add"><input id="w-input" type="text" placeholder="作品标题" autocomplete="off"><input id="w-platform" type="text" placeholder="平台" style="width:84px" autocomplete="off"><button class="w-btn" data-wact="cr-add">＋</button></div></div>';
+  },
+  acts: {
+    'cr-add': async () => {
+      const t = ($('w-input').value || '').trim(); if(!t){ toast('写个标题'); return; }
+      const l = wget('cr'); l.unshift({ id: Date.now(), title: t, platform: ($('w-platform').value || '').trim(), status: 'draft' });
+      wset('cr', l); openWidget(curWidget);
+    },
+    'cr-cycle': async b => {
+      const l = wget('cr'); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.status = { draft: 'ready', ready: 'published', published: 'hot', hot: 'draft' }[x.status]; wset('cr', l); } openWidget(curWidget);
+    },
+    'cr-del': async b => { wset('cr', wget('cr').filter(i => i.id != b.dataset.id)); openWidget(curWidget); }
+  }
+};
+
+/* ---------- AI 学习 ---------- */
+WIDGETS['AI 学习'] = {
+  render(){
+    const checks = wget('ai_check');
+    const t = todayStr();
+    const today = checks.find(x => x.date === t);
+    const tools = wget('ai_tools');
+    return wCard('🤖 今日 AI 学习',
+      goalCard('ai', today ? today.minutes : 0, '分钟', 20) +
+      (today ? '<div class="w-row"><span class="w-row-t">已学 <b style="color:#2E8B57">' + today.minutes + '</b> 分钟' + (today.note ? ' · ' + esc(today.note) : '') + '</span></div>' : wMinNote('ai-check', '打卡')),
+      '<div class="w-streak">连续 <b>' + calcStreak(checks.map(x => x.date)) + '</b> 天</div>') +
+      wCard('📰 AI 日报', '<div id="w-ai-news"><div class="w-empty">加载中…</div></div><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="ai-news">刷新</button></div>') +
+      wCard('🧰 常用 AI 工具', tools.length ? tools.map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.name) + '</b></span><button class="w-tag" data-wact="ai-use" data-id="' + x.id + '">已用 ' + x.count + ' 次</button><button class="w-del" data-wact="ai-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">还没有工具</div>') +
+      wAdd('工具名（如：Claude）', 'ai-add');
+  },
+  after(){ loadAINews(); },
+  acts: {
+    'ai-check': async () => {
+      const min = parseInt($('w-min').value || '15', 10);
+      const note = ($('w-note').value || '').trim();
+      const l = wget('ai_check'); const ex = l.find(x => x.date === todayStr());
+      if(ex){ ex.minutes = min; ex.note = note; } else l.push({ date: todayStr(), minutes: min, note });
+      wset('ai_check', l); openWidget(curWidget);
+    },
+    'ai-news': async () => { loadAINews(); },
+    'ai-add': async () => {
+      const n = ($('w-input').value || '').trim(); if(!n){ toast('填个工具名'); return; }
+      const l = wget('ai_tools');
+      if(l.find(x => x.name === n)){ toast('工具已存在'); return; }
+      l.push({ id: Date.now(), name: n, count: 0 }); wset('ai_tools', l); openWidget(curWidget);
+    },
+    'ai-use': async b => {
+      const l = wget('ai_tools'); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.count++; wset('ai_tools', l); } openWidget(curWidget);
+    },
+    'ai-del': async b => { wset('ai_tools', wget('ai_tools').filter(i => i.id != b.dataset.id)); openWidget(curWidget); }
+  }
+};
+
+/* ---------- 新闻资讯（实时热闻 + 今日读报） ---------- */
+async function loadNews(){
+  const box = document.getElementById('w-news-feed');
+  if(!box || curWidget !== '新闻资讯') return;
+  box.innerHTML = '<div class="w-empty">加载中…</div>';
+  try{
+    const url = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://sspai.com/feed');
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('feed ' + res.status);
+    const j = await res.json();
+    if(curWidget !== '新闻资讯' || !document.getElementById('w-news-feed')) return;
+    const items = (j.items || []).slice(0, 8);
+    if(!items.length) throw new Error('empty');
+    box.innerHTML = items.map(it => {
+      const title = it.title || '无标题';
+      const link = it.link || '';
+      const date = (it.pubDate || '').slice(5, 16).replace('T', ' ');
+      return '<div class="w-row"><a class="w-row-t" href="' + link + '" target="_blank" rel="noopener">' + esc(title) + '</a><span class="w-row-s">' + esc(date) + '</span><button class="w-tag" data-wact="news-fav" data-title="' + esc(title).replace(/"/g, '&quot;') + '" data-url="' + link + '">★ 收藏</button></div>';
+    }).join('') + '<div class="w-note">少数派 RSS（免 Key）· 点标题读原文，★ 收藏进今日读报。</div>';
+  }catch(e){
+    if(curWidget !== '新闻资讯' || !document.getElementById('w-news-feed')) return;
+    box.innerHTML = '<div class="w-empty">暂时拉不到实时新闻（网络/接口限制）</div>';
+  }
+}
+WIDGETS['新闻资讯'] = {
+  render(){
+    const l = wget('news');
+    const t = todayStr();
+    const todayItems = l.filter(x => x.date === t);
+    const readN = todayItems.filter(x => x.read).length;
+    const checks = wget('news_check');
+    const streak = calcStreak(checks.filter(c => c.count > 0).map(c => c.date));
+    return wCard('📡 实时热闻', '<div id="w-news-feed"><div class="w-empty">加载中…</div></div>', '<div class="w-streak">免 Key · 中文</div>') +
+      wCard('📰 今日读报',
+      todayItems.length ? todayItems.map(x => '<div class="w-row' + (x.read ? ' done' : '') + '"><span class="w-row-t">' + (x.url ? '<a href="' + x.url + '" target="_blank" rel="noopener">' + esc(x.title) + '</a>' : esc(x.title)) + '</span>' + (x.source ? '<span class="w-row-s">' + esc(x.source) + '</span>' : '') + '<button class="w-tag' + (x.read ? ' done' : '') + '" data-wact="news-toggle" data-id="' + x.id + '">' + (x.read ? '已读' : '未读') + '</button><button class="w-del" data-wact="news-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">今天还没收藏文章，可从上方热闻收藏</div>',
+      '<div class="w-streak">今日已读 <b>' + readN + '</b> 篇 · 连续 <b>' + streak + '</b> 天</div>') +
+      wAdd('文章标题', 'news-add', '<input id="w-source" type="text" placeholder="来源" style="width:84px" autocomplete="off">');
+  },
+  after(){ loadNews(); },
+  acts: {
+    'news-add': async () => {
+      const t = ($('w-input').value || '').trim(); if(!t){ toast('写个标题'); return; }
+      const l = wget('news'); l.push({ id: Date.now(), date: todayStr(), title: t, source: ($('w-source').value || '').trim(), read: false });
+      wset('news', l);
+      const c = wget('news_check'); const ex = c.find(x => x.date === todayStr());
+      if(ex) ex.count++; else c.push({ date: todayStr(), count: 1 });
+      wset('news_check', c); openWidget(curWidget);
+    },
+    'news-toggle': async b => {
+      const l = wget('news'); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.read = !x.read; wset('news', l); } openWidget(curWidget);
+    },
+    'news-del': async b => { wset('news', wget('news').filter(i => i.id != b.dataset.id)); openWidget(curWidget); },
+    'news-fav': async b => {
+      const title = (b.dataset.title || '').trim(); if(!title){ toast('无标题'); return; }
+      const l = wget('news');
+      if(l.some(x => x.date === todayStr() && x.title === title)){ toast('已在今日读报'); return; }
+      l.push({ id: Date.now(), date: todayStr(), title: title, source: '实时', read: false, url: b.dataset.url || '' });
+      wset('news', l);
+      const c = wget('news_check'); const ex = c.find(x => x.date === todayStr());
+      if(ex) ex.count++; else c.push({ date: todayStr(), count: 1 });
+      wset('news_check', c);
+      toast('已收藏到今日读报');
+      openWidget(curWidget);
+    }
+  }
+};
+/* 抽屉开关 */
+function openDrawer(){ $('drawer').classList.add('open'); $('drawerMask').classList.add('show'); }
+function closeDrawer(){ $('drawer').classList.remove('open'); $('drawerMask').classList.remove('show'); }
+
+/* ================= 日历复盘组件 ================= */
+const cal = { y: new Date().getFullYear(), m: new Date().getMonth(), sel: todayStr() };
+async function renderCalendar(){
+  const y = cal.y, m = cal.m, p = n => String(n).padStart(2, '0');
+  $('calTitle').textContent = y + '年' + (m + 1) + '月';
+  const startDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const today = todayStr();
+  const tasks = await getAll('tasks');
+  const doneSet = new Set(tasks.filter(t => t.completed).map(t => t.date));
+  let cells = '';
+  for(let i = 0; i < startDow; i++) cells += '<span class="cal-day other"></span>';
+  for(let d = 1; d <= daysInMonth; d++){
+    const ds = y + '-' + p(m + 1) + '-' + p(d);
+    const cls = ['cal-day'];
+    if(ds === today) cls.push('today');
+    if(ds === cal.sel) cls.push('selected');
+    if(doneSet.has(ds)) cls.push('has');
+    cells += '<button class="' + cls.join(' ') + '" data-date="' + ds + '">' + d + '</button>';
+  }
+  $('calGrid').innerHTML = cells;
+  const nDone = tasks.filter(t => t.date === cal.sel && t.completed).length;
+  const selLabel = cal.sel === today ? '今天' : fmtDate(cal.sel);
+  $('calFoot').textContent = '已选中 ' + selLabel + ' · 完成 ' + nDone + ' 件';
+}
+/* 保存复盘（右下角金色按钮） */
+async function saveReview(){
+  const d = todayStr();
+  const prev = localStorage.getItem('shuiji_review_' + d) || '';
+  const v = await showModal('今日复盘',
+    '<textarea id="reviewInput" rows="4" placeholder="今天完成了什么？收获是什么？" style="width:100%;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:15px;color:var(--text);resize:none;font-family:inherit;">' + esc(prev) + '</textarea>',
+    [{label:'取消', value:null},{label:'保存', value:'ok', primary:true}]);
+  if(v !== 'ok') return;
+  const txt = ($('reviewInput').value || '').trim();
+  localStorage.setItem('shuiji_review_' + d, txt);
+  toast(txt ? '复盘已保存 🌿' : '已清空今日复盘');
 }
 
 /* ========================= PWA：Service Worker 注册（占位） ========================= */
@@ -1231,6 +2672,8 @@ async function init(){
   $('waterPhrase').textContent = phraseOfDay();
   setupSpeech();
   loadSettings();
+  loadPomo(); renderPomo();
+  renderHabitDefList();
   await refreshToday();
 
   /* 事件绑定 */
@@ -1239,12 +2682,31 @@ async function init(){
   document.querySelectorAll('.mood-emoji').forEach(el => {
     el.addEventListener('click', () => recordMood(el.dataset.mood));
   });
-  document.querySelectorAll('.habit-btn').forEach(b => {
-    b.addEventListener('click', () => checkHabit(b.dataset.type));
+  $('focusBtn').addEventListener('click', () => { if(pomo.running) pomoPause(); else pomoStart(); });
+  $('focusReset').addEventListener('click', pomoReset);
+  $('habitAddBtn').addEventListener('click', addHabit);
+  $('resetLocConsentBtn').addEventListener('click', () => {
+    localStorage.removeItem('shuiji_loc_consent');
+    toast('已重置，下次使用「吃啥」会重新询问');
   });
-  document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', () => switchTab(t.dataset.view));
+  $('menuBtn').addEventListener('click', openDrawer);
+  $('drawerMask').addEventListener('click', closeDrawer);
+  document.querySelectorAll('.drawer-item').forEach(it => {
+    it.addEventListener('click', () => {
+      closeDrawer();
+      if(it.dataset.widget) openWidget(it.dataset.widget);
+      else switchTab(it.dataset.view);
+    });
   });
+  $('calPrev').addEventListener('click', () => { cal.m--; if(cal.m < 0){ cal.m = 11; cal.y--; } renderCalendar(); });
+  $('calNext').addEventListener('click', () => { cal.m++; if(cal.m > 11){ cal.m = 0; cal.y++; } renderCalendar(); });
+  $('calGrid').addEventListener('click', e => {
+    const b = e.target.closest('.cal-day');
+    if(!b || !b.dataset.date) return;
+    cal.sel = b.dataset.date;
+    renderCalendar();
+  });
+  $('saveReviewBtn').addEventListener('click', saveReview);
   $('oldClose').addEventListener('click', () => $('oldPanel').classList.add('hidden'));
   $('shakeBtn').addEventListener('click', pickRandom);
   $('refreshEatBtn').addEventListener('click', () => locate(true));
@@ -1267,6 +2729,7 @@ async function init(){
 
   /* 定时刷新：冷却倒计时 + 柔和提醒（18:00 判断） */
   setInterval(updateCooldownUI, 1000);
+  setInterval(pomoTick, 1000);
   setInterval(updateSoftReminder, 60000);
   updateCooldownUI();
 }
