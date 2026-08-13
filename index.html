@@ -228,6 +228,14 @@
   .habit-btn:active{transform:scale(.9);}
   .habit-btn.active{filter:none;}
   .habit-label{font-size:12px;color:var(--sub);}
+  .habit-sub{display:block;font-size:11px;font-weight:700;color:var(--accent);margin-top:1px;font-variant-numeric:tabular-nums;}
+  .sleep-time{display:block;font-size:11px;font-weight:700;color:var(--accent);margin-top:1px;font-variant-numeric:tabular-nums;}
+  .drink-progress{margin:2px auto 12px;max-width:300px;}
+  .dp-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--sub);margin-bottom:5px;}
+  .dp-txt{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .dp-bar{height:9px;border-radius:6px;background:rgba(33,64,44,0.12);overflow:hidden;}
+  .dp-fill{height:100%;width:0%;border-radius:6px;background:linear-gradient(90deg,#7fc4ff,#3f8efc);transition:width .45s ease;}
+  .dp-hint{font-size:11px;color:var(--sub);margin-top:4px;}
 
   /* ================= 番茄钟 ================= */
   .focus-box{position:relative;width:150px;height:150px;margin:10px auto 4px;}
@@ -651,6 +659,10 @@
       <div class="water-phrase" id="waterPhrase"></div>
 
       <div class="habits">
+        <div class="drink-progress hidden" id="drinkProgress">
+          <div class="dp-row"><span>💧 今日喝水</span><span class="dp-txt" id="dpTxt">0/2000ml</span></div>
+          <div class="dp-bar"><div class="dp-fill" id="dpFill"></div></div>
+        </div>
         <div class="streak-line" id="streakLine">今日打卡 0/0 · 已连续坚持 0 天</div>
         <div class="habit-row" id="habitRow"></div>
       </div>
@@ -851,15 +863,17 @@ function audioCtx(){
   return actx;
 }
 function playTone(freq, dur, gain, delay){
-  const c = audioCtx();
-  const t0 = c.currentTime + (delay || 0);
-  const o = c.createOscillator(), g = c.createGain();
-  o.type = 'sine';
-  o.frequency.value = freq;
-  g.gain.setValueAtTime(gain, t0);
-  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
-  o.connect(g); g.connect(c.destination);
-  o.start(t0); o.stop(t0 + dur + 0.02);
+  try{
+    const c = audioCtx();
+    const t0 = c.currentTime + (delay || 0);
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t0); o.stop(t0 + dur + 0.02);
+  }catch(e){}                                   // 音效异常不影响功能
 }
 /* 左滑完成 → 叮（高频短促） */
 function ding(){ playTone(880, 0.12, 0.22); playTone(1318, 0.22, 0.18, 0.06); }
@@ -1362,18 +1376,42 @@ async function renderHabits(){
   const defs = loadHabitDefs();
   const all = await getAll('habits');
   const t = todayStr();
-  const done = new Set(all.filter(h => h.date === t).map(h => h.type));
+  const today = all.filter(h => h.date === t);
+  const drinkMl = today.filter(h => h.type === 'drink').reduce((s,h) => s + (h.ml||0), 0);
+  const sleepRec = today.find(h => h.type === 'sleep');
+  /* drink/sleep 有数据才算当天已做；旧版无 ml 的 drink 记录忽略 */
+  const done = new Set(today.filter(h => !(h.type === 'drink' && !h.ml)).map(h => h.type));
   const row = $('habitRow');
-  row.innerHTML = defs.map(h =>
-    '<button class="habit-btn' + (done.has(h.type) ? ' active' : '') + '" data-type="' + esc(h.type) + '">' +
-      '<span>' + h.emoji + '</span><span class="habit-label">' + esc(h.label) + '</span>' +
-    '</button>'
-  ).join('');
-  row.querySelectorAll('.habit-btn').forEach(b => b.addEventListener('click', () => checkHabit(b.dataset.type)));
+  row.innerHTML = defs.map(h => {
+    let sub = '';
+    if(h.type === 'drink' && drinkMl > 0) sub = '<span class="habit-sub">' + drinkMl + 'ml</span>';
+    if(h.type === 'sleep' && sleepRec && sleepRec.time) sub = '<span class="sleep-time">' + esc(sleepRec.time) + ' 睡</span>';
+    return '<button class="habit-btn' + (done.has(h.type) ? ' active' : '') + '" data-type="' + esc(h.type) + '">' +
+      '<span>' + h.emoji + '</span><span class="habit-label">' + esc(h.label) + '</span>' + sub +
+    '</button>';
+  }).join('');
+  /* 喝水：单击快记 +100ml，长按选量杯；其余单击签到 */
+  row.querySelectorAll('.habit-btn').forEach(b => {
+    const type = b.dataset.type;
+    b.addEventListener('click', () => { if(longHit){ longHit = false; return; } type === 'drink' ? fastDrink() : checkHabit(type); });
+    if(type === 'drink'){
+      let lp = null;
+      b.addEventListener('touchstart', () => { lp = setTimeout(() => { lp = null; longHit = true; recordWater(); }, 600); }, {passive:true});
+      ['touchend','touchmove','touchcancel'].forEach(ev => b.addEventListener(ev, () => { if(lp){ clearTimeout(lp); lp = null; } }, {passive:true}));
+    }
+  });
   const doneCount = defs.filter(h => done.has(h.type)).length;
   let best = 0;
   defs.forEach(h => { const s = streakFrom(all, h.type); if(s > best) best = s; });
   $('streakLine').textContent = '今日打卡 ' + doneCount + '/' + defs.length + ' · 已连续坚持 ' + best + ' 天';
+  /* 今日喝水进度条 */
+  const dp = $('drinkProgress');
+  if(drinkMl > 0){
+    dp.classList.remove('hidden');
+    const target = waterTarget();
+    $('dpTxt').textContent = drinkMl + '/' + target + 'ml';
+    $('dpFill').style.width = Math.min(100, Math.round(drinkMl / target * 100)) + '%';
+  } else dp.classList.add('hidden');
 }
 
 /* 设置页：习惯列表管理 */
@@ -1404,7 +1442,9 @@ function removeHabit(i){
   saveHabitDefs(defs);
   renderHabitDefList(); renderHabits();
 }
+let longHit = false;                                     // 喝水长按后抑制随后的单击
 async function checkHabit(type){
+  if(type === 'sleep'){ recordSleep(); return; }
   const all = await getAll('habits');
   if(all.some(h => h.date === todayStr() && h.type === type)){ toast('今天已经签到啦'); return; }
   await add('habits', { date: todayStr(), type });
@@ -1414,6 +1454,78 @@ async function checkHabit(type){
   if(s === 7){                                           // 彩蛋：连签7天
     showModal('🎯', '水养了七天，你稳了 🎯', [{label:'收下', value:1, primary:true}]);
   }
+}
+
+/* 喝水：单击直接 +100ml 快记（“喝一口，点一下”） */
+async function fastDrink(){
+  await add('habits', { date: todayStr(), type:'drink', ml:100, ts: Date.now() });
+  blub();
+  toast('💧 +100ml');
+  await renderHabits();
+}
+
+/* ---------- 喝水：选量杯逐次记录，当天累加毫升 ---------- */
+function waterTarget(){
+  try{ const p = JSON.parse(localStorage.getItem('shuiji_w_profile') || 'null'); if(p && p.w) return Math.max(1500, Math.round(p.w * 30 / 50) * 50); }catch(e){}
+  return 2000;
+}
+async function recordWater(){
+  const ml = await showModal('💧 喝了多少水？', '这一杯大约多少？', [
+    {label:'小杯 · 100ml', value:100},
+    {label:'中杯 · 200ml', value:200},
+    {label:'大杯 · 250ml', value:250},
+    {label:'水瓶 · 500ml', value:500},
+    {label:'取消', value:0}
+  ]);
+  longHit = false;                                       // 长按结束，恢复单击快记
+  if(!ml) return;
+  await add('habits', { date: todayStr(), type:'drink', ml, ts: Date.now() });
+  blub();
+  toast('记录喝水 ' + ml + 'ml 🌊');
+  await renderHabits();
+}
+
+/* ---------- 睡觉：记入睡时间（快速档位或自定义，当天覆盖） ---------- */
+async function recordSleep(){
+  const now = new Date();
+  const hh = ('0'+now.getHours()).slice(-2), mm = ('0'+now.getMinutes()).slice(-2);
+  const quick = ['21:30','22:00','22:30','23:00','23:30','00:00','00:30','01:00'];
+  const time = await new Promise(res => {
+    $('modalTitle').textContent = '😴 大概几点睡的？';
+    $('modalBody').innerHTML =
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">' +
+      quick.map(t => '<button class="modal-btn" data-sq="' + t + '">' + t + '</button>').join('') +
+      '</div>' +
+      '<div style="margin-top:12px;font-size:13px;color:var(--sub)">或自定义入睡时间：</div>' +
+      '<input type="time" id="sleepT" value="' + hh + ':' + mm + '" style="width:100%;padding:10px 12px;margin-top:6px;font-size:18px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text)">';
+    $('modalActions').innerHTML = '<button class="modal-btn primary" id="sleepOk">确定</button>';
+    const close = v => { hideModal(); res(v); };
+    $('modalMask').querySelectorAll('[data-sq]').forEach(b => b.onclick = () => close(b.dataset.sq));
+    $('sleepOk').onclick = () => close($('sleepT').value);
+    $('modalMask').classList.remove('hidden');
+  });
+  if(!time) return;
+  const all = await getAll('habits');
+  const cur = all.find(h => h.date === todayStr() && h.type === 'sleep');
+  if(cur){ cur.time = time; cur.ts = Date.now(); await put('habits', cur); }
+  else { await add('habits', { date: todayStr(), type:'sleep', time, ts: Date.now() }); }
+  toast('记录今晚 ' + time + ' 入睡 😴' + sleepDiffTip(all));
+  await renderHabits();
+}
+
+/* 入睡时间 vs 近 7 天平均 → 早/晚反馈 */
+function daysAgoStr(n){ const d = new Date(); d.setDate(d.getDate() - n); return todayStr(d); }
+function fmtMin(m){ const h = Math.floor(m/60), r = m % 60; return h ? (h + '小时' + (r ? ' ' + r + '分钟' : '')) : (r + '分钟'); }
+function sleepDiffTip(all){
+  const rec = all.find(h => h.date === todayStr() && h.type === 'sleep' && h.time);
+  if(!rec) return '';
+  const recent = all.filter(h => h.type === 'sleep' && h.time && h.date >= daysAgoStr(6));
+  if(recent.length < 3) return '';
+  const toMin = r => { const p = r.split(':'); return Number(p[0]) * 60 + Number(p[1]); };
+  const avg = recent.reduce((s,h) => s + toMin(h.time), 0) / recent.length;
+  const diff = Math.round(toMin(rec.time) - avg);           // 正=更晚，负=更早
+  if(Math.abs(diff) < 10) return '';
+  return diff < 0 ? ' · 比近 7 天平均早 ' + fmtMin(-diff) + ' 🌙' : ' · 比近 7 天平均晚 ' + fmtMin(diff) + ' 😴';
 }
 
 /* ========================= 情绪签到 ========================= */
@@ -1492,7 +1604,7 @@ async function renderWeekStats(monStr, today){
   for(let i = 0; i < 7; i++){
     const d = new Date(base); d.setDate(base.getDate() + i);
     const ds = todayStr(d);
-    const n = habits.filter(h => h.date === ds).length;
+    const n = new Set(habits.filter(h => h.date === ds).map(h => h.type)).size;
     cal += '<div class="cal-cell' + (n ? ' has' : '') + (ds > today ? ' future' : '') + '" title="' + ds + '">' +
       (n ? n : '·') + '</div>';
   }
