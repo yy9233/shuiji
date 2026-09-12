@@ -1,0 +1,20 @@
+# WorkBuddy 本地工作区数据（含对话记忆、个人笔记，切勿上传）
+.workbuddy/
+
+# 本地改前备份（含原始副本，不提交）
+_backup/
+
+# 导出的个人备份（含你的任务/习惯数据，不要上传公开仓库）
+shuiji-backup-*.json
+
+# 词库原始素材（已转成 cet4.txt / cet46.txt，App 不读这些）
+*.pdf
+*.doc
+*.docx
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
