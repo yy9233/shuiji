@@ -237,6 +237,7 @@
   .task-dot.talk{background:var(--talk);}
   .task-dot.wait{background:var(--wait);}
   .task-text{flex:1;font-size:var(--fs-17,17px);word-break:break-word;}
+  .task-focus{font-size:var(--fs-12,12px);color:var(--accent);font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums;}
   .task-card.delayed{opacity:.45;}
   .task-card.done-out{transition:transform .3s ease, opacity .3s ease;transform:translateX(-60px);opacity:0;}
   .inline-input{
@@ -288,8 +289,15 @@
 
   /* ================= 番茄钟 ================= */
   /* 番茄钟：折叠成一行小卡片 */
-  .focus-box{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:14px;padding:12px 14px;margin:0 0 14px;box-shadow:var(--shadow);}
+  .focus-box{display:flex;flex-direction:column;gap:8px;background:var(--card);border-radius:14px;padding:12px 14px;margin:0 0 14px;box-shadow:var(--shadow);}
   .focus-box.running{border:1px solid var(--accent);}
+  .focus-row{display:flex;align-items:center;gap:10px;}
+  .focus-task{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:8px 10px;font-size:var(--fs-13,13px);color:var(--text);font-family:inherit;outline:none;
+    appearance:none;-webkit-appearance:none;box-sizing:border-box;
+  }
+  .focus-task:disabled{opacity:.55;}
   .focus-ic{font-size:var(--fs-20,20px);}
   .focus-time{flex:1;font-size:var(--fs-20,20px);font-weight:800;letter-spacing:.5px;font-variant-numeric:tabular-nums;}
   .focus-actions{display:flex;gap:8px;}
@@ -706,6 +714,16 @@
   .modal-btn.primary{background:var(--accentSoft);color:var(--accent);}
   .modal-btn:active{background:color-mix(in srgb, var(--accent) 25%, transparent);}
 
+  /* 日历某天明细的操作按钮 */
+  .dd-acts{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .dd-act{
+    background:var(--accentSoft);color:var(--accent);border-radius:10px;
+    padding:9px 12px;font-size:var(--fs-13,13px);font-weight:600;text-align:left;
+  }
+  .dd-act:active{background:color-mix(in srgb, var(--accent) 25%, transparent);}
+
+  .rv-seg{margin-bottom:12px;}
+
   /* ================= Toast ================= */
   #toast{
     position:absolute;left:50%;bottom:96px;z-index:60;
@@ -827,12 +845,15 @@
 
       <!-- 番茄钟（折叠成一行） -->
       <div class="focus-box" id="focusBox">
-        <span class="focus-ic">🍅</span>
-        <div class="focus-time" id="focusTime">25:00</div>
-        <div class="focus-actions">
-          <button id="focusBtn">开始专注</button>
-          <button id="focusReset">重置</button>
+        <div class="focus-row">
+          <span class="focus-ic">🍅</span>
+          <div class="focus-time" id="focusTime">25:00</div>
+          <div class="focus-actions">
+            <button id="focusBtn">开始专注</button>
+            <button id="focusReset">重置</button>
+          </div>
         </div>
+        <select class="focus-task" id="focusTaskSel" aria-label="专注于哪件任务"></select>
       </div>
 
       <!-- 日历复盘组件：月份切换 + 选中黄色高亮 -->
@@ -852,13 +873,17 @@
     <!-- 回顾 -->
     <section class="view" id="view-review">
       <div class="view-title">回顾</div>
-      <div class="stat-card">
-        <div class="stat-row"><span>本周任务完成率</span><span id="statRateText">0/0 · 0%</span></div>
-        <div class="stat-bar"><div class="stat-fill" id="statRateFill"></div></div>
-        <div class="stat-row" style="margin-top:10px"><span>本周专注</span><span id="statFocusText">0 次</span></div>
+      <div class="seg rv-seg" id="rvSeg">
+        <button data-p="week" class="on">本周</button><button data-p="month">本月</button><button data-p="q90">近 90 天</button>
       </div>
       <div class="stat-card">
-        <div class="stat-row"><span>本周打卡日历</span></div>
+        <div class="stat-row"><span id="statRateLabel">本周任务完成率</span><span id="statRateText">0/0 · 0%</span></div>
+        <div class="stat-bar"><div class="stat-fill" id="statRateFill"></div></div>
+        <div class="stat-row" style="margin-top:10px"><span id="statFocusLabel">本周专注</span><span id="statFocusText">0 次</span></div>
+        <div class="stat-row" style="margin-top:10px"><span id="statTrendLabel">较上周</span><span id="statTrendText">--</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-row"><span>近 7 天打卡</span></div>
         <div class="mini-cal" id="miniCal"></div>
       </div>
       <div class="mood-heatmap hidden" id="moodHeatmap">
@@ -869,7 +894,7 @@
           <span>😊 好</span><span>😣 一般</span><span>😫 糟</span><span>· 未记</span>
         </div>
       </div>
-      <div class="view-sub">本周已完成</div>
+      <div class="view-sub" id="rvListLabel">本周已完成</div>
       <div id="reviewList"></div>
     </section>
 
@@ -920,6 +945,12 @@
           <label>字体大小</label>
           <div class="seg" id="fsSeg">
             <button data-f="sm">小</button><button data-f="md">中</button><button data-f="lg">大</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <label>番茄钟时长</label>
+          <div class="seg" id="pomoDurSeg">
+            <button data-d="900">15分</button><button data-d="1500">25分</button><button data-d="2700">45分</button><button data-d="custom">自定义</button>
           </div>
         </div>
       </div>
@@ -1016,6 +1047,21 @@ function fmtDate(s){ // 'YYYY-MM-DD' → '8月13日 周四'
   return (d.getMonth()+1) + '月' + d.getDate() + '日 ' + WEEK[d.getDay()];
 }
 function fmtDist(m){ return m < 1000 ? Math.round(m)+'m' : (m/1000).toFixed(1)+'km'; }
+/* 朗读单词：Web Speech API，系统自带语音，无需 Key 也无需联网 */
+function speakWord(w){
+  const word = String(w || '').trim();
+  if(!word) return;
+  try{
+    if(!('speechSynthesis' in window)){ toast('这个浏览器不支持朗读'); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = /[\u4e00-\u9fa5]/.test(word) ? 'zh-CN' : 'en-US';
+    u.rate = 0.9;
+    speechSynthesis.speak(u);
+  }catch(e){ toast('朗读失败'); }
+}
+/* 分钟数 → 紧凑可读："45m" / "1h15m" / "2h" */
+function fmtHm(m){ return !m ? '0m' : (m < 60 ? m + 'm' : Math.floor(m/60) + 'h' + (m % 60 ? (m % 60) + 'm' : '')); }
 /* URL 安全：只放行 http / https，其余（含 javascript:）一律降级为 # */
 function safeUrl(u){
   try{
@@ -1341,12 +1387,16 @@ async function renderTodayProgress(){
   const habits = await getAll('habits');
   const doneHabits = new Set(habits.filter(h => h.date === t).map(h => h.type)).size;
   const habitTotal = defs.length;
-  const done = doneTasks + doneHabits, total = taskTotal + habitTotal;
+  /* 每日计划的完成同样计入今日进度 —— 两处都是「今天要做的事」 */
+  const todayPlans = wget('dailyplan').filter(x => x.date === t);
+  const planTotal = todayPlans.length, planDone = todayPlans.filter(x => x.done).length;
+  const done = doneTasks + doneHabits + planDone, total = taskTotal + habitTotal + planTotal;
   const pct = total ? Math.round(done / total * 100) : 0;
   const num = $('tpNum'), fill = $('tpFill'), sub = $('tpSub');
   if(num) num.textContent = pct + '%';
   if(fill) fill.style.height = pct + '%';                    /* 完成度 = 水位 */
-  if(sub) sub.textContent = '任务 ' + doneTasks + '/' + taskTotal + ' · 习惯 ' + doneHabits + '/' + habitTotal;
+  if(sub) sub.textContent = '任务 ' + doneTasks + '/' + taskTotal + ' · 习惯 ' + doneHabits + '/' + habitTotal +
+    (planTotal ? ' · 计划 ' + planDone + '/' + planTotal : '');
   /* 连击：所有习惯里最长的一条 —— 唯一的沉没成本，放到水面正中 */
   let best = 0;
   defs.forEach(h => { const s = streakFrom(habits, h.type); if(s > best) best = s; });
@@ -1380,6 +1430,10 @@ async function renderTaskList(){
   const todo = (await getActiveToday()).sort((a, b) => ((b.important ? 1 : 0) - (a.important ? 1 : 0)) ||
     ((a.createdAt || '').localeCompare(b.createdAt || '')));
   const done = (await getCompletedToday()).sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''));
+  /* 每个任务累计投入的专注时长（读取全部历史 focus 记录） */
+  const allFocus = await getAll('focus');
+  const fSum = {};
+  allFocus.forEach(f => { if(f.taskId) fSum[String(f.taskId)] = (fSum[String(f.taskId)] || 0) + (f.duration || 0); });
   const mkCard = t => {
     const card = document.createElement('div');
     card.className = 'task-card' + (t.important ? ' important' : '');
@@ -1388,6 +1442,7 @@ async function renderTaskList(){
       '<button class="task-check" aria-label="完成"></button>' +
       '<span class="task-dot ' + t.category + '"></span>' +
       '<span class="task-text">' + esc(t.text) + '</span>' +
+      (fSum[String(t.id)] ? '<span class="task-focus">\u23F1 ' + fmtHm(Math.round(fSum[String(t.id)] / 60)) + '</span>' : '') +
       '<button class="task-star' + (t.important ? ' on' : '') + '">' + (t.important ? '⭐' : '☆') + '</button>';
     return card;
   };
@@ -1396,6 +1451,7 @@ async function renderTaskList(){
   wd.querySelectorAll('.task-card').forEach(c => c.remove());
   for(const t of todo){ const c = mkCard(t); wt.appendChild(c); bindCard(c); }
   for(const t of done){ const c = mkCard(t); wd.appendChild(c); bindCard(c); }
+  await syncFocusTaskSel();          /* 任务增删后同步番茄钟的下拉候选 */
   $('tabTodoCnt').textContent = todo.length;
   $('tabDoneCnt').textContent = done.length;
   updateAddQuota(todo.length);
@@ -1637,16 +1693,47 @@ function initPull(){
 }
 
 /* ========================= 番茄钟专注计时 ========================= */
-const POMO_DUR = 25 * 60;                       // 25 分钟
-let pomo = { end:0, remaining:POMO_DUR, running:false };
+/* 番茄钟时长（秒）：默认 25 分钟，可在设置页切换 / 自定义 */
+function pomoDur(){
+  const v = parseInt(localStorage.getItem('shuiji_pomo_dur') || '1500', 10);
+  return (v >= 60 && v <= 3 * 3600) ? v : 1500;
+}
+function setPomoDur(sec){
+  localStorage.setItem('shuiji_pomo_dur', String(sec));
+  pomoReset();                 /* 换时长即从头开始，避免剩余时间与新时长打架 */
+  syncPomoDurUI();
+}
+function syncPomoDurUI(){
+  const d = String(pomoDur()), seg = $('pomoDurSeg');
+  if(seg) seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.d === d));
+}
+/* 当前专注的目标任务：存 localStorage，刷新 / 锁屏回来都不丢 */
+function focusTask(){ try{ return JSON.parse(localStorage.getItem('shuiji_pomo_task') || 'null'); }catch(e){ return null; } }
+function setFocusTask(tk){
+  if(tk) localStorage.setItem('shuiji_pomo_task', JSON.stringify(tk));
+  else localStorage.removeItem('shuiji_pomo_task');
+}
+/* 把今日待办填进下拉；已选任务若已完成或删除则退回自由专注 */
+async function syncFocusTaskSel(){
+  const sel = $('focusTaskSel');
+  if(!sel) return;
+  const list = await getActiveToday();
+  const cur = focusTask();
+  sel.innerHTML = '<option value="">\uD83C\uDFAF 自由专注（不计入任务）</option>' +
+    list.map(x => '<option value="' + esc(String(x.id)) + '">' + esc(x.text) + '</option>').join('');
+  if(cur && list.some(x => String(x.id) === String(cur.id))) sel.value = String(cur.id);
+  else setFocusTask(null);
+  sel.disabled = pomo.running;
+}
+let pomo = { end:0, remaining:pomoDur(), running:false };
 function loadPomo(){
   const e = parseInt(localStorage.getItem('shuiji_pomo_end') || '0', 10);
-  const r = parseInt(localStorage.getItem('shuiji_pomo_remaining') || String(POMO_DUR), 10);
+  const r = parseInt(localStorage.getItem('shuiji_pomo_remaining') || String(pomoDur()), 10);
   pomo.running = localStorage.getItem('shuiji_pomo_running') === '1';
-  pomo.remaining = isNaN(r) ? POMO_DUR : r;
+  pomo.remaining = isNaN(r) ? pomoDur() : r;
   pomo.end = e;
   if(pomo.running && pomo.end && Date.now() >= pomo.end){   // 离开期间已到点 → 补一次完成
-    pomo.running = false; pomo.remaining = POMO_DUR; pomo.end = 0; savePomo(); completeFocus();
+    pomo.running = false; pomo.remaining = pomoDur(); pomo.end = 0; savePomo(); completeFocus();
   }
 }
 function savePomo(){
@@ -1665,25 +1752,29 @@ function pomoPause(){
   pomo.running = false; savePomo(); renderPomo();
 }
 function pomoReset(){
-  pomo.running = false; pomo.remaining = POMO_DUR; pomo.end = 0; savePomo(); renderPomo();
+  pomo.running = false; pomo.remaining = pomoDur(); pomo.end = 0; savePomo(); renderPomo();
 }
 function pomoTick(){
   if(!pomo.running) return;
-  if(Date.now() >= pomo.end){ pomo.running = false; pomo.remaining = POMO_DUR; pomo.end = 0; savePomo(); renderPomo(); completeFocus(); }
+  if(Date.now() >= pomo.end){ pomo.running = false; pomo.remaining = pomoDur(); pomo.end = 0; savePomo(); renderPomo(); completeFocus(); }
   else renderPomo();
 }
 function renderPomo(){
   const left = pomo.running ? Math.max(0, Math.round((pomo.end - Date.now()) / 1000)) : pomo.remaining;
   $('focusTime').textContent = String(Math.floor(left/60)).padStart(2,'0') + ':' + String(left%60).padStart(2,'0');
   $('focusBox').classList.toggle('running', pomo.running);
-  $('focusBtn').textContent = pomo.running ? '暂停' : (left < POMO_DUR ? '继续' : '开始专注');
+  $('focusBtn').textContent = pomo.running ? '暂停' : (left < pomoDur() ? '继续' : '开始专注');
 }
 /* 专注完成 → 和弦音 + 记录到 IndexedDB(focus) */
 async function completeFocus(){
-  await add('focus', { date: todayStr(), duration: POMO_DUR, completedAt: new Date().toISOString() });
+  const tk = focusTask();
+  await add('focus', { date: todayStr(), duration: pomoDur(), completedAt: new Date().toISOString(),
+    taskId: tk ? tk.id : null, taskTitle: tk ? tk.text : '' });
   playTone(659,0.16,0.2); playTone(784,0.16,0.2,0.16); playTone(1046,0.35,0.2,0.32);
   buzz([60, 90, 60]);
-  toast('专注完成 🌊');
+  waterRipple();
+  toast(tk ? ('\u23F1 专注完成 · ' + tk.text) : '专注完成 🌊');
+  await refreshToday();                    /* 让任务卡上的累计投入立即刷新 */
   if(isView('review')) renderReview();
 }
 
@@ -1910,13 +2001,28 @@ async function recordMood(mood){
 }
 
 /* ========================= 回顾页 ========================= */
-async function renderReview(){
-  const t = todayStr();
-  // 本周一作为范围起点
-  const now = new Date();
+/* 回顾页统计周期：本周 / 本月 / 近 90 天（选择会被记住） */
+function rvPeriod(){ return localStorage.getItem('shuiji_rv_period') || 'week'; }
+function rvRange(p){
+  const now = new Date(), end = todayStr();
+  if(p === 'month') return { start: todayStr(new Date(now.getFullYear(), now.getMonth(), 1)), end, label:'本月', prevLabel:'较上月' };
+  if(p === 'q90'){ const d = new Date(now); d.setDate(now.getDate() - 89); return { start: todayStr(d), end, label:'近 90 天', prevLabel:'较上个 90 天' }; }
   const dow = now.getDay();
   const mon = new Date(now); mon.setDate(now.getDate() + (dow === 0 ? -6 : 1 - dow));
-  const monStr = todayStr(mon);
+  return { start: todayStr(mon), end, label:'本周', prevLabel:'较上周' };
+}
+/* 上一个等长周期，用于算环比 */
+function rvPrevRange(start){
+  const s = new Date(start + 'T00:00:00'), e = new Date(todayStr() + 'T00:00:00');
+  const days = Math.round((e - s) / 86400000) + 1;
+  const pe = new Date(s); pe.setDate(s.getDate() - 1);
+  const ps = new Date(pe); ps.setDate(pe.getDate() - days + 1);
+  return { start: todayStr(ps), end: todayStr(pe) };
+}
+async function renderReview(){
+  const t = todayStr();
+  const rg = rvRange(rvPeriod());
+  const monStr = rg.start;
 
   const done = (await getAll('tasks')).filter(x => x.completed && x.date >= monStr && x.date <= t)
     .sort((a, b) => b.date < a.date ? -1 : b.date > a.date ? 1 : (b.completedAt||'').localeCompare(a.completedAt||''));
@@ -1924,7 +2030,7 @@ async function renderReview(){
   done.forEach(x => (groups[x.date] = groups[x.date] || []).push(x));
 
   const box = $('reviewList');
-  if(!done.length){ box.innerHTML = '<div class="empty">本周还没有完成任务</div>'; }
+  if(!done.length){ box.innerHTML = '<div class="empty">' + rg.label + '还没有完成任务</div>'; }
   else {
     box.innerHTML = Object.keys(groups).sort().reverse().map(ds =>
       '<div class="rev-group"><div class="rev-date">' + fmtDate(ds) + '</div>' +
@@ -1934,7 +2040,8 @@ async function renderReview(){
       ).join('') + '</div>'
     ).join('');
   }
-  renderWeekStats(monStr, t);
+  const rl = $('rvListLabel'); if(rl) rl.textContent = rg.label + '已完成';
+  renderWeekStats(monStr, t, rvPrevRange(monStr), rg);
   renderMoodHeatmap();
 }
 /* 情绪热力图：有记录就显示本周分布；无记录给引导 */
@@ -1960,18 +2067,35 @@ async function renderMoodHeatmap(){
   wrap.classList.remove('hidden');
 }
 /* 每周统计：任务完成率 + 专注次数 + 打卡日历 */
-async function renderWeekStats(monStr, today){
+async function renderWeekStats(monStr, today, prev, rg){
   const allTasks = await getAll('tasks');
   const weekTasks = allTasks.filter(x => x.date >= monStr && x.date <= today);
   const total = weekTasks.length, done = weekTasks.filter(x => x.completed).length;
   const rate = total ? Math.round(done / total * 100) : 0;
   $('statRateText').textContent = done + '/' + total + ' · ' + rate + '%';
   $('statRateFill').style.width = rate + '%';
+  const lab = rg ? rg.label : '本周';
+  if($('statRateLabel')) $('statRateLabel').textContent = lab + '任务完成率';
+  if($('statFocusLabel')) $('statFocusLabel').textContent = lab + '专注';
+  /* 环比：和上一个等长周期比才知道是在变好还是变差 */
+  if(prev && $('statTrendText')){
+    if($('statTrendLabel')) $('statTrendLabel').textContent = rg ? rg.prevLabel : '较上周';
+    const pTasks = allTasks.filter(x => x.date >= prev.start && x.date <= prev.end);
+    if(!pTasks.length){ $('statTrendText').textContent = '上个周期还没有数据'; }
+    else{
+      const pRate = Math.round(pTasks.filter(x => x.completed).length / pTasks.length * 100);
+      const d = rate - pRate;
+      $('statTrendText').textContent = d > 0 ? ('\u2191 ' + d + ' 个百分点') : (d < 0 ? ('\u2193 ' + Math.abs(d) + ' 个百分点') : '与上周期持平');
+    }
+  }
 
   const focus = await getAll('focus');
   const fw = focus.filter(f => f.date >= monStr && f.date <= today);
   const fMin = Math.round(fw.reduce((s, f) => s + (f.duration || 0), 0) / 60);
-  $('statFocusText').textContent = fw.length + ' 次 · ' + fMin + ' 分钟';
+  const byTask = {};
+  fw.forEach(f => { const k = f.taskTitle || ''; byTask[k] = (byTask[k] || 0) + (f.duration || 0); });
+  const topTask = Object.keys(byTask).filter(Boolean).sort((a, b) => byTask[b] - byTask[a])[0];
+  $('statFocusText').textContent = fw.length + ' 次 · ' + fMin + ' 分钟' + (topTask ? ' · 主要在「' + topTask + '」' : '');
 
   const habits = await getAll('habits');
   const base = new Date(monStr + 'T00:00:00');
@@ -2601,7 +2725,7 @@ WIDGETS['每日计划'] = {
       return '<div style="font-size:var(--fs-13,13px);color:var(--sub);margin:8px 0 4px">' + label + '</div>' +
         (list.length ? list.map(x => '<div class="w-row' + (x.done ? ' done' : '') + '"><button class="w-check' + (x.done ? ' on' : '') + '" data-wact="plan-toggle" data-id="' + x.id + '"></button><span class="w-row-t">' + esc(x.text) + '</span><button class="w-del" data-wact="plan-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">暂无，在下方添加</div>');
     }).join('');
-    return wCard('📅 今日计划', html + (yLeft ? '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-backfill">📥 补昨日未完成 ' + yLeft + ' 项</button></div>' : ''), '<div class="w-streak">已完成 <b>' + done + '</b>/<b>' + items.length + '</b> · 剩 <b>' + (items.length - done) + '</b></div>') +
+    return wCard('📅 今日计划', html + (yLeft ? '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-backfill">📥 补昨日未完成 ' + yLeft + ' 项</button></div>' : '' + '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-import">\u{1F504} 同步今日任务进计划</button></div>'), '<div class="w-streak">已完成 <b>' + done + '</b>/<b>' + items.length + '</b> · 剩 <b>' + (items.length - done) + '</b></div>') +
       '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">添加计划</div><div class="w-add"><select id="w-section"><option value="morning">上午</option><option value="afternoon">下午</option><option value="evening">晚上</option></select><input id="w-input" type="text" placeholder="计划事项…" autocomplete="off"><button class="w-btn" data-wact="plan-add">＋</button></div></div>';
   },
   acts: {
@@ -2613,10 +2737,30 @@ WIDGETS['每日计划'] = {
     },
     'plan-toggle': async b => {
       const l = wget('dailyplan'); const x = l.find(i => i.id == b.dataset.id);
-      if(x){ x.done = !x.done; wset('dailyplan', l); } openWidget(curWidget);
+      if(x){ x.done = !x.done; wset('dailyplan', l); if(x.done) ding(); }
+      await renderTodayProgress();          /* 计划打勾也要让水位上涨 */
+      openWidget(curWidget);
     },
     'plan-del': async b => {
       wset('dailyplan', wget('dailyplan').filter(i => i.id != b.dataset.id)); openWidget(curWidget);
+    },
+    'plan-import': async () => {
+      const t = todayStr();
+      const tasks = await getActiveToday();
+      const plan = wget('dailyplan');
+      const existing = new Set(plan.filter(p => p.date === t).map(p => p.text));
+      const secs = ['morning', 'afternoon', 'evening'];
+      let i = 0, n = 0;
+      for(const tk of tasks){
+        if(existing.has(tk.text)) continue;
+        plan.push({ id: Date.now() + '-' + i, date: t, section: secs[i % 3], text: tk.text, done: false });
+        i++; n++;
+      }
+      if(!n){ toast('今日任务都已经在计划里了'); return; }
+      wset('dailyplan', plan);
+      await renderTodayProgress();
+      openWidget(curWidget);
+      toast('\u{1F504} 已同步 ' + n + ' 项到今日计划');
     },
     'plan-backfill': async () => {
       const t = todayStr(), y = yesterdayStr();
@@ -3155,7 +3299,9 @@ function todayNewCardHtml(){
     body = '<div class="w-flip"><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">' + (done + 1) + '/' + total + ' · 第 1 次背</div>' +
       '<div class="wf-word">' + esc(cur.word) + '</div>' +
       '<div class="wf-def" id="wf-new-def">点下方查看释义</div>' +
-      '<div style="margin-top:10px;display:flex;gap:8px;justify-content:center"><button class="w-btn" data-wact="en-new-flip">查看释义</button><button class="w-btn" data-wact="en-new-known" data-id="' + cur.id + '">认识 ✓</button><button class="w-btn" data-wact="en-new-next">不认识 →</button></div></div>';
+      '<div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
+      '<button class="w-btn" data-wact="en-speak" data-word="' + esc(cur.word) + '">\u{1F50A} 朗读</button>' +
+      '<button class="w-btn" data-wact="en-new-flip">查看释义</button><button class="w-btn" data-wact="en-new-known" data-id="' + cur.id + '">认识 ✓</button><button class="w-btn" data-wact="en-new-next">不认识 →</button></div></div>';
   }else{
     body = '<div class="w-empty">今天 ' + total + ' 个新词已背完 ✅ 明天自动换一批新词</div>' +
       (words.some(w => !w.known && !(w.times || 0)) ? '<div class="w-note">生词本里还有没学过的，明天会接着排上。</div>' : '');
@@ -3230,7 +3376,7 @@ WIDGETS['英语学习'] = {
       wCard('🎓 内置词库',
         Object.keys(BUILTIN_BOOKS).map(k => '<div class="w-row"><span class="w-row-t">' + BUILTIN_BOOKS[k].label + '</span><button class="w-tag" data-wact="' + k + '-import">导入</button></div>').join('') +
         '<div class="w-note" style="margin-top:6px">导入进对应词书，已存在自动跳过；数据只存本地。</div>') +
-      (rev ? wCard('🎴 复习卡片 · ' + esc(curBookName()) + (dueCount ? ' · 今日 ' + dueCount + ' 到期' : ''), '<div class="w-flip"><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">第 ' + ((rev.times || 0) + 1) + ' 次背</div><div class="wf-word">' + esc(rev.word) + '</div><div class="wf-def" id="wf-def">' + (revShown ? esc(rev.def) : '点下方查看释义') + '</div><div style="margin-top:10px;display:flex;gap:8px;justify-content:center"><button class="w-btn" data-wact="en-flip">查看释义</button><button class="w-btn" data-wact="en-known" data-id="' + rev.id + '">认识 ✓</button><button class="w-btn" data-wact="en-next">换一个</button></div></div>' + (dueCount ? '' : (words.length ? '<div class="w-note" style="margin-top:8px">今天没有到期的复习词，先随意复习一个</div>' : ''))) : '');
+      (rev ? wCard('🎴 复习卡片 · ' + esc(curBookName()) + (dueCount ? ' · 今日 ' + dueCount + ' 到期' : ''), '<div class="w-flip"><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">第 ' + ((rev.times || 0) + 1) + ' 次背</div><div class="wf-word">' + esc(rev.word) + '</div><div class="wf-def" id="wf-def">' + (revShown ? esc(rev.def) : '点下方查看释义') + '</div><div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="w-btn" data-wact="en-speak" data-word="' + esc(rev.word) + '">\u{1F50A} 朗读</button><button class="w-btn" data-wact="en-spell" data-id="' + rev.id + '">\u270F 拼写</button><button class="w-btn" data-wact="en-flip">查看释义</button><button class="w-btn" data-wact="en-known" data-id="' + rev.id + '">认识 ✓</button><button class="w-btn" data-wact="en-next">换一个</button></div></div>' + (dueCount ? '' : (words.length ? '<div class="w-note" style="margin-top:8px">今天没有到期的复习词，先随意复习一个</div>' : ''))) : '');
   },
   acts: {
     'book-switch': async b => {
@@ -3298,6 +3444,25 @@ WIDGETS['英语学习'] = {
     'en-flip': async () => {
       const pool = enRevPool(); const rev = pool[revIdx % pool.length];
       if(rev){ $('wf-def').textContent = rev.def; revShown = true; }
+    },
+    'en-speak': async b => { speakWord(b.dataset.word || ''); },
+    /* 拼写练习：看着释义把单词敲出来 —— 比「认识 / 不认识」记得牢得多 */
+    'en-spell': async b => {
+      const l = bookWords(curBook()); const x = l.find(i => i.id == b.dataset.id);
+      if(!x){ toast('这个词不在生词本里了'); return; }
+      const choice = await showModal('\u270F 拼写练习',
+        '<div class="w-note" style="margin-bottom:8px">释义：' + esc(x.def || '（无）') + '</div>' +
+        '<input id="spellInput" type="text" placeholder="拼出这个单词" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-16,16px);color:var(--text);box-sizing:border-box;outline:none">',
+        [{label:'取消', value:'c'}, {label:'提交', value:'ok', primary:true}]
+      );
+      if(choice !== 'ok') return;                  /* 取消则原样留在生词本里 */
+      const typed = ((($('spellInput') || {}).value) || '').trim().toLowerCase();
+      if(!typed){ toast('没有输入，跳过这个词'); revIdx++; revShown = false; openWidget(curWidget); return; }
+      const ok = typed === String(x.word).toLowerCase();
+      if(ok){ x.times = (x.times || 0) + 1; x.known = true; saveBookWords(curBook(), l); revIdx++; revShown = false; }
+      toast(ok ? ('\u2714 拼对了 · ' + x.word) : ('\u2718 正确拼写是 ' + x.word));
+      if(ok){ speakWord(x.word); ding(); }
+      openWidget(curWidget);
     },
     'en-known': async b => {
       const l = bookWords(curBook()); const x = l.find(i => i.id == b.dataset.id);
@@ -3702,6 +3867,13 @@ async function loadDayDetail(ds){
   if(moods.length) html += '<div class="dd-sec">🎭 心情</div>' + moods.map(m => '<div class="dd-item">' + (MOOD[m.mood] || m.mood) + '</div>').join('');
   if(review) html += '<div class="dd-sec">📝 复盘</div><div class="dd-item">' + esc(review) + '</div>';
   if(!done.length && !todo.length && !habits.length && !moods.length && !review) html += '<div class="dd-empty">这天没有记任何东西</div>';
+  /* 让回顾产生行动，而不是看完就算 */
+  if(ds !== t || todo.length){
+    html += '<div class="dd-acts">' +
+      (todo.length && ds !== t ? '<button class="dd-act" data-dd="carry" data-date="' + ds + '">\u21A9 把这天的未完成 ' + todo.length + ' 件带到今天</button>' : '') +
+      '<button class="dd-act" data-dd="report" data-date="' + ds + '">\u{1F4CB} 复制' + (ds === t ? '今日' : fmtDate(ds)) + '日报</button>' +
+      '</div>';
+  }
   box.innerHTML = html;
   box.classList.remove('hidden');
 }
@@ -3720,11 +3892,11 @@ async function saveReview(){
 
 /* ========================= 今日日报（一键聚合 + 一键复制） ========================= */
 /* 取当天的小组件记录：它们的 date 字段都是 'YYYY-MM-DD' */
-function todayArr(k){ return wget(k).filter(x => x.date === todayStr()); }
+function todayArr(k, d){ return wget(k).filter(x => x.date === (d || todayStr())); }
 function sumMin(arr){ return arr.reduce((s, x) => s + (Number(x.minutes) || 0), 0); }
 /* 把当天的任务 / 习惯 / 专注 / 学习 / 读报 / 复盘聚合成一段可发送的纯文本 */
-async function buildReport(){
-  const t = todayStr();
+async function buildReport(dv){
+  const t = dv || todayStr();
   const tasks  = await getAll('tasks');
   const habits = await getAll('habits');
   const focus  = await getAll('focus');
@@ -3778,14 +3950,19 @@ async function buildReport(){
   if(todayFocus.length){
     const mins = Math.round(todayFocus.reduce((s, f) => s + (f.duration || 0), 0) / 60);
     L.push('【专注】' + todayFocus.length + ' 个番茄 · 累计 ' + mins + ' 分钟');
+    /* 按任务聚合：让「专注了多久」有主语 */
+    const byTask = {};
+    todayFocus.forEach(f => { const k = f.taskTitle || '自由专注'; byTask[k] = (byTask[k] || 0) + (f.duration || 0); });
+    Object.keys(byTask).sort((a, b) => byTask[b] - byTask[a])
+      .forEach(k => L.push('  · ' + k + ' ' + fmtHm(Math.round(byTask[k] / 60))));
     L.push('');
   }
 
   /* 4. 学习 / 练习：汇总各小组件当天的记录 */
-  const en = todayArr('en_check'), bk = todayArr('bk_read'), ai = todayArr('ai_check'),
-        hw = todayArr('hw'), ex = todayArr('ex'), exp = todayArr('exp');
+  const en = todayArr('en_check', t), bk = todayArr('bk_read', t), ai = todayArr('ai_check', t),
+        hw = todayArr('hw', t), ex = todayArr('ex', t), exp = todayArr('exp', t);
   const study = [];
-  const sess = todayArr('en_sess')[0];
+  const sess = todayArr('en_sess', t)[0];
   if(sess){
     const words = bookWords(curBook());
     const n = (sess.ids || []).filter(id => ((words.find(w => w.id === id) || {}).times || 0) > 0).length;
@@ -3804,7 +3981,7 @@ async function buildReport(){
   }
 
   /* 5. 今日读报 */
-  const news = todayArr('news');
+  const news = todayArr('news', t);
   if(news.length){
     L.push('【今日读报】' + news.filter(n => n.read).length + '/' + news.length + ' 篇');
     news.forEach(n => L.push('  · ' + n.title + (n.source ? '（' + n.source + '）' : '')));
@@ -3840,7 +4017,11 @@ async function showReport(){
 /* 复制：优先 Clipboard API（需 HTTPS），不可用时退回 execCommand 兜底 */
 async function copyReport(){
   const ta = $('reportText');
-  const txt = (ta ? ta.value : lastReport) || '';
+  await copyText((ta ? ta.value : lastReport) || '');
+}
+/* 复制任意文本：优先 Clipboard API（需 HTTPS），不可用时退回 execCommand */
+async function copyText(txt){
+  txt = txt || '';
   if(!txt.trim()){ toast('没有可复制的内容'); return; }
   try{
     if(navigator.clipboard && window.isSecureContext){
@@ -3974,6 +4155,62 @@ async function init(){
   $('importBtn').addEventListener('click', () => $('importFile').click());
   $('importFile').addEventListener('change', importData);
   $('clearBtn').addEventListener('click', clearAll);
+
+  /* 番茄钟：时长切换 + 自定义 */
+  document.querySelectorAll('#pomoDurSeg button').forEach(b => b.addEventListener('click', () => {
+    if(b.dataset.d === 'custom'){
+      showModal('\u23F1 自定义番茄钟时长',
+        '<input id="pomoDurInput" type="number" inputmode="numeric" min="1" max="180" placeholder="分钟数（1-180）" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-15,15px);color:var(--text);box-sizing:border-box;outline:none">' +
+        '<div class="w-note" style="margin-top:6px">跑一整套回归测试时长任务时用 45 分钟更合适。</div>',
+        [{label:'取消', value:'c'}, {label:'确定', value:'ok', primary:true}]
+      ).then(v => {
+        if(v !== 'ok') return;
+        const m = parseInt(($('pomoDurInput') || {}).value, 10);
+        if(!m || m < 1 || m > 180){ toast('请输入 1-180 之间的分钟数'); return; }
+        setPomoDur(m * 60);
+        toast('\u23F1 已设为 ' + m + ' 分钟');
+      });
+      return;
+    }
+    setPomoDur(parseInt(b.dataset.d, 10));
+    toast('\u23F1 已设为 ' + Math.round(parseInt(b.dataset.d, 10) / 60) + ' 分钟');
+  }));
+  /* 回顾页周期切换 */
+  document.querySelectorAll('#rvSeg button').forEach(b => b.addEventListener('click', () => {
+    localStorage.setItem('shuiji_rv_period', b.dataset.p);
+    document.querySelectorAll('#rvSeg button').forEach(x => x.classList.toggle('on', x === b));
+    renderReview();
+  }));
+  {
+    const cur = rvPeriod();
+    document.querySelectorAll('#rvSeg button').forEach(x => x.classList.toggle('on', x.dataset.p === cur));
+  }
+
+  /* 日历某天明细 → 把未完成带到今天 / 复制当天日报 */
+  const ddBox = $('dayDetail');
+  if(ddBox) ddBox.addEventListener('click', async e => {
+    const b = e.target.closest('.dd-act');
+    if(!b) return;
+    const ds = b.dataset.date;
+    if(b.dataset.dd === 'carry'){
+      const cap = (typeof MAX_ACTIVE !== 'undefined') ? MAX_ACTIVE : 3;
+      const active = await getActiveToday();
+      const pend = (await getAll('tasks')).filter(x => x.date === ds && !x.completed);
+      const move = pend.slice(0, Math.max(0, cap - active.length));
+      for(const it of move){ it.date = todayStr(); it.delayed = false; await put('tasks', it); }
+      toast(move.length ? ('\u21A9 已带到今天 ' + move.length + ' 件') : '今天已经没有名额了');
+      await refreshToday(); loadDayDetail(ds);
+      return;
+    }
+    if(b.dataset.dd === 'report') await copyText(await buildReport(ds));
+  });
+
+  /* 番茄钟：选择专注的任务 */
+  const fSel = $('focusTaskSel');
+  if(fSel) fSel.addEventListener('change', () => {
+    setFocusTask(fSel.value ? { id: fSel.value, text: fSel.options[fSel.selectedIndex].textContent } : null);
+  });
+  syncPomoDurUI();
 
   initPull();
   initShake();
