@@ -578,6 +578,96 @@
   .w-chart-small{height:44px;margin:6px 0;}
   .w-note a{color:var(--accent);}
 
+  /* 减脂启动卡：新用户第一眼看到的东西 */
+  .fit-start{background:var(--card);border-radius:20px;padding:18px 16px 16px;margin:2px 0 12px;
+    box-shadow:var(--shadow);border:1px solid color-mix(in srgb, var(--accent) 28%, transparent);}
+  .fit-start-t{font-size:var(--fs-17,17px);font-weight:700;color:var(--text);}
+  .fit-start-s{font-size:var(--fs-12,12px);color:var(--sub);margin-top:5px;line-height:1.65;}
+  .fit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+  .fit-f{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);
+    border-radius:12px;padding:9px 11px;}
+  .fit-f label{font-size:var(--fs-12,12px);color:var(--sub);flex-shrink:0;}
+  .fit-f input{flex:1;min-width:0;background:transparent;border:none;outline:none;text-align:right;
+    font-size:var(--fs-15,15px);color:var(--text);font-variant-numeric:tabular-nums;}
+  .fit-f select{flex:1;min-width:0;background:transparent;border:none;outline:none;text-align:right;
+    font-size:var(--fs-13,13px);color:var(--text);}
+  .fit-u{font-size:var(--fs-11,11px);color:var(--sub);flex-shrink:0;}
+  .fit-start-btn{display:block;width:100%;margin-top:12px;background:var(--accent);color:#fff;font-weight:700;
+    border:none;border-radius:12px;padding:12px;font-size:var(--fs-15,15px);cursor:pointer;}
+  .fit-start-btn:active{transform:scale(.98);}
+
+  /* 首页减肥入口 */
+  .fit-quick{display:flex;align-items:center;gap:9px;background:var(--card);border-radius:14px;
+    padding:11px 14px;margin:0 0 14px;box-shadow:var(--shadow);cursor:pointer;
+    border:1px solid transparent;transition:transform .15s ease;}
+  .fit-quick:active{transform:scale(.99);}
+  .fit-quick.need{border-color:color-mix(in srgb, var(--accent) 38%, transparent);
+    background:color-mix(in srgb, var(--accent) 9%, var(--card));}
+  .fq-txt{flex:1;font-size:var(--fs-13,13px);color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fq-btn{font-size:var(--fs-12,12px);color:var(--accent);font-weight:700;flex-shrink:0;}
+
+  /* ================= 减肥：减脂视觉 ================= */
+  .fit-journey{background:var(--card);border-radius:20px;padding:18px 16px 16px;margin:2px 0 12px;box-shadow:var(--shadow);}
+  .fit-j-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+  .fit-j-big{font-size:var(--fs-34,34px);font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px;}
+  .fit-j-cap{font-size:var(--fs-12,12px);color:var(--sub);margin-top:5px;}
+  .fit-j-side{text-align:right;flex-shrink:0;}
+  .fit-j-side .s-num{font-size:var(--fs-17,17px);font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
+  .fit-j-side .s-cap{font-size:var(--fs-11,11px);color:var(--sub);margin-top:3px;}
+  /* 减脂里程条：起点体重 → 目标体重的一段路 */
+  .fit-road{position:relative;height:14px;border-radius:99px;background:color-mix(in srgb, var(--accent) 12%, transparent);margin:2px 11px 0;}
+  .fit-road-fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;min-width:14px;
+    background:linear-gradient(90deg,color-mix(in srgb, var(--accent) 45%, #ffffff),var(--accent));
+    transition:width .7s cubic-bezier(.22,1,.36,1);}
+  .fit-road-dot{position:absolute;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+    transition:left .7s cubic-bezier(.22,1,.36,1);}
+  .fit-road-dot::after{content:'';position:absolute;left:7px;top:5px;width:8px;height:8px;border-radius:50%;background:#fff;opacity:.9;}
+  .fit-road-ends{display:flex;justify-content:space-between;margin-top:9px;font-size:var(--fs-11,11px);color:var(--sub);font-variant-numeric:tabular-nums;}
+  .fit-j-foot{margin-top:12px;font-size:var(--fs-12,12px);color:var(--sub);line-height:1.6;}
+
+  /* 今日体重主卡 */
+  .fit-wt{background:var(--card);border-radius:20px;padding:18px 16px 14px;box-shadow:var(--shadow);margin-bottom:12px;}
+  .fit-wt-main{display:flex;align-items:baseline;justify-content:center;gap:3px;}
+  .fit-wt-num{font-size:var(--fs-44,44px);font-weight:800;line-height:1;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-1px;}
+  .fit-wt-unit{font-size:var(--fs-15,15px);color:var(--sub);font-weight:600;}
+  .fit-wt-delta{text-align:center;margin-top:8px;font-size:var(--fs-13,13px);font-weight:600;}
+  .fit-wt-delta.down{color:var(--accent);}
+  .fit-wt-delta.up{color:#C8813A;}
+  .fit-wt-sub{text-align:center;margin-top:3px;font-size:var(--fs-12,12px);color:var(--sub);}
+  .fit-wt-act{margin-top:12px;display:flex;gap:8px;}
+  .fit-wt-act input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;
+    padding:9px 11px;font-size:var(--fs-15,15px);color:var(--text);outline:none;box-sizing:border-box;}
+  .fit-wt-act input::placeholder{color:var(--sub);opacity:.7;}
+
+  /* 能量收支 */
+  .fit-e-row{display:flex;align-items:center;gap:9px;margin:9px 0;}
+  .fit-e-label{width:46px;font-size:var(--fs-12,12px);color:var(--sub);flex-shrink:0;}
+  .fit-e-bar{flex:1;height:11px;border-radius:99px;background:rgba(33,64,44,0.08);overflow:hidden;}
+  .fit-e-fill{height:100%;border-radius:99px;background:var(--accent);width:0;transition:width .5s ease;}
+  .fit-e-fill.over{background:#D98A3D;}
+  .fit-e-val{width:74px;text-align:right;font-size:var(--fs-12,12px);color:var(--text);flex-shrink:0;font-variant-numeric:tabular-nums;}
+
+  /* 三餐打卡 */
+  .fit-meal{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);}
+  .fit-meal:last-child{border-bottom:none;}
+  .fit-meal-name{width:34px;font-size:var(--fs-13,13px);color:var(--text);font-weight:600;flex-shrink:0;}
+  .fit-meal-opts{display:flex;gap:6px;flex:1;}
+  .fit-mo{flex:1;text-align:center;font-size:var(--fs-12,12px);padding:7px 0;border-radius:10px;
+    background:rgba(33,64,44,0.05);color:var(--sub);cursor:pointer;}
+  .fit-mo.sel{background:var(--accent);color:#fff;font-weight:700;}
+  .fit-meal-val{width:60px;text-align:right;font-size:var(--fs-11,11px);color:var(--sub);flex-shrink:0;font-variant-numeric:tabular-nums;}
+  .fit-net{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+  .fit-net-num{font-size:var(--fs-20,20px);font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .fit-net-num.warn{color:#C8813A;}
+
+  /* 体重趋势图 */
+  .fit-trend{width:100%;height:auto;aspect-ratio:320/96;display:block;margin-top:2px;}
+  .fit-trend-lg{display:flex;gap:12px;justify-content:center;margin-top:6px;font-size:var(--fs-11,11px);color:var(--sub);}
+  .fit-trend-lg span{display:flex;align-items:center;gap:4px;}
+  .fit-trend-lg i{width:12px;height:2px;border-radius:2px;display:inline-block;}
+
   /* ================= 回顾页 ================= */
   .view-title{font-size:var(--fs-18,18px);font-weight:700;margin:12px 0 14px;}
   .view-sub{color:var(--sub);font-size:var(--fs-14,14px);margin:16px 0 8px;}
@@ -807,6 +897,8 @@
           </div>
         </div>
       </div>
+      <!-- 减肥：今日称重（一步直达，不用翻抽屉） -->
+      <div class="fit-quick" id="fitQuick" role="button" aria-label="今日称重"></div>
       <div class="input-row">
         <input id="taskInput" placeholder="添加待办…" autocomplete="off" enterkeyhint="done">
         <button class="add-btn" id="addBtn" title="添加">＋</button>
@@ -880,6 +972,7 @@
         <div class="stat-row"><span id="statRateLabel">本周任务完成率</span><span id="statRateText">0/0 · 0%</span></div>
         <div class="stat-bar"><div class="stat-fill" id="statRateFill"></div></div>
         <div class="stat-row" style="margin-top:10px"><span id="statFocusLabel">本周专注</span><span id="statFocusText">0 次</span></div>
+        <div class="stat-row" style="margin-top:10px"><span id="statWeightLabel">体重变化</span><span id="statWeightText">暂无记录</span></div>
         <div class="stat-row" style="margin-top:10px"><span id="statTrendLabel">较上周</span><span id="statTrendText">--</span></div>
       </div>
       <div class="stat-card">
@@ -1407,6 +1500,7 @@ async function renderTodayProgress(){
     tip.textContent = left > 0 ? '今日圆满还差 ' + left + ' 件' : '今日圆满';
     tip.style.display = left > 0 ? '' : 'none';
   }
+  renderWeightQuick();      /* 首页称重条跟着数据一起刷新 */
 }
 /* 完成时：水面中心扩散一圈涟漪（克制，0.8s，不打断操作） */
 function waterRipple(){
@@ -2077,6 +2171,21 @@ async function renderWeekStats(monStr, today, prev, rg){
   const lab = rg ? rg.label : '本周';
   if($('statRateLabel')) $('statRateLabel').textContent = lab + '任务完成率';
   if($('statFocusLabel')) $('statFocusLabel').textContent = lab + '专注';
+  /* 体重变化：周期开始前最近一次 → 周期内最后一次 */
+  if($('statWeightText')){
+    if($('statWeightLabel')) $('statWeightLabel').textContent = lab + '体重变化';
+    const wsAll = wget('ex_w').filter(x => x && x.date);
+    const inR = wsAll.filter(x => x.date >= monStr && x.date <= today);
+    const before = wsAll.filter(x => x.date < monStr);
+    if(inR.length){
+      const lastW = inR[inR.length - 1], baseW = before.length ? before[before.length - 1] : inR[0];
+      const d = Math.round((lastW.weight - baseW.weight) * 10) / 10;
+      $('statWeightText').textContent = lastW.weight + ' kg' +
+        (Math.abs(d) >= 0.05 ? ' · ' + (d < 0 ? '↓ ' : '↑ ') + Math.abs(d).toFixed(1) + ' kg' : ' · 持平');
+    } else {
+      $('statWeightText').textContent = before.length ? before[before.length - 1].weight + ' kg（' + lab + '还没记）' : '暂无记录';
+    }
+  }
   /* 环比：和上一个等长周期比才知道是在变好还是变差 */
   if(prev && $('statTrendText')){
     if($('statTrendLabel')) $('statTrendLabel').textContent = rg ? rg.prevLabel : '较上周';
@@ -2617,13 +2726,88 @@ function handwritingLesson(){
 }
 /* 表达：经典辩题灵感 */
 const DEBATES = ['「钱和理想，哪个更重要？」','「朋友之间该不该谈钱？」','「996 是福是祸？」','「AI 会取代人类吗？」','「该不该相信网上的陌生人？」','「工作和生活，边界在哪里？」','「孩子该不该玩手机？」','「留在大城市还是小城市？」','「自律重要还是自由重要？」','「努力和选择，哪个更重要？」','「要不要听父母的安排？」','「内卷真的无法避免吗？」','「该不该为了爱好放弃稳定？」','「科技让生活变得更好了吗？」','「成功是不是唯一的评价标准？」','「真话和善良，哪个优先？」'];
-/* 减肥：体重近 7 次迷你柱状图 */
-function weightSpark(ws){
-  const vals = ws.slice(-7);
-  const min = Math.min.apply(null, vals.map(x => x.weight));
-  const max = Math.max.apply(null, vals.map(x => x.weight));
-  const span = Math.max(0.5, max - min);
-  return '<div class="w-chart w-chart-small">' + vals.map(x => '<div class="w-bar" style="height:' + Math.max(8, Math.round((x.weight - min) / span * 100)) + '%"><small></small></div>').join('') + '</div>';
+/* ================= 减肥：计算 ================= */
+/* MET 代谢当量：按真实体重算运动消耗。80kg 与 50kg 跑同样的时间消耗不同 */
+const EX_MET = { '跳绳':11, '跑步':8.3, '骑行':7, '力量':5, '深蹲':5, '快走':4.3, '瑜伽':3 };
+function fitKcal(type, min){
+  const p = loadProfile();
+  if(!p || !p.w) return Math.round(min * (EX_MET[type] ? EX_MET[type] * 1.2 : 6));
+  return Math.round((EX_MET[type] || 6) * p.w * (min / 60));
+}
+/* 每日建议摄入 / TDEE / 缺口：与 planView 同一套公式 */
+function planIntake(p){
+  if(!p) return null;
+  const bmr = 10 * p.w + 6.25 * p.h - 5 * p.age + (p.gender === 'male' ? 5 : -161);
+  const tdee = Math.round(bmr * p.activity);
+  const deficit = Math.max(350, Math.min(750, Math.round(tdee - 1200)));
+  return { tdee, deficit, intake: Math.max(1200, tdee - deficit) };
+}
+/* 三餐：占每日预算的比例，以及「少 / 正常 / 多」三档系数 */
+const MEALS = [{ k:'breakfast', n:'早餐', r:0.25 }, { k:'lunch', n:'午餐', r:0.35 },
+               { k:'dinner', n:'晚餐', r:0.30 }, { k:'snack', n:'加餐', r:0.10 }];
+const MEAL_LV = { less:{ n:'少', f:0.6 }, normal:{ n:'正常', f:1 }, more:{ n:'多', f:1.5 } };
+function mealKcal(base, r, lv){ return Math.round((base || 0) * r * ((MEAL_LV[lv] || MEAL_LV.normal).f)); }
+function todayMeals(d){
+  const l = wget('ex_meal').filter(x => x.date === (d || todayStr()));
+  const m = {}; l.forEach(x => { m[x.meal] = x; });
+  return m;
+}
+/* 今日能量：摄入（三餐粗估）- 运动消耗 = 净 */
+function todayEnergy(out){
+  const p = loadProfile(), pi = planIntake(p);
+  const budget = pi ? pi.intake : 0;
+  const burn = out || 0;
+  const allowance = budget + burn;          /* 运动消耗让今天可以多吃一点 */
+  const ms = todayMeals();
+  let eaten = 0, counted = 0;
+  MEALS.forEach(m => { const x = ms[m.k]; if(x){ eaten += (x.kcal || 0); counted++; } });
+  return { budget, burn, eaten, allowance, counted, left: allowance - eaten, pi };
+}
+/* 连续称重天数：今天没称就从昨天往前数 */
+function weightStreak(ws){
+  const byDate = {}; ws.forEach(x => { if(x && x.date) byDate[x.date] = true; });
+  let n = 0; const d = new Date();
+  if(!byDate[todayStr(d)]) d.setDate(d.getDate() - 1);
+  while(byDate[todayStr(d)]){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function lastWeightRec(ws){ const o = ws.filter(x => x.date !== todayStr()); return o.length ? o[o.length - 1] : null; }
+/* ================= 减肥：体重趋势图 ================= */
+/* 折线 + 7 日移动平均 + 目标体重虚线。日波动是水分，均线才是真实趋势 */
+function weightTrend(ws, goal){
+  const pts = ws.slice(-14).filter(x => x && typeof x.weight === 'number');
+  if(pts.length < 2) return '<div class="w-empty">至少记两次体重，才看得出趋势</div>';
+  const vals = pts.map(x => x.weight);
+  let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if(goal){ lo = Math.min(lo, goal); hi = Math.max(hi, goal); }
+  const pad = Math.max(0.5, (hi - lo) * 0.18);
+  lo -= pad; hi += pad;
+  const W = 320, H = 96, PL = 6, PR = 6, PT = 10, PB = 6;
+  const X = i => PL + i * (W - PL - PR) / (pts.length - 1);
+  const Y = v => PT + (hi - v) / (hi - lo) * (H - PT - PB);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p.weight).toFixed(1)).join(' ');
+  const area = line + ' L' + X(pts.length - 1).toFixed(1) + ' ' + H + ' L' + X(0).toFixed(1) + ' ' + H + ' Z';
+  /* 移动平均：窗口 5，边缘自动收缩 */
+  const ma = pts.map((p, i) => {
+    const s = Math.max(0, i - 2), e = Math.min(pts.length - 1, i + 2);
+    let sum = 0; for(let k = s; k <= e; k++) sum += pts[k].weight;
+    return X(i).toFixed(1) + ' ' + Y(sum / (e - s + 1)).toFixed(1);
+  });
+  const maLine = 'M' + ma.join(' L');
+  const goalLine = (goal && goal >= lo && goal <= hi)
+    ? '<line x1="' + PL + '" y1="' + Y(goal).toFixed(1) + '" x2="' + (W - PR) + '" y2="' + Y(goal).toFixed(1) + '" stroke="#C8813A" stroke-width="1" stroke-dasharray="4 3" opacity=".85"/>'
+    : '';
+  const last = pts[pts.length - 1];
+  return '<svg class="fit-trend" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="体重趋势">' +
+    '<path d="' + area + '" fill="color-mix(in srgb, var(--accent) 14%, transparent)"/>' +
+    goalLine +
+    '<path d="' + maLine + '" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
+    '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="1" opacity=".38" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
+    '<circle cx="' + X(pts.length - 1).toFixed(1) + '" cy="' + Y(last.weight).toFixed(1) + '" r="3.2" fill="var(--accent)" stroke="var(--card)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>' +
+    '</svg>' +
+    '<div class="fit-trend-lg"><span><i style="background:var(--accent)"></i>7 日均线</span>' +
+    (goal ? '<span><i style="background:#C8813A"></i>目标 ' + goal + 'kg</span>' : '') +
+    '<span>' + pts.length + ' 次记录</span></div>';
 }
 function fmtDelta(d){ const s = d >= 0 ? '+' : ''; return s + (d).toFixed(1) + ' kg'; }
 /* AI 日报：Hacker News 公开接口（免 Key、CORS 友好） */
@@ -3087,57 +3271,253 @@ function planProgressHtml(){
     '<div class="w-row"><span class="w-row-t">预计达标</span><span class="w-row-s">约 ' + weeks + ' 周（按计划坚持）</span></div>';
   return wCard('📈 计划进度', rows + (remaining <= 0 ? '<div class="w-empty">🎉 已达到目标 ' + goal + 'kg，继续保持！</div>' : ''));
 }
+/* ================= 首页：今日称重入口 ================= */
+function renderWeightQuick(){
+  const el = $('fitQuick'); if(!el) return;
+  const ws = wget('ex_w'), t = todayStr();
+  const today = ws.find(x => x.date === t);
+  const prev = ws.filter(x => x.date !== t).slice(-1)[0];
+  if(today){
+    let d = '';
+    if(prev){
+      const diff = Math.round((today.weight - prev.weight) * 10) / 10;
+      if(Math.abs(diff) >= 0.05) d = (diff < 0 ? ' ↓' : ' ↑') + Math.abs(diff).toFixed(1);
+    }
+    el.classList.remove('need');
+    el.innerHTML = '<span>⚖️</span><span class="fq-txt">' + today.weight + ' kg' + d +
+      (today.waist ? ' · 腰围 ' + today.waist + 'cm' : '') + '</span>' +
+      '<span class="fq-btn">连续 ' + weightStreak(ws) + ' 天 ›</span>';
+  } else {
+    el.classList.add('need');
+    el.innerHTML = '<span>⚖️</span><span class="fq-txt">' +
+      (prev ? '上次 ' + prev.weight + ' kg · 今天还没称' : '记一次体重，开始这段路') +
+      '</span><span class="fq-btn">记录 ›</span>';
+  }
+}
+function openWeightQuick(){
+  const ws = wget('ex_w');
+  const today = ws.find(x => x.date === todayStr());
+  const inp = (id, ph, val, mt) => '<input id="' + id + '" type="number" step="0.1" inputmode="decimal" placeholder="' + ph +
+    '" autocomplete="off" value="' + (val != null ? val : '') + '" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:var(--fs-16,16px);color:var(--text);box-sizing:border-box;outline:none' +
+    (mt ? ';margin-top:8px' : '') + '">';
+  showModal('⚖️ 今日称重',
+    inp('qk-wt', '体重 kg', today ? today.weight : '') +
+    inp('qk-wst', '腰围 cm（可选）', today && today.waist ? today.waist : '', true) +
+    '<div class="w-note" style="margin-top:8px">早上起床上完厕所称，每天同一时间最准。</div>',
+    [{ label:'取消', value:'c' }, { label:'记录', value:'ok', primary:true }]
+  ).then(v => {
+    if(v !== 'ok') return;
+    const w = parseFloat((($('qk-wt') || {}).value || '').trim());
+    if(isNaN(w) || w <= 0){ toast('填个体重'); return; }
+    const wsEl = $('qk-wst'), waist = wsEl ? parseFloat((wsEl.value || '').trim()) : NaN;
+    const l = wget('ex_w'), ex = l.find(x => x.date === todayStr());
+    if(ex){ ex.weight = w; if(!isNaN(waist)) ex.waist = waist; }
+    else l.push(Object.assign({ id:Date.now(), date:todayStr(), weight:w }, isNaN(waist) ? {} : { waist }));
+    wset('ex_w', l);
+    blub(); renderWeightQuick();
+    if(curWidget === '减肥运动') openWidget(curWidget);
+    toast(isNaN(waist) ? '体重已记 ✓' : '体重 + 腰围已记 ✓');
+  });
+}
+
+/* ================= 减肥：区块 HTML ================= */
+function fitJourneyHtml(ws, p, goalW){
+  const goal = (p && p.goal) || goalW || 0;
+  if(!goal || !ws.length){
+    return '<div class="fit-journey"><div class="w-empty">记一次体重、定一个目标<br>这里会画出你的减脂进度</div></div>';
+  }
+  const initial = ws[0].weight, latest = ws[ws.length - 1].weight;
+  const total = initial - goal;
+  const lost = initial - latest;
+  const pct = total <= 0 ? (latest <= goal ? 100 : 0)
+                         : Math.max(0, Math.min(100, Math.round(lost / total * 100)));
+  const remain = Math.max(0, Math.round((latest - goal) * 10) / 10);
+  const pi = planIntake(p);
+  let eta = '';
+  if(pi && remain > 0){
+    const wk = Math.max(0.2, pi.deficit / 1100);
+    eta = '按计划约 ' + Math.max(1, Math.ceil(remain / wk)) + ' 周达标';
+  }
+  return '<div class="fit-journey">' +
+    '<div class="fit-j-head">' +
+      '<div><div class="fit-j-big">' + (lost > 0 ? lost.toFixed(1) : '0.0') + '<span style="font-size:var(--fs-15,15px);font-weight:600"> kg</span></div>' +
+        '<div class="fit-j-cap">开秤以来已减</div></div>' +
+      '<div class="fit-j-side"><div class="s-num">' + (remain > 0 ? remain.toFixed(1) + ' kg' : '已达标') + '</div>' +
+        '<div class="s-cap">距目标 ' + goal + 'kg</div></div>' +
+    '</div>' +
+    '<div class="fit-road"><div class="fit-road-fill" style="width:' + pct + '%"></div><div class="fit-road-dot" style="left:' + pct + '%"></div></div>' +
+    '<div class="fit-road-ends"><span>起点 ' + initial + 'kg</span><span class="fit-road-pct">' + pct + '%</span><span>目标 ' + goal + 'kg</span></div>' +
+    '<div class="fit-j-foot">' + (eta ? eta + ' · ' : '') + '当前 ' + latest + 'kg · 日降 0.5–1kg 是安全速度</div>' +
+  '</div>';
+}
+function weightHeroHtml(ws, goalW){
+  const t = todayStr();
+  const today = ws.find(x => x.date === t);
+  const prev = lastWeightRec(ws);
+  const lastShown = today || prev;
+  const actRow = '<div class="fit-wt-act">' +
+      '<input id="w-wt" type="number" step="0.1" inputmode="decimal" placeholder="今日体重 kg" autocomplete="off" value="' + (today ? today.weight : '') + '">' +
+      '<input id="w-wst" type="number" step="0.1" inputmode="decimal" placeholder="腰围 cm" autocomplete="off" style="max-width:100px" value="' + (today && today.waist ? today.waist : '') + '">' +
+      '<button class="w-btn" data-wact="ex-wadd">' + (today ? '更新' : '记录') + '</button>' +
+    '</div>';
+  if(!lastShown){
+    return '<div class="fit-wt"><div class="fit-wt-main"><span class="fit-wt-num" style="color:var(--sub);opacity:.5">--.-</span>' +
+      '<span class="fit-wt-unit">kg</span></div><div class="fit-wt-sub">还没有体重记录</div>' + actRow + '</div>';
+  }
+  const w = today ? today.weight : prev.weight;
+  let deltaTxt = '', cls = '';
+  if(today && prev){
+    const d = Math.round((today.weight - prev.weight) * 10) / 10;
+    if(Math.abs(d) < 0.05){ deltaTxt = '与上次持平'; }
+    else { cls = d < 0 ? ' down' : ' up'; deltaTxt = (d < 0 ? '↓ ' : '↑ ') + Math.abs(d).toFixed(1) + ' kg · 较上次'; }
+  } else if(!today){
+    deltaTxt = '今天还没称';
+  }
+  const st = weightStreak(ws);
+  const waist = today && today.waist ? ' · 腰围 ' + today.waist + 'cm' : (prev && prev.waist ? ' · 腰围 ' + prev.waist + 'cm（上次）' : '');
+  return '<div class="fit-wt">' +
+    '<div class="fit-wt-main"><span class="fit-wt-num">' + w + '</span><span class="fit-wt-unit">kg</span></div>' +
+    '<div class="fit-wt-delta' + cls + '">' + esc(deltaTxt) + '</div>' +
+    '<div class="fit-wt-sub">连续称重 ' + st + ' 天' + esc(waist) + (goalW ? ' · 目标 ' + goalW + 'kg' : '') + '</div>' +
+    actRow + '</div>';
+}
+function energyHtml(burn, p){
+  const pi = planIntake(p);
+  if(!pi) return '';
+  const e = todayEnergy(burn);
+  const pct = Math.min(100, Math.round(e.eaten / (e.allowance || 1) * 100));
+  const over = e.left < 0;
+  return wCard('⚖️ 今日能量',
+    '<div class="fit-e-row"><span class="fit-e-label">今日额度</span>' +
+      '<span class="fit-e-bar"><span class="fit-e-fill" style="width:' + pct + '%' + (over ? ';background:#D98A3D' : '') + '"></span></span>' +
+      '<span class="fit-e-val">' + e.eaten + ' / ' + e.allowance + '</span></div>' +
+    '<div class="fit-e-row"><span class="fit-e-label">其中运动</span>' +
+      '<span class="fit-e-bar"><span class="fit-e-fill" style="width:' + Math.min(100, Math.round(e.burn / (e.allowance || 1) * 100)) + '%"></span></span>' +
+      '<span class="fit-e-val">+' + e.burn + ' kcal</span></div>' +
+    '<div class="fit-net"><span>' + (over ? '已超额度' : '还剩可吃') + '</span>' +
+      '<span class="fit-net-num' + (over ? ' warn' : '') + '">' + (over ? '+' : '') + (-e.left) + ' kcal</span></div>' +
+    '<div class="w-note" style="margin-top:8px">基础预算 ' + e.budget + ' kcal，运动一次就把额度加回来一点。</div>',
+    '<div class="w-streak">TDEE ' + pi.tdee + ' · 缺口 ' + pi.deficit + '</div>');
+}
+function mealHtml(){
+  const p = loadProfile(), pi = planIntake(p);
+  if(!pi) return '';
+  const ms = todayMeals();
+  const rows = MEALS.map(m => {
+    const x = ms[m.k];
+    const kc = x ? (x.kcal || 0) : 0;
+    return '<div class="fit-meal"><span class="fit-meal-name">' + m.n + '</span>' +
+      '<span class="fit-meal-opts">' +
+      Object.keys(MEAL_LV).map(lv =>
+        '<span class="fit-mo' + (x && x.level === lv ? ' sel' : '') + '" data-wact="meal-set" data-meal="' + m.k + '" data-lv="' + lv + '">' + MEAL_LV[lv].n + '</span>'
+      ).join('') + '</span>' +
+      '<span class="fit-meal-val">' + (kc ? kc + ' kcal' : '未记') + '</span></div>';
+  }).join('');
+  return wCard('🍽 今日三餐', rows, '<div class="w-streak">粗估即可 · 日预算 ' + pi.intake + ' kcal</div>');
+}
+function fitStartHtml(){
+  const fld = (id, label, unit, val, min, max) =>
+    '<div class="fit-f"><label>' + label + '</label>' +
+    '<input id="' + id + '" type="number" inputmode="decimal" value="' + val + '" min="' + min + '" max="' + max + '" autocomplete="off">' +
+    '<span class="fit-u">' + unit + '</span></div>';
+  const opts = (id, o) => '<div class="fit-f"><label>' + o.label + '</label><select id="' + id + '">' +
+    o.list.map(x => '<option value="' + x[0] + '"' + (x[0] === o.def ? ' selected' : '') + '>' + x[1] + '</option>').join('') + '</select></div>';
+  return '<div class="fit-start">' +
+    '<div class="fit-start-t">🌱 开始你的减脂计划</div>' +
+    '<div class="fit-start-s">填四个数字，帮你算清楚每天能吃多少、多久能达标</div>' +
+    '<div class="fit-grid">' +
+      fld('p-h', '身高', 'cm', 170, 100, 230) +
+      fld('p-w', '体重', 'kg', 65, 20, 300) +
+      fld('p-goal', '目标', 'kg', 60, 20, 300) +
+      fld('p-age', '年龄', '岁', 25, 12, 100) +
+    '</div>' +
+    '<div class="fit-grid" style="margin-top:8px">' +
+      opts('p-gender', { label:'性别', def:'male', list:[['male','男'], ['female','女']] }) +
+      opts('p-act', { label:'活动', def:'1.375', list:[['1.2','久坐 · 办公为主'], ['1.375','轻度 · 每周 1-3 次'], ['1.55','中度 · 每周 3-5 次'], ['1.725','高活动 · 几乎每天']] }) +
+    '</div>' +
+    '<button class="fit-start-btn" data-wact="plan-gen">生成我的计划</button>' +
+    '<div class="w-note" style="margin-top:10px">基于 Mifflin-St Jeor 公式估算，数据只存这台手机。</div>' +
+  '</div>';
+}
+function fitTrendCard(ws, goalW){
+  return wCard('📈 体重趋势', weightTrend(ws, goalW), '<div class="w-streak">近 14 次记录</div>');
+}
 WIDGETS['减肥运动'] = {
   render(){
     const l = wget('ex');
     const t = todayStr();
     const todayItems = l.filter(x => x.date === t);
     const todayMin = todayItems.reduce((s, x) => s + x.minutes, 0);
+    const todayBurn = todayItems.reduce((s, x) => s + (x.kcal || 0), 0);
     const week = l.filter(x => x.date >= weekStartStr());
     const totalMin = week.reduce((s, x) => s + x.minutes, 0);
-    const totalKcal = week.reduce((s, x) => s + x.kcal, 0);
+    const totalKcal = week.reduce((s, x) => s + (x.kcal || 0), 0);
     const ws = wget('ex_w');
+    const p = loadProfile();
     const goalW = parseFloat(localStorage.getItem('shuiji_wg_weight') || '0');
-    const latest = ws.length ? ws[ws.length - 1].weight : null;
-    const delta = ws.length >= 2 ? ws[ws.length - 1].weight - ws[0].weight : null;
-    return wCard('🏃 减肥运动',
-      goalCard('ex', todayMin, '分钟', 20) +
-      (todayItems.length
-        ? todayItems.map(x => '<div class="w-row"><span class="w-row-t">' + esc(x.type) + '</span><span class="w-row-s">' + x.minutes + ' 分钟 · ~' + x.kcal + ' kcal</span><button class="w-del" data-wact="ex-del" data-id="' + x.id + '">✕</button></div>').join('')
-        : '<div class="w-empty">今天还没运动</div>'),
-      '<div class="w-streak">本周 <b>' + totalMin + '</b> 分钟 · <b>' + totalKcal + '</b> kcal</div>') +
-      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">记录运动</div><div class="w-add"><select id="w-type"><option>跑步</option><option>跳绳</option><option>深蹲</option><option>瑜伽</option><option>骑行</option><option>力量</option><option>快走</option></select><input id="w-min" type="number" class="w-min" value="20" min="1" max="600"><button class="w-btn" data-wact="ex-add">＋</button></div></div>' +
+    const needStart = !p && !ws.length;      /* 完全没开始：先把启动卡放第一屏 */
+    return (needStart ? fitStartHtml() : '') +
+      fitJourneyHtml(ws, p, goalW) +
+      weightHeroHtml(ws, goalW) +
+      (ws.length >= 2 ? fitTrendCard(ws, goalW) : '') +
+      energyHtml(todayBurn, p) +
+      mealHtml() +
+      wCard('🏃 今日运动',
+        goalCard('ex', todayMin, '分钟', 20) +
+        (todayItems.length
+          ? todayItems.map(x => '<div class="w-row"><span class="w-row-t">' + esc(x.type) + (x.from === 'ai' ? ' <span class="w-tag">AI</span>' : '') + '</span><span class="w-row-s">' + x.minutes + ' 分钟 · ' + (x.kcal || 0) + ' kcal</span><button class="w-del" data-wact="ex-del" data-id="' + x.id + '">✕</button></div>').join('')
+          : '<div class="w-empty">今天还没运动</div>'),
+        '<div class="w-streak">本周 <b>' + totalMin + '</b> 分钟 · <b>' + totalKcal + '</b> kcal</div>') +
+      '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">记录运动</div><div class="w-add"><select id="w-type"><option>跑步</option><option>跳绳</option><option>深蹲</option><option>瑜伽</option><option>骑行</option><option>力量</option><option>快走</option></select><input id="w-min" type="number" class="w-min" value="20" min="1" max="600"><button class="w-btn" data-wact="ex-add">＋</button></div>' +
+        '<div class="w-note" style="margin-top:6px">消耗按你的体重和运动类型估算。</div></div>' +
       chartCard(l, x => x.minutes) +
-      wCard('⚖️ 体重管理' + (goalW ? ' · 目标 ' + goalW + 'kg' : ''),
-        '<div class="w-add"><input id="w-wt" type="number" class="w-min" step="0.1" placeholder="今日体重 kg" autocomplete="off"><button class="w-btn" data-wact="ex-wadd">记录</button></div>' +
-        (ws.length ? weightSpark(ws) + '<div class="w-row"><span class="w-row-t">最新 ' + latest + ' kg</span>' + (delta !== null ? '<span class="w-row-s">较最初 ' + fmtDelta(delta) + '</span>' : '') + '</div>' : '<div class="w-empty">还没有体重记录，先记一个</div>') +
-        '<div class="w-goal-row" style="margin-top:8px"><input type="number" id="w-wgoal" class="w-goal-input" step="0.1" value="' + (goalW || 60) + '" min="20" max="300" autocomplete="off"><button class="w-btn" data-wact="ex-wgoal">设目标体重</button></div>') +
-      wCard('📋 定制减肥计划', planCardHtml()) +
       dsFitCardHtml() +
+      (needStart ? '' : wCard('📋 我的计划', planCardHtml())) +
       planProgressHtml();
   },
   acts: {
     'ex-add': async () => {
       const type = $('w-type').value;
       const min = parseInt($('w-min').value || '20', 10);
-      const kcal = Math.round(min * (type === '跑步' || type === '跳绳' ? 10 : type === '骑行' ? 8 : type === '快走' ? 5 : type === '瑜伽' ? 3 : 6));
-      const l = wget('ex'); l.push({ id: Date.now(), date: todayStr(), type, minutes: min, kcal });
-      wset('ex', l); openWidget(curWidget);
+      const l = wget('ex');
+      l.push({ id: Date.now(), date: todayStr(), type, minutes: min, kcal: fitKcal(type, min) });
+      wset('ex', l); blub(); openWidget(curWidget);
+      toast('🔥 记下了 · 约 ' + fitKcal(type, min) + ' kcal');
     },
     'ex-del': async b => { wset('ex', wget('ex').filter(x => x.id != b.dataset.id)); openWidget(curWidget); },
     'ex-wadd': async () => {
       const v = parseFloat(($('w-wt').value || '').trim());
       if(isNaN(v) || v <= 0){ toast('填个体重'); return; }
+      const wEl = $('w-wst');
+      const waist = wEl ? parseFloat((wEl.value || '').trim()) : NaN;
       const ws = wget('ex_w'); const ex = ws.find(x => x.date === todayStr());
-      if(ex) ex.weight = v; else ws.push({ id: Date.now(), date: todayStr(), weight: v });
-      wset('ex_w', ws); openWidget(curWidget);
+      if(ex){ ex.weight = v; if(!isNaN(waist)) ex.waist = waist; }
+      else ws.push(Object.assign({ id: Date.now(), date: todayStr(), weight: v }, isNaN(waist) ? {} : { waist }));
+      wset('ex_w', ws); blub(); openWidget(curWidget);
+      toast(isNaN(waist) ? '体重已记 ✓' : '体重 + 腰围已记 ✓');
     },
-    'ex-wgoal': async () => {
-      const v = parseFloat(($('w-wgoal').value || '').trim());
-      if(isNaN(v) || v <= 0){ toast('填个目标体重'); return; }
-      localStorage.setItem('shuiji_wg_weight', v);
-      toast('目标体重 ' + v + 'kg');
-      openWidget(curWidget);
+    'meal-set': async b => {
+      const p = loadProfile(), pi = planIntake(p);
+      if(!pi){ toast('先在下面定制一份减肥计划'); return; }
+      const m = MEALS.find(x => x.k === b.dataset.meal);
+      if(!m) return;
+      const l = wget('ex_meal');
+      const idx = l.findIndex(x => x.date === todayStr() && x.meal === m.k);
+      const rec = { id: Date.now(), date: todayStr(), meal: m.k, level: b.dataset.lv, kcal: mealKcal(pi.intake, m.r, b.dataset.lv) };
+      if(idx >= 0) l[idx] = rec; else l.push(rec);
+      wset('ex_meal', l); blub(); openWidget(curWidget);
+    },
+    'fit-do': async b => {
+      const l = wget('ds_fit'); const today = l.find(x => x.date === todayStr());
+      if(!today) return;
+      const it = today.items[parseInt(b.dataset.i, 10)];
+      if(!it) return;
+      const exs = wget('ex');
+      if(exs.some(x => x.date === todayStr() && x.type === it.name)){ toast('这个动作今天已经记过了'); return; }
+      const min = parseInt(it.min, 10) || 10;
+      exs.push({ id: Date.now(), date: todayStr(), type: it.name, minutes: min, kcal: fitKcal(it.name, min), from: 'ai' });
+      wset('ex', exs); ding(); openWidget(curWidget);
+      toast('⏱ 已记入今日运动 · ' + min + ' 分钟');
     },
     'plan-gen': async () => {
       const h = parseFloat(($('p-h').value || '').trim());
@@ -3148,7 +3528,9 @@ WIDGETS['减肥运动'] = {
       if(!h || !w || !goal || !age || h < 100 || h > 230 || w < 20 || age < 12){ toast('身高/体重/年龄填完整'); return; }
       if(goal >= w){ toast('目标体重要小于当前体重'); return; }
       localStorage.setItem('shuiji_w_profile', JSON.stringify({ h, w, goal, age, gender, activity }));
+      localStorage.setItem('shuiji_wg_weight', goal);
       planEdit = false; openWidget(curWidget);
+      toast('计划已生成 · 目标同步为 ' + goal + 'kg');
     },
     'plan-edit': async () => { planEdit = true; openWidget(curWidget); },
     'ds-fit': async () => { await dsFitGen(); }
@@ -3221,7 +3603,13 @@ function dsFitCardHtml(){
   const today = l.find(x => x.date === todayStr());
   return wCard('🤖 今日具体训练（AI）',
     today
-      ? today.items.map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.name) + '</b><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-top:2px">' + esc(x.detail) + '</div></span><span class="w-row-s">' + (x.min ? '~' + x.min + ' 分钟' : '') + '</span></div>').join('')
+      ? today.items.map((x, i) => {
+          const exs = wget('ex');
+          const done = exs.some(e => e.date === todayStr() && e.type === x.name);
+          return '<div class="w-row"><span class="w-row-t"><b>' + esc(x.name) + '</b><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-top:2px">' + esc(x.detail) + '</div></span>' +
+            '<span class="w-row-s">' + (x.min ? '~' + x.min + ' 分' : '') + '</span>' +
+            '<button class="w-btn" data-wact="fit-do" data-i="' + i + '" style="padding:5px 10px;font-size:var(--fs-12,12px)' + (done ? ';opacity:.45' : '') + '">' + (done ? '已记' : '完成 ✓') + '</button></div>';
+        }).join('')
         + '<div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="ds-fit">🔄 换一套</button></div>'
       : '<div id="w-ds-fit"><div class="w-empty">让 AI 按你的计划生成今天的具体动作</div></div><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="ds-fit">✨ 生成今日训练</button></div>',
     '<div class="w-streak">DeepSeek 生成 · 数据只存本地</div>');
@@ -3943,6 +4331,37 @@ async function buildReport(dv){
       L.push('  ' + d.emoji + ' ' + d.label + extra);
     });
     L.push('');
+
+  /* 3. 减脂：体重 + 运动消耗 + 三餐，把一天的努力集中到一处 */
+  const wsAll = wget('ex_w').filter(x => x && x.date);
+  const wt = wsAll.find(x => x.date === t);
+  const exT = todayArr('ex', t);
+  const mealT = wget('ex_meal').filter(x => x.date === t);
+  if(wt || exT.length || mealT.length){
+    L.push('【今日减脂】');
+    if(wt){
+      const older = wsAll.filter(x => x.date < t);
+      const before = older.length ? older[older.length - 1] : null;
+      let dl = '';
+      if(before){
+        const diff = Math.round((wt.weight - before.weight) * 10) / 10;
+        if(Math.abs(diff) >= 0.05) dl = (diff < 0 ? ' ↓' : ' ↑') + Math.abs(diff).toFixed(1);
+      }
+      L.push('  · 体重 ' + wt.weight + ' kg' + dl +
+        (wt.waist ? ' · 腰围 ' + wt.waist + 'cm' : '') +
+        (t === todayStr() ? ' · 连续称重 ' + weightStreak(wsAll) + ' 天' : ''));
+    }
+    if(exT.length){
+      const kc = exT.reduce((s, x) => s + (x.kcal || 0), 0);
+      L.push('  · 运动 ' + sumMin(exT) + ' 分钟 · ' + kc + ' kcal');
+      const names = exT.map(x => x.type).filter(Boolean).join('、');
+      if(names) L.push('    ' + names);
+    }
+    if(mealT.length){
+      L.push('  · 三餐已记 ' + mealT.length + '/4 · 约 ' + mealT.reduce((s, x) => s + (x.kcal || 0), 0) + ' kcal');
+    }
+    L.push('');
+  }
   }
 
   /* 3. 专注 */
@@ -3971,7 +4390,6 @@ async function buildReport(dv){
   if(bk.length) study.push('读书 ' + sumMin(bk) + ' 分钟');
   if(ai.length) study.push('AI 学习 ' + sumMin(ai) + ' 分钟');
   if(hw.length) study.push('练字 ' + sumMin(hw) + ' 分钟');
-  if(ex.length) study.push('运动 ' + sumMin(ex) + ' 分钟 · ' + ex.reduce((s, x) => s + (x.kcal || 0), 0) + ' kcal');
   const expToday = exp.find(x => (x.practice || '').trim());
   if(expToday) study.push('表达练习 ' + sumMin(exp) + ' 分钟');
   if(study.length){
@@ -4117,6 +4535,7 @@ async function init(){
     await loadDayDetail(cal.sel);
   });
   $('saveReviewBtn').addEventListener('click', saveReview);
+  { const fq = $('fitQuick'); if(fq) fq.addEventListener('click', openWeightQuick); }
   $('reportBtn').addEventListener('click', showReport);
   $('oldClose').addEventListener('click', () => $('oldPanel').classList.add('hidden'));
   $('shakeBtn').addEventListener('click', pickRandom);
