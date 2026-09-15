@@ -2108,7 +2108,8 @@ function showPerfectBanner(){
 /* ---------------- #2 小组件排序与隐藏 ---------------- */
 const WIDGET_META = [
   { k:'每日计划', i:'📅' }, { k:'天气', i:'🌤️' }, { k:'练字打卡', i:'✍️' }, { k:'减肥运动', i:'🏃' },
-  { k:'测试日报', i:'🧪' }, { k:'英语学习', i:'📖' }, { k:'表达能力', i:'🗣️' }, { k:'读书推荐', i:'📚' },
+  { k:'测试日报', i:'🧪' }, { k:'测试成长', i:'🎯' }, { k:'口语跟读', i:'🎙️' }, { k:'英语学习', i:'📖' }, { k:'表达能力', i:'🗣️' }, { k:'读书推荐', i:'📚' },
+  { k:'结构化复盘', i:'📝' }, { k:'30天挑战', i:'🔥' }, { k:'OKR目标', i:'📌' },
   { k:'爆款二创', i:'🎬' }, { k:'AI 学习', i:'🤖' }, { k:'新闻资讯', i:'📰' }
 ];
 function wOrder(){
@@ -6468,11 +6469,13 @@ WIDGETS['测试日报'] = {
       '<div class="qa-lab">今日产出</div>' + qaArea('qa-output', '用例 / 报告 / 脚本…', rec.output) +
       '<div class="qa-lab">风险与阻塞</div>' + qaArea('qa-risk', '卡在哪、需要谁支持', rec.risk) +
       '<div class="qa-lab">明日计划</div>' + qaArea('qa-plan', '明天要做什么', rec.plan) +
-      '<div style="margin-top:12px;display:flex;gap:8px">' +
+      '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">' +
         '<button class="w-btn" data-wact="qa-save">保存</button>' +
         '<button class="w-btn" data-wact="qa-gen">生成日报</button>' +
         '<button class="w-btn" data-wact="qa-copy">直接复制</button>' +
-      '</div>',
+        '<button class="w-btn on" data-wact="qa-ai">🤖 AI 补全</button>' +
+      '</div>' +
+      '<div id="qa-ai-status" class="w-note" style="margin-top:6px"></div>',
       '<div class="w-streak">' + qaWeekSummary() + '</div>') +
       wCard('📈 近 7 天趋势', qaTrendHtml(),
         '<div style="margin-top:8px;text-align:right"><button class="w-tag" data-wact="qa-tpl">⚙ 自定义日报模板</button></div>') +
@@ -6521,6 +6524,46 @@ WIDGETS['测试日报'] = {
       if(!r){ toast('先保存一份，或直接点「生成日报」'); return; }
       await copyText(qaText(r, r.date));
     },
+    'qa-ai': async () => {
+      const g = id => ($(id) ? $(id).value : '');
+      const rec = {
+        module: g('qa-module').trim(),
+        total: qaNum(g('qa-total')), pass: qaNum(g('qa-pass')), fail: qaNum(g('qa-fail')), block: qaNum(g('qa-block')),
+        bugFatal: qaNum(g('qa-fatal')), bugMajor: qaNum(g('qa-major')), bugMinor: qaNum(g('qa-minor')), bugIdea: qaNum(g('qa-idea'))
+      };
+      rec.bugTotal = rec.bugFatal + rec.bugMajor + rec.bugMinor + rec.bugIdea;
+      const key = (localStorage.getItem('shuiji_ds_key') || '').trim();
+      const st = $('qa-ai-status');
+      if(!key){ if(st) st.textContent = '先去「设置」页填 DeepSeek Key'; toast('先去设置页填 DeepSeek Key'); return; }
+      if(st) st.textContent = 'AI 思考中…';
+      const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 25000);
+      try{
+        const res = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+              { role: 'system', content: '你是资深测试工程师。根据今日测试数据，输出 JSON：{"risk":"风险与阻塞研判(2-3句)","plan":"明日计划(3条具体可执行，用换行分隔)"}。不要其他文字。' },
+              { role: 'user', content: '今日数据：' + JSON.stringify(rec) }
+            ],
+            max_tokens: 400, temperature: 0.7
+          }),
+          signal: ctl.signal
+        });
+        const j = await res.json();
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const c = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+        const m = c.match(/\{[\s\S]*\}/);
+        const obj = m ? JSON.parse(m[0]) : {};
+        if(obj.risk && $('qa-risk')) $('qa-risk').value = obj.risk;
+        if(obj.plan && $('qa-plan')) $('qa-plan').value = obj.plan;
+        if(st) st.textContent = '✅ AI 已补全风险与明日计划，可再微调';
+        toast('AI 已补全');
+      }catch(e){
+        if(st) st.textContent = 'AI 调用失败：' + (String(e.message || e).slice(0, 40)) + '，检查 Key / 网络后重试';
+      }finally{ clearTimeout(to); }
+    },
     'qa-view': async b => {
       const r = qaAll().find(x => x.date === b.dataset.date);
       if(!r) return;
@@ -6543,6 +6586,411 @@ WIDGETS['测试日报'] = {
       else { localStorage.setItem('shuiji_qa_tpl', t); toast('模板已保存'); }
       openWidget(curWidget);
     }
+  }
+};
+
+/* ================= 测试成长：SRS 错题本 + 每日一题 ================= */
+/* 复用通用 SM-2 引擎（srsGrade / srsDue / srsTip），卡片字段与单词卡一致 */
+function tkAll(){
+  return wget('tk_cards');
+}
+function tkSave(l){
+  wset('tk_cards', l);
+}
+function tkFind(id){
+  return tkAll().find(x => String(x.id) === String(id));
+}
+function tkAdd(q, a, tag){
+  q = (q || '').trim(); a = (a || '').trim();
+  if(!q) return false;
+  const l = tkAll();
+  if(l.some(x => x.q === q)) return false;
+  l.unshift({ id: Date.now(), q, a, tag: tag || '', known:false, iv:0, ef:2.5, times:0, wrong:0, due: todayStr(), last:null, date: todayStr() });
+  tkSave(l); return true;
+}
+function tkDueList(){
+  return tkAll().filter(w => srsDue(w));
+}
+function tkGrade(id, ok){
+  const l = tkAll();
+  const w = l.find(x => String(x.id) === String(id));
+  if(!w) return;
+  srsGrade(w, ok); tkSave(l);
+}
+function tkSeed(){
+  let h = 0; const s = todayStr();
+  for(const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h;
+}
+/* 内置测试 / 质量题库（每日一题来源）；答错自动进错题本 */
+const TK_BANK = [
+  { id:'t1',  q:'黑盒测试的「边界值分析」通常选取哪些点？', a:'上点（正好边界）、离点（刚好越过边界）、内点（区间内），重点测边界附近。', tag:'黑盒' },
+  { id:'t2',  q:'等价类划分的作用是什么？', a:'把无穷输入空间分成有限个等价类，每类抽一个测，减少用例数同时保覆盖。', tag:'黑盒' },
+  { id:'t3',  q:'什么是回归测试？什么时候做？', a:'改代码后重跑已有用例，确认没引入新 bug；每次需求/缺陷修复后都该做。', tag:'流程' },
+  { id:'t4',  q:'Bug 的生命周期一般包含哪些状态？', a:'新建→指派→打开/修复中→已修复→待验证→关闭；也可能打回/拒绝/重复/延期。', tag:'Bug' },
+  { id:'t5',  q:'严重等级（Severity）和优先级（Priority）有什么区别？', a:'严重=对系统危害程度（致命/严重/一般/建议）；优先=先修谁，受业务影响，二者不一定正相关。', tag:'Bug' },
+  { id:'t6',  q:'探索式测试和脚本测试有什么区别？', a:'脚本测试按预定用例执行；探索式靠测试人员边学边测、凭直觉临时设计，适合时间紧或未知场景。', tag:'方法' },
+  { id:'t7',  q:'一条「测试用例」必备的要素有哪些？', a:'前置条件、步骤、预期结果、实际结果；缺预期结果就无法判定通过与否。', tag:'用例' },
+  { id:'t8',  q:'何时该把用例标记为「阻塞（Blocked）」？', a:'依赖环境/数据/他人模块未就绪导致无法执行时标记阻塞并写明卡点，而不是写失败。', tag:'用例' },
+  { id:'t9',  q:'兼容性测试一般覆盖哪些维度？', a:'操作系统、浏览器/机型、分辨率、网络（弱网/离线）、版本升级。', tag:'类型' },
+  { id:'t10', q:'缺陷复现（repro）的三要素是什么？', a:'稳定步骤、必现环境、实际 vs 预期；附截图/日志/录屏能大幅提升研发修复效率。', tag:'Bug' },
+  { id:'t11', q:'接口测试通常校验哪些内容？', a:'状态码、响应字段与类型、业务状态码、超时、幂等、异常入参、安全（越权/注入）。', tag:'接口' },
+  { id:'t12', q:'为什么需要测试左移（Shift-Left）？', a:'越早暴露缺陷修复成本越低；左移=在需求/设计阶段就介入评审，而非等开发完才测。', tag:'流程' }
+];
+function tkDayQid(){
+  const t = todayStr();
+  const done = wget('tk_done').find(x => x.date === t);
+  if(done) return done.qid;
+  return (TK_BANK[tkSeed() % TK_BANK.length] || TK_BANK[0]).id;
+}
+function tkDayQ(){ return TK_BANK.find(x => x.id === tkDayQid()) || TK_BANK[0]; }
+function tkLogDay(qid, correct){
+  const l = wget('tk_done'); const t = todayStr();
+  const i = l.findIndex(x => x.date === t);
+  const rec = { date:t, qid, correct };
+  if(i >= 0) l[i] = rec; else l.push(rec);
+  wset('tk_done', l);
+}
+function tkReviewHtml(){
+  const due = tkDueList();
+  if(!due.length) return wCard('📇 错题本复习', '<div class="w-empty">今天没有待复习的卡片，去加几张或等明天</div>');
+  const w = due[0];
+  const body = '<div class="w-flip"><div style="font-size:var(--fs-12,12px);color:var(--sub)">待复习 ' + due.length + ' 张 · ' + esc(w.tag || '未分类') + '</div>' +
+    '<div class="wf-word">' + esc(w.q) + '</div>' +
+    '<div class="wf-def" id="tk-rv-def">点下方查看答案</div>' +
+    '<div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
+    '<button class="w-btn" data-wact="tk-rv-show" data-id="' + w.id + '">查看答案</button>' +
+    '</div></div>';
+  return wCard('📇 错题本复习（SM-2）', body);
+}
+WIDGETS['测试成长'] = {
+  render(){
+    const t = todayStr();
+    const all = tkAll();
+    const known = all.filter(x => x.known).length;
+    const dq = tkDayQ();
+    const done = wget('tk_done').find(x => x.date === t);
+    return wCard('🎯 每日一题',
+      (done ? '<div class="w-note">今天这题你已经做过了 ✅</div>' : '') +
+      '<div class="w-flip"><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">测试 / 质量 · ' + esc(dq.tag || '') + '</div>' +
+      '<div class="wf-word" style="font-size:var(--fs-15,15px);line-height:1.6">' + esc(dq.q) + '</div>' +
+      (done ? '<div class="wf-def" style="margin-top:8px">' + esc(dq.a) + '</div>' :
+        '<div class="wf-def" id="tk-dq-a" style="margin-top:8px;color:var(--sub)">先自己想，再点「显示答案」</div>' +
+        '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button class="w-btn" data-wact="tk-dq-show" data-id="' + dq.id + '">显示答案</button>' +
+        '<button class="w-btn" data-wact="tk-dq-right" data-id="' + dq.id + '">我答对了 ✓</button>' +
+        '<button class="w-btn" data-wact="tk-dq-wrong" data-id="' + dq.id + '">答错 → 入错题本</button></div>') +
+      '</div>',
+      '<div class="w-streak">连续 <b>' + calcStreak(wget('tk_done').map(x => x.date)) + '</b> 天</div>') +
+    tkReviewHtml() +
+    wCard('➕ 添加知识卡',
+      '<div class="w-add"><input id="tk-q" type="text" placeholder="问题 / 知识点" style="flex:1"><input id="tk-tag" type="text" placeholder="标签(选填)" style="width:80px"></div>' +
+      '<textarea id="tk-a" rows="2" placeholder="答案 / 要点" style="width:100%;margin-top:6px;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:var(--fs-14,14px);color:var(--text);resize:none;font-family:inherit;box-sizing:border-box"></textarea>' +
+      '<div style="margin-top:6px;text-align:right"><button class="w-btn" data-wact="tk-add">加入错题本</button></div>',
+      '<div class="w-streak">已掌握 <b>' + known + '</b> / 共 <b>' + all.length + '</b></div>') +
+    wCard('📚 我的错题本（' + all.length + '）',
+      all.length ? all.slice(0, 20).map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.q) + '</b><span style="color:var(--sub);font-size:var(--fs-12,12px)"> · ' + esc(srsTip(x)) + (x.tag ? ' · ' + esc(x.tag) : '') + '</span></span>' +
+        (x.known ? '<span class="w-tag done">已掌握</span>' : '<button class="w-tag" data-wact="tk-reset" data-id="' + x.id + '">重练</button>') +
+        '<button class="w-del" data-wact="tk-del" data-id="' + x.id + '">✕</button></div>').join('')
+        : '<div class="w-empty">还没有卡片，上面加一张，或答错每日一题会自动进来</div>');
+  },
+  acts: {
+    'tk-dq-show': async b => { const el = $('tk-dq-a'); const q = TK_BANK.find(x => x.id === b.dataset.id); if(el && q) el.textContent = q.a; },
+    'tk-dq-right': async b => { tkLogDay(b.dataset.id, true); toast('👍 保持手感'); openWidget(curWidget); },
+    'tk-dq-wrong': async b => { const q = TK_BANK.find(x => x.id === b.dataset.id); tkLogDay(b.dataset.id, false); tkAdd(q.q, q.a, q.tag); toast('已加入错题本'); openWidget(curWidget); },
+    'tk-rv-show': async b => {
+      const w = tkFind(b.dataset.id); const def = $('tk-rv-def');
+      if(def && w) def.textContent = w.a;
+      if(b.parentElement) b.parentElement.innerHTML = '<button class="w-btn" data-wact="tk-rv-known" data-id="' + b.dataset.id + '">认识 ✓</button><button class="w-btn" data-wact="tk-rv-again" data-id="' + b.dataset.id + '">不认识 →</button>';
+    },
+    'tk-rv-known': async b => { tkGrade(b.dataset.id, true); toast('✓ 记牢了'); openWidget(curWidget); },
+    'tk-rv-again': async b => { tkGrade(b.dataset.id, false); toast('明天再来'); openWidget(curWidget); },
+    'tk-add': async () => { const q = ($('tk-q') ? $('tk-q').value : ''); const a = ($('tk-a') ? $('tk-a').value : ''); const tag = ($('tk-tag') ? $('tk-tag').value : ''); if(!q || !a){ toast('问题和答案都要填'); return; } if(tkAdd(q, a, tag)) toast('已加入错题本'); else toast('这道题已在错题本里'); openWidget(curWidget); },
+    'tk-reset': async b => { const w = tkFind(b.dataset.id); if(w){ w.known = false; w.iv = 0; w.due = todayStr(); tkSave(tkAll()); toast('已重置，重新练'); openWidget(curWidget); } },
+    'tk-del': async b => { tkSave(tkAll().filter(x => String(x.id) !== String(b.dataset.id))); openWidget(curWidget); }
+  }
+};
+
+/* ================= 口语跟读：播放标准句 → 跟读 → 识别打分（S3） ================= */
+/* 复用 SP 发音层 speakWord；识别用独立的 en-US SpeechRecognition 实例 */
+function shSupported(){
+  return (typeof window !== 'undefined') && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+function enRecognize(cb){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ cb(null, '当前浏览器不支持语音识别（试试 Chrome / Android 自带浏览器）'); return; }
+  try{
+    const r = new SR();
+    r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 1;
+    let done = false;
+    r.onresult = e => { const t = e.results[0][0].transcript; done = true; cb(t, null); };
+    r.onerror = e => { if(done) return; const er = (e && e.error) || ''; cb(null, er === 'not-allowed' ? '浏览器拒绝了麦克风权限' : '识别失败，请重试'); };
+    r.onend = () => { if(!done) cb(null, '没听到声音，再试一次'); };
+    r.start();
+  }catch(e){ cb(null, '语音不可用'); }
+}
+function shNorm(s){ return (s || '').toLowerCase().replace(/[^a-z0-9\s']/g, ' ').replace(/\s+/g, ' ').trim(); }
+function shTokens(s){ return shNorm(s).split(' ').filter(Boolean); }
+function shScore(target, got){
+  const T = shTokens(target), R = shTokens(got);
+  if(!T.length) return { score:0, hit:0, total:0, extra:0, tTokens:T, match:[] };
+  const tc = {}, rc = {};
+  T.forEach(w => tc[w] = (tc[w] || 0) + 1);
+  R.forEach(w => rc[w] = (rc[w] || 0) + 1);
+  let hit = 0; const match = []; const usedR = {};
+  for(let i = 0; i < T.length; i++){
+    const w = T[i];
+    if((rc[w] || 0) > (usedR[w] || 0)){ hit++; match.push(i); usedR[w] = (usedR[w] || 0) + 1; }
+  }
+  const extra = Math.max(0, R.length - hit);
+  const prec = R.length ? hit / R.length : 0;
+  const rec = T.length ? hit / T.length : 0;
+  const f1 = (prec + rec) ? 2 * prec * rec / (prec + rec) : 0;
+  return { score: Math.round(f1 * 100), hit, total: T.length, extra, tTokens: T, match };
+}
+function shSeed(){
+  let h = 0; const s = todayStr();
+  for(const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h;
+}
+/* 跟读句子库：日常对话 + 测试术语 + 发音练习（绕口令） */
+const SH_BANK = [
+  { id:'s1',  en:'Could you please repeat that?', zh:'您能重复一遍吗？', tag:'日常', lv:1 },
+  { id:'s2',  en:'I will write a test case for this bug.', zh:'我会为这个 bug 写一个测试用例。', tag:'测试', lv:1 },
+  { id:'s3',  en:'The build failed because of a merge conflict.', zh:'构建失败是因为合并冲突。', tag:'测试', lv:2 },
+  { id:'s4',  en:'Please reproduce the issue with clear steps.', zh:'请用清晰的步骤复现这个问题。', tag:'测试', lv:2 },
+  { id:'s5',  en:'We should shift testing to the left.', zh:'我们应该把测试左移。', tag:'测试', lv:2 },
+  { id:'s6',  en:'How are you doing today?', zh:'你今天过得怎么样？', tag:'日常', lv:1 },
+  { id:'s7',  en:'Let us run the regression suite before release.', zh:'发布前我们跑一遍回归套件。', tag:'测试', lv:3 },
+  { id:'s8',  en:'The API returned a five hundred error.', zh:'这个接口返回了 500 错误。', tag:'测试', lv:2 },
+  { id:'s9',  en:'She sells seashells by the seashore.', zh:'她在海边卖贝壳。（绕口令）', tag:'测试', lv:2 },
+  { id:'s10', en:'I need to verify the edge cases carefully.', zh:'我得仔细验证边界情况。', tag:'测试', lv:2 },
+  { id:'s11', en:'Nice to meet you, welcome to the team.', zh:'很高兴认识你，欢迎加入团队。', tag:'日常', lv:1 },
+  { id:'s12', en:'The test environment is not ready yet.', zh:'测试环境还没准备好。', tag:'测试', lv:2 },
+  { id:'s13', en:'Redundant code should be removed in review.', zh:'冗余代码应该在评审时删掉。', tag:'测试', lv:3 },
+  { id:'s14', en:'Can you confirm the expected result?', zh:'你能确认预期结果吗？', tag:'测试', lv:1 },
+  { id:'s15', en:'Thirty-three thirsty thieves.', zh:'三十三个口渴的小偷。（绕口令）', tag:'发音', lv:3 },
+  { id:'s16', en:'Lets automate the boring repetitive tasks.', zh:'我们把无聊的重复任务自动化吧。', tag:'测试', lv:2 },
+  { id:'s17', en:'How do you prioritize these defects?', zh:'你怎么给这些缺陷排优先级？', tag:'测试', lv:3 },
+  { id:'s18', en:'Have a great day at work!', zh:'祝你工作愉快！', tag:'日常', lv:1 }
+];
+function shFind(id){ return SH_BANK.find(x => x.id === id) || SH_BANK[0]; }
+function shRandId(){
+  if(SH_BANK.length <= 1) return SH_BANK[0].id;
+  let i;
+  do { i = Math.floor(Math.random() * SH_BANK.length); } while(SH_BANK[i].id === shDayId());
+  return SH_BANK[i].id;
+}
+function shDayId(){
+  const t = todayStr();
+  const cur = wget('sh_cur');
+  if(cur && cur.date === t && shFind(cur.id)) return cur.id;
+  const done = wget('sh_scores').find(x => x.date === t);
+  if(done && done.id) return done.id;
+  return (SH_BANK[shSeed() % SH_BANK.length] || SH_BANK[0]).id;
+}
+function shLog(date, id, score, got){
+  const l = wget('sh_scores');
+  l.push({ date, id, score, got: shNorm(got), t: Date.now() });
+  wset('sh_scores', l.slice(-200));
+}
+function shBestToday(){
+  const t = todayStr();
+  const todays = wget('sh_scores').filter(x => x.date === t);
+  if(!todays.length) return null;
+  return todays.reduce((a, b) => (b.score > (a.score || 0) ? b : a), todays[0]);
+}
+function shScoreColor(s){ return s >= 85 ? 'var(--ok,#2e9e5b)' : s >= 60 ? '#e08a00' : 'var(--bad,#d24b4b)'; }
+function shCompareHtml(target, got){
+  const sc = shScore(target, got);
+  const html = sc.tTokens.map((w, i) => {
+    const ok = sc.match.includes(i);
+    return '<span style="padding:1px 4px;border-radius:6px;margin:2px;display:inline-block;' +
+      (ok ? 'background:rgba(46,158,91,.15);color:var(--ok,#2e9e5b)' : 'background:rgba(210,75,75,.12);color:var(--bad,#d24b4b);text-decoration:line-through') +
+      '">' + esc(w) + '</span>';
+  }).join('');
+  return { sc, html };
+}
+let shLast = null;
+WIDGETS['口语跟读'] = {
+  render(){
+    const t = todayStr();
+    const day = shFind(shDayId());
+    const best = shBestToday();
+    const log = wget('sh_scores').filter(x => x.date === t);
+    const supported = shSupported();
+    const listen = supported ? '' : '<div class="w-note">⚠️ 当前浏览器不支持语音识别，可点播放跟读后手动自评</div>';
+    const out = shLast
+      ? '<div style="font-size:var(--fs-14,14px);margin-bottom:6px">你说：<b>' + esc(shLast.got) + '</b></div>' +
+        '<div style="font-size:var(--fs-20,20px);font-weight:700;color:' + shScoreColor(shLast.score) + ';margin-bottom:6px">' + shLast.score + ' 分</div>' +
+        '<div style="line-height:1.8">' + shLast.html + '</div>' +
+        '<div class="w-note" style="margin-top:8px">' + shLast.tip + '（命中 ' + shLast.hit + '/' + shLast.total + (shLast.extra ? '，多读 ' + shLast.extra + ' 个' : '') + '）</div>'
+      : '';
+    return wCard('🎙️ 每日跟读',
+      listen +
+      '<div class="w-flip">' +
+      '<div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">今日句 · ' + esc(day.tag) + ' · 难度 ' + '★'.repeat(day.lv) + '</div>' +
+      '<div class="wf-word" style="font-size:var(--fs-16,16px);line-height:1.6">' + esc(day.en) + '</div>' +
+      '<div style="color:var(--sub);font-size:var(--fs-13,13px);margin-top:4px">' + esc(day.zh) + '</div>' +
+      '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button class="w-btn" data-wact="sh-play" data-id="' + day.id + '">🔊 播放</button>' +
+      '<button class="w-btn on" data-wact="sh-rec" data-id="' + day.id + '"' + (supported ? '' : ' disabled style="opacity:.5"') + '>🎤 跟读</button>' +
+      '<button class="w-btn" data-wact="sh-swap">换一句</button>' +
+      '</div>' +
+      '<div id="sh-out" style="margin-top:10px">' + out + '</div>' +
+      '</div>',
+      '<div class="w-streak">今日最佳 <b>' + (best ? best.score : '—') + '</b> · 已练 ' + log.length + ' 次</div>') +
+    wCard('📊 我的跟读记录',
+      log.length ? log.slice(-12).reverse().map(x => {
+        const s = x.score; const c = shScoreColor(s);
+        const en = shFind(x.id).en;
+        return '<div class="w-row"><span class="w-row-t"><b>' + esc(en.length > 28 ? en.slice(0, 28) + '…' : en) + '</b><span style="color:var(--sub);font-size:var(--fs-12,12px)"> ' + esc(x.got || '') + '</span></span>' +
+          '<span class="w-tag" style="color:' + c + ';border-color:' + c + '">' + s + '分</span></div>';
+      }).join('') : '<div class="w-empty">今天还没跟读，点上面的「🎤 跟读」开练</div>',
+      '<div class="w-streak">连续 <b>' + calcStreak(wget('sh_scores').map(x => x.date)) + '</b> 天</div>');
+  },
+  acts: {
+    'sh-play': async b => { shLast = null; speakWord(shFind(b.dataset.id).en); openWidget(curWidget); },
+    'sh-swap': async () => { shLast = null; wset('sh_cur', { date: todayStr(), id: shRandId() }); toast('已换新句'); openWidget(curWidget); },
+    'sh-rec': async b => {
+      if(!shSupported()){ toast('当前浏览器不支持语音识别，请在 Chrome / Android 浏览器里用'); return; }
+      const out = $('sh-out'); const id = b.dataset.id; const target = shFind(id).en;
+      if(out) out.innerHTML = '<div class="w-note">🎤 请跟读，说完自动识别…</div>';
+      enRecognize((got, err) => {
+        const o = $('sh-out');
+        if(err){
+          if(o) o.innerHTML = '<div class="w-note" style="color:var(--bad,#d24b4b)">' + esc(err) + '</div>';
+          shLast = { got:'', score:0, html:'', tip:err, hit:0, total:shTokens(target).length, extra:0 };
+          openWidget(curWidget); return;
+        }
+        const { sc, html } = shCompareHtml(target, got);
+        const tip = sc.score >= 85 ? '发音很棒！👍' : sc.score >= 60 ? '不错，多听标准发音再跟读' : '多听几遍标准发音，慢一点跟读';
+        shLog(todayStr(), id, sc.score, got);
+        shLast = { got, score: sc.score, html, tip, hit: sc.hit, total: sc.total, extra: sc.extra };
+        openWidget(curWidget);
+      });
+    }
+  }
+};
+
+/* ================= A4 结构化复盘模板 ================= */
+function rvAll(){ return wget('rv2'); }
+function rvSave(e){ const l = rvAll(); const i = l.findIndex(x => x.date === e.date); if(i >= 0) l[i] = e; else l.push(e); wset('rv2', l); }
+function rvToday(){ return rvAll().find(x => x.date === todayStr()) || null; }
+function rvMoodStars(n){ let s = ''; for(let i = 1; i <= 5; i++) s += i <= n ? '★' : '☆'; return s; }
+let rvMood = 0;
+WIDGETS['结构化复盘'] = {
+  render(){
+    const t = todayStr();
+    const e = rvToday();
+    const md = e ? e.mood : rvMood;
+    const TA = 'width:100%;margin-top:6px;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:14px;color:var(--text);resize:none;font-family:inherit;box-sizing:border-box';
+    const all = rvAll();
+    const recent = all.filter(x => x.date !== t).slice(-6).reverse();
+    return wCard('📝 结构化复盘',
+      '<div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:6px">固定结构，复盘更快更准</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px">' +
+      '<textarea id="rv-win" rows="2" placeholder="✅ 今天做成了什么" style="' + TA + '">' + esc(e ? e.win : '') + '</textarea>' +
+      '<textarea id="rv-hard" rows="2" placeholder="🚧 遇到了什么困难" style="' + TA + '">' + esc(e ? e.hard : '') + '</textarea>' +
+      '<textarea id="rv-plan" rows="2" placeholder="🎯 明天最重要的 1-3 件事" style="' + TA + '">' + esc(e ? e.plan : '') + '</textarea>' +
+      '</div>' +
+      '<div style="margin-top:6px">心情：<b id="rv-mood">' + (md ? rvMoodStars(md) : '未评') + '</b> ' +
+      [1, 2, 3, 4, 5].map(n => '<button class="w-btn" data-wact="rv-mood" data-n="' + n + '">' + n + '</button>').join('') + '</div>' +
+      '<div style="margin-top:8px;text-align:right"><button class="w-btn on" data-wact="rv-save">保存今日复盘</button></div>',
+      '<div class="w-streak">已复盘 <b>' + all.length + '</b> 天 · 连续 <b>' + calcStreak(all.map(x => x.date)) + '</b></div>') +
+    wCard('🕘 最近复盘',
+      recent.length ? recent.map(x => '<div class="w-row"><span class="w-row-t"><b>' + x.date + '</b> ' + (x.mood ? rvMoodStars(x.mood) : '') + '<span style="color:var(--sub);font-size:var(--fs-12,12px)"> ' + esc((x.win || '').slice(0, 24)) + '</span></span></div>').join('') : '<div class="w-empty">还没有历史复盘</div>');
+  },
+  acts: {
+    'rv-mood': async b => { const e = rvToday() || { date: todayStr(), win: '', hard: '', plan: '', mood: 0 }; e.mood = parseInt(b.dataset.n, 10); rvSave(e); rvMood = e.mood; openWidget(curWidget); },
+    'rv-save': async () => {
+      const win = $('rv-win') ? $('rv-win').value : '';
+      const hard = $('rv-hard') ? $('rv-hard').value : '';
+      const plan = $('rv-plan') ? $('rv-plan').value : '';
+      const e = rvToday() || { date: todayStr(), win: '', hard: '', plan: '', mood: 0 };
+      e.win = win; e.hard = hard; e.plan = plan; if(!e.mood) e.mood = rvMood;
+      rvSave(e); toast('已保存今日复盘'); openWidget(curWidget);
+    },
+    'rv-del': async b => { wset('rv2', rvAll().filter(x => x.date !== b.dataset.d)); openWidget(curWidget); }
+  }
+};
+
+/* ================= A5 30 天挑战 + 日历热力 ================= */
+function chGet(){ const c = wget('chal'); if(!c || Array.isArray(c)) return { name: '', start: '', days: {} }; return c; }
+function chSave(c){ wset('chal', c); }
+function chDays(){ const c = chGet(); return Object.keys(c.days || {}).filter(d => c.days[d]).length; }
+function chHeatmap(){
+  const c = chGet(); const today = todayStr();
+  const cells = [];
+  for(let i = 29; i >= 0; i--){
+    const d = daysAgoStr(i);
+    const on = !!(c.days && c.days[d]);
+    const isT = d === today;
+    cells.push('<span title="' + d + '" style="display:inline-block;width:14px;height:14px;border-radius:3px;margin:1px;' +
+      (on ? 'background:var(--ok,#2e9e5b)' : 'background:rgba(0,0,0,.06)') + (isT ? ';box-shadow:0 0 0 2px var(--text)' : '') + '"></span>');
+  }
+  return cells.join('');
+}
+WIDGETS['30天挑战'] = {
+  render(){
+    const c = chGet(); const t = todayStr();
+    const doneToday = !!(c.days && c.days[t]);
+    const total = chDays();
+    return wCard('🔥 30天挑战',
+      c.name ? '<div class="wf-word" style="font-size:var(--fs-15,15px)">' + esc(c.name) + '</div>' : '<div class="w-empty">还没设定挑战，点「设定挑战」开始</div>',
+      '<div class="w-streak">已坚持 <b>' + total + '</b> / 30 天</div>') +
+    wCard('📅 打卡热力',
+      chHeatmap() +
+      '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">' +
+      '<button class="w-btn on" data-wact="ch-check"' + (doneToday ? ' disabled style="opacity:.5"' : '') + '>' + (doneToday ? '今天已打卡 ✓' : '今天打卡') + '</button>' +
+      '<button class="w-btn" data-wact="ch-set">设定挑战</button>' +
+      '<button class="w-btn" data-wact="ch-reset">重置</button></div>');
+  },
+  acts: {
+    'ch-check': async () => { const c = chGet(); c.days = c.days || {}; c.days[todayStr()] = 1; if(!c.name) c.name = '每天进步一点点'; chSave(c); toast('打卡成功 🔥'); openWidget(curWidget); },
+    'ch-set': async () => {
+      let name = '';
+      try { name = window.prompt ? window.prompt('挑战目标是什么？（30天内每天做的一件事）') : ''; } catch(e) { name = ''; }
+      if(name === null || name === undefined) return;
+      const c = chGet(); c.name = (name || '').trim() || c.name; if(!c.start) c.start = todayStr(); chSave(c); toast('挑战已设定'); openWidget(curWidget);
+    },
+    'ch-reset': async () => { wset('chal', { name: '', start: '', days: {} }); openWidget(curWidget); }
+  }
+};
+
+/* ================= B4 轻量 OKR ================= */
+function okrAll(){ return wget('okr') || []; }
+function okrSave(l){ wset('okr', l); }
+function okrAdd(obj, krText){
+  const l = okrAll();
+  const krs = krText.split(/[;\n]/).map(s => s.trim()).filter(Boolean).map(t => ({ text: t, done: false }));
+  l.push({ id: Date.now(), obj: (obj || '').trim(), krs });
+  okrSave(l);
+}
+function okrProgress(o){ if(!o.krs || !o.krs.length) return 0; return Math.round(o.krs.filter(k => k.done).length / o.krs.length * 100); }
+WIDGETS['OKR目标'] = {
+  render(){
+    const l = okrAll();
+    const TA = 'width:100%;margin-top:6px;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:14px;color:var(--text);resize:none;font-family:inherit;box-sizing:border-box';
+    const cards = l.length ? l.map(o => {
+      const p = okrProgress(o);
+      const krs = o.krs.map((k, i) => '<div style="display:flex;align-items:center;gap:6px;margin:3px 0"><button class="w-tag' + (k.done ? ' done' : '') + '" data-wact="okr-kr" data-id="' + o.id + '" data-i="' + i + '">' + (k.done ? '✓ ' : '○ ') + esc(k.text) + '</button></div>').join('');
+      return '<div style="margin-bottom:8px"><div style="font-weight:600">' + esc(o.obj) + '</div>' +
+        '<div style="height:6px;background:rgba(0,0,0,.06);border-radius:4px;margin:6px 0;overflow:hidden"><div style="width:' + p + '%;height:100%;background:var(--ok,#2e9e5b)"></div></div>' +
+        '<div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">进度 ' + p + '%</div>' + krs +
+        '<div style="margin-top:4px"><button class="w-del" data-wact="okr-del" data-id="' + o.id + '">删除目标</button></div></div>';
+    }).join('') : '<div class="w-empty">还没有目标，先定一个季度 / 月度 OKR</div>';
+    return wCard('📌 轻量 OKR',
+      cards +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">' +
+      '<input id="okr-obj" type="text" placeholder="目标 O（如：提升接口测试覆盖率）" style="flex:1">' +
+      '<textarea id="okr-krs" rows="2" placeholder="关键结果 KR，用分号或换行分隔" style="' + TA + '"></textarea>' +
+      '<div style="text-align:right"><button class="w-btn on" data-wact="okr-add">添加目标</button></div></div>');
+  },
+  acts: {
+    'okr-add': async () => { const obj = $('okr-obj') ? $('okr-obj').value : ''; const krs = $('okr-krs') ? $('okr-krs').value : ''; if(!obj.trim()){ toast('先写目标 O'); return; } okrAdd(obj, krs); toast('目标已添加'); openWidget(curWidget); },
+    'okr-kr': async b => { const l = okrAll(); const o = l.find(x => String(x.id) === String(b.dataset.id)); if(!o) return; const i = parseInt(b.dataset.i, 10); o.krs[i].done = !o.krs[i].done; okrSave(l); openWidget(curWidget); },
+    'okr-del': async b => { okrSave(okrAll().filter(x => String(x.id) !== String(b.dataset.id))); openWidget(curWidget); }
   }
 };
 
