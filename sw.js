@@ -3,7 +3,7 @@
  * 更新提示：检测到新 SW 后由页面弹出「点此更新」，用户点击即 skipWaiting + reload。
  * 注意：Service Worker 仅在 HTTPS（或 localhost）下生效。
  */
-const CACHE = 'shuiji-v11';
+const CACHE = 'shuiji-v16';
 const ASSETS = [
   './index.html',
   './cet4.txt',

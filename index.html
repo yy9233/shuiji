@@ -94,25 +94,25 @@
 
   /* ================= 顶部栏 ================= */
   .topbar{
-    position:relative;
-    display:flex;align-items:center;justify-content:center;
-    padding:16px 18px 10px;
+    display:flex;align-items:center;gap:6px;
+    padding:14px 16px 8px;
     flex-shrink:0;
   }
   .menu-btn{
-    position:absolute;left:16px;top:14px;
-    font-size:var(--fs-22,22px);color:var(--text);
-    padding:2px 6px;border-radius:10px;
+    flex-shrink:0;
+    font-size:var(--fs-22,22px);color:var(--text);line-height:1;
+    padding:4px 5px;border-radius:10px;
     transition:transform .1s ease, background .15s ease;
   }
   .menu-btn:active{transform:scale(.9);background:color-mix(in srgb, var(--accent) 15%, transparent);}
-  .top-title{font-size:var(--fs-20,20px);font-weight:700;letter-spacing:1px;color:var(--accent);}
-  .top-right{display:flex;align-items:center;gap:10px;position:absolute;right:16px;top:14px;}
-  .done-count{color:var(--sub);font-size:var(--fs-13,13px);white-space:nowrap;}
+  .top-mid{flex:1;min-width:0;text-align:center;}
+  .top-title{font-size:var(--fs-20,20px);font-weight:700;letter-spacing:1px;color:var(--accent);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .done-count{display:block;color:var(--sub);font-size:var(--fs-13,13px);white-space:nowrap;line-height:1.4;}
+  .top-right{display:flex;align-items:center;gap:4px;flex-shrink:0;}
   .mood-emoji{
-    font-size:var(--fs-18,18px);opacity:0.8;
+    font-size:var(--fs-18,18px);opacity:0.8;line-height:1;
     transition:transform .12s ease, opacity .12s ease;
-    padding:2px;
+    padding:2px 1px;
   }
   .mood-emoji:active{transform:scale(1.35);opacity:1;}
 
@@ -237,6 +237,41 @@
   .task-dot.talk{background:var(--talk);}
   .task-dot.wait{background:var(--wait);}
   .task-text{flex:1;font-size:var(--fs-17,17px);word-break:break-word;}
+  .task-time{font-size:var(--fs-11,11px);color:var(--sub);background:color-mix(in srgb, var(--sub) 10%, transparent);
+    padding:1px 6px;border-radius:8px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+  /* #4 清单模板 */
+  .tpl-btn{border:none;background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent);
+    font-size:var(--fs-16,16px);width:34px;height:34px;border-radius:11px;flex-shrink:0;padding:0;
+    display:flex;align-items:center;justify-content:center;}
+  .tpl-btn:active{transform:scale(.92)}
+  .tpl-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:var(--card);
+    box-shadow:var(--shadow);margin-bottom:8px;cursor:pointer;}
+  .tpl-item:active{transform:scale(.99)}
+  .tpl-name{flex:1;font-size:var(--fs-14,14px);font-weight:600}
+  .tpl-cnt{font-size:var(--fs-11,11px);color:var(--sub)}
+  .tpl-preview{font-size:var(--fs-11,11px);color:var(--sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* #2 小组件排序与隐藏 */
+  .dg-act{margin-left:auto;background:none;border:none;color:var(--accent);font-size:var(--fs-12,12px);padding:2px 4px;font-weight:600}
+  .dg-act:active{opacity:.6}
+  .wm-row{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .wm-row:last-of-type{border-bottom:none}
+  .wm-i{width:22px;text-align:center;font-size:var(--fs-15,15px)}
+  .wm-n{flex:1;font-size:var(--fs-14,14px);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wm-b{border:none;background:color-mix(in srgb, var(--accent) 10%, transparent);color:var(--accent);
+    font-size:var(--fs-12,12px);padding:5px 8px;border-radius:8px;white-space:nowrap}
+  .wm-b:disabled{opacity:.3}
+  .wm-b:active{transform:scale(.94)}
+  .ttab-act{margin-left:auto;color:var(--sub);font-size:var(--fs-12,12px)}
+  .ttab-act.on{color:var(--accent);font-weight:700}
+  /* #3 批量操作 */
+  .batch-bar{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));
+    background:var(--card);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.18);
+    padding:10px 12px;display:flex;align-items:center;gap:8px;z-index:70;}
+  .batch-bar .bb-n{flex:1;font-size:var(--fs-13,13px);color:var(--text);font-weight:600}
+  .batch-bar button{border:none;background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent);
+    font-size:var(--fs-13,13px);padding:8px 12px;border-radius:10px;font-weight:600}
+  .batch-bar button.danger{background:color-mix(in srgb, #E57368 16%, transparent);color:#C0392B}
+  .task-card.picked{outline:2px solid var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--card));}
   .task-focus{font-size:var(--fs-12,12px);color:var(--accent);font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums;}
   .task-card.delayed{opacity:.45;}
   .task-card.done-out{transition:transform .3s ease, opacity .3s ease;transform:translateX(-60px);opacity:0;}
@@ -547,6 +582,7 @@
   .w-add button{background:var(--accentSoft);color:var(--accent);border-radius:12px;padding:8px 14px;font-size:var(--fs-14,14px);flex-shrink:0;}
   .w-btn{background:var(--accentSoft);color:var(--accent);border-radius:12px;padding:8px 14px;font-size:var(--fs-14,14px);border:none;cursor:pointer;}
   .w-btn:active{background:color-mix(in srgb, var(--accent) 30%, transparent);}
+  .w-btn.on{background:var(--accent);color:#fff;font-weight:600;}
   .w-min{width:76px;}
   .w-stat{display:flex;gap:10px;margin-bottom:10px;}
   .w-stat div{flex:1;background:color-mix(in srgb, var(--accent) 8%, transparent);border-radius:12px;padding:10px;text-align:center;}
@@ -603,6 +639,30 @@
   .fit-quick:active{transform:scale(.99);}
   .fit-quick.need{border-color:color-mix(in srgb, var(--accent) 38%, transparent);
     background:color-mix(in srgb, var(--accent) 9%, var(--card));}
+  /* #9 测试日报趋势图 */
+  .qa-trend{display:flex;align-items:flex-end;gap:5px;height:82px;margin:8px 0 2px}
+  .qa-tb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}
+  .qa-tnum{font-size:10px;color:var(--sub);font-variant-numeric:tabular-nums;line-height:1}
+  .qa-tbar{width:100%;max-width:24px;border-radius:5px 5px 2px 2px;min-height:3px;
+    background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 78%, transparent), color-mix(in srgb, var(--accent) 42%, transparent));}
+  .qa-tbar.zero{background:color-mix(in srgb, var(--sub) 16%, transparent)}
+  .qa-td{font-size:10px;color:var(--sub);line-height:1}
+  .qa-tb.today .qa-td{color:var(--accent);font-weight:700}
+  .qa-legend{display:flex;align-items:center;gap:8px;font-size:var(--fs-11,11px);color:var(--sub);margin-top:4px}
+  .qa-legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .qa-lv{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:var(--fs-12,12px)}
+  .qa-lv-n{width:28px;color:var(--sub);flex-shrink:0}
+  .qa-lv-bar{flex:1;height:7px;border-radius:4px;background:color-mix(in srgb, var(--sub) 12%, transparent);overflow:hidden}
+  .qa-lv-bar i{display:block;height:100%;border-radius:4px}
+  .qa-lv-v{width:22px;text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+  /* #13 首页今日跟练快捷入口 */
+  .fit-quick.fqv{padding:8px 10px 8px 8px;align-items:stretch;}
+  .fqv-thumb{width:64px;height:40px;border-radius:9px;object-fit:cover;flex-shrink:0;background:color-mix(in srgb, var(--accent) 10%, var(--card));}
+  .fqv-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1px;}
+  .fqv-t{font-size:var(--fs-13,13px);font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .fqv-s{font-size:var(--fs-11,11px);color:var(--sub);}
+  .fqv-go{align-self:center;font-size:var(--fs-13,13px);color:var(--accent);font-weight:700;padding:0 6px;}
+  .fit-quick.fqv.done{opacity:.62;}
   .fq-txt{flex:1;font-size:var(--fs-13,13px);color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .fq-btn{font-size:var(--fs-12,12px);color:var(--accent);font-weight:700;flex-shrink:0;}
@@ -827,6 +887,117 @@
     box-shadow:0 6px 24px rgba(33,64,44,0.35);
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ===================== V4 新增（2026-09-15） ===================== */
+  /* 带撤销按钮的 toast */
+  #toast .toast-undo{
+    margin-left:12px;background:transparent;border:1px solid rgba(255,255,255,.75);
+    color:#fff;border-radius:999px;padding:3px 12px;font-size:var(--fs-13,13px);
+    font-family:inherit;cursor:pointer;line-height:1.6;
+  }
+  /* 首页分区折叠条 */
+  .sec-head{
+    display:flex;align-items:center;gap:8px;width:100%;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:9px 14px;margin:12px 0 0;font-size:var(--fs-14,14px);color:var(--text);
+    font-family:inherit;text-align:left;cursor:pointer;
+  }
+  .sec-head .sec-arrow{margin-left:auto;color:var(--sub);transition:transform .2s ease;font-size:16px}
+  .sec-head.open .sec-arrow{transform:rotate(90deg)}
+  .sec-head .sec-tip{font-size:var(--fs-12,12px);color:var(--sub);font-weight:400}
+  /* 安装到主屏幕提示条 */
+  .install-bar{
+    display:flex;align-items:center;gap:10px;margin:8px 0 0;padding:10px 14px;
+    border-radius:12px;font-size:var(--fs-13,13px);
+    background:color-mix(in srgb, var(--accent) 12%, var(--card));
+    border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);color:var(--text);
+  }
+  .install-bar .ib-btn{
+    margin-left:auto;background:var(--accent);color:#fff;border:none;border-radius:999px;
+    padding:5px 14px;font-size:var(--fs-13,13px);font-family:inherit;cursor:pointer;
+  }
+  .install-bar .ib-close{background:transparent;border:none;color:var(--sub);font-size:16px;cursor:pointer;padding:0 2px}
+  /* 成就徽章墙 */
+  .badge-wall{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .badge{
+    text-align:center;padding:10px 4px;border-radius:12px;
+    background:var(--bg);border:1px solid var(--line);opacity:.4;
+  }
+  .badge.on{
+    opacity:1;background:color-mix(in srgb, var(--accent) 12%, var(--card));
+    border-color:color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .badge .b-ic{font-size:20px;line-height:1.2}
+  .badge .b-nm{font-size:11px;margin-top:3px;color:var(--text)}
+  .badge .b-ds{font-size:10px;color:var(--sub);margin-top:2px;line-height:1.25}
+  /* 重复任务标记 */
+  .task-rep{font-size:11px;color:var(--sub);margin-left:4px}
+  .top-search{background:transparent;border:none;font-size:15px;color:var(--text);cursor:pointer;padding:0 6px;opacity:.75;font-family:inherit}
+  /* 搜索面板 */
+  .search-panel{
+    position:fixed;inset:0;z-index:80;background:var(--bg);
+    display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top,0px) + 12px) 14px calc(env(safe-area-inset-bottom,0px) + 12px);
+  }
+  .search-panel .sp-top{display:flex;gap:8px;align-items:center}
+  .search-panel .sp-input{
+    flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;font-size:var(--fs-15,15px);color:var(--text);font-family:inherit;outline:none;
+  }
+  .search-panel .sp-cancel{background:transparent;border:none;color:var(--sub);font-size:var(--fs-14,14px);font-family:inherit;cursor:pointer}
+  .sp-list{margin-top:12px;overflow:auto;flex:1}
+  .sp-item{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;margin-bottom:8px;font-size:var(--fs-13,13px);color:var(--text);cursor:pointer;
+  }
+  .sp-item .sp-meta{font-size:11px;color:var(--sub);margin-top:3px}
+  .sp-empty{color:var(--sub);font-size:var(--fs-13,13px);text-align:center;padding:24px 0}
+  /* ---------- 跟练视频 ---------- */
+  .vp-wrap{position:fixed;inset:0;z-index:85;background:var(--bg);display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top,0px) + 12px) 14px calc(env(safe-area-inset-bottom,0px) + 12px);}
+  .vp-top{display:flex;gap:8px;align-items:center;flex-shrink:0}
+  .vp-back{background:transparent;border:none;color:var(--accent);font-size:var(--fs-15,15px);font-family:inherit;cursor:pointer;padding:4px 2px}
+  .vp-tt{flex:1;font-size:var(--fs-15,15px);font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vp-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin:12px 0}
+  .vp-frame iframe{width:100%;height:100%;border:0;display:block}
+  .vp-open{display:block;text-align:center;margin:10px 0;color:var(--accent);font-size:var(--fs-13,13px);text-decoration:none;padding:6px}
+  .vp-meta{font-size:var(--fs-13,13px);color:var(--sub);margin-bottom:12px;line-height:1.6}
+  .vp-bar{display:flex;gap:8px;flex-shrink:0}
+  .vp-btn{flex:1;padding:13px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:var(--fs-15,15px);font-family:inherit;cursor:pointer}
+  .vp-btn.ghost{background:transparent;border:1px solid var(--line);color:var(--sub)}
+  .vp-btn:active{opacity:.85}
+  .vid-card{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:8px;cursor:pointer}
+  .vid-thumb{width:76px;height:48px;border-radius:8px;object-fit:cover;background:color-mix(in srgb,var(--accent) 12%,transparent);flex-shrink:0}
+  .vid-main{flex:1;min-width:0}
+  .vid-t{font-size:var(--fs-13,13px);color:var(--text);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .vid-s{font-size:11px;color:var(--sub);margin-top:3px}
+  .vid-go{font-size:var(--fs-18,18px);color:var(--accent);flex-shrink:0;padding:0 2px}
+  .vid-ok{font-size:11px;color:var(--accent);flex-shrink:0}
+  .vid-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);margin-left:5px}
+  .vid-seg{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px;-webkit-overflow-scrolling:touch}
+  .vid-seg button{flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:5px 12px;font-size:var(--fs-12,12px);color:var(--sub);font-family:inherit;cursor:pointer}
+  .vid-seg button.on{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:transparent;color:var(--accent);font-weight:600}
+  /* 洞察卡 */
+  .insight-card .ins-line{
+    display:flex;gap:8px;font-size:var(--fs-13,13px);color:var(--text);
+    line-height:1.6;padding:6px 0;
+  }
+  .insight-card .ins-line b{color:var(--accent);font-weight:500}
+  /* 测试日报表单 */
+  .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .qa-grid input{
+    width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:9px 11px;font-size:var(--fs-14,14px);color:var(--text);font-family:inherit;
+    box-sizing:border-box;outline:none;
+  }
+  .qa-lab{font-size:var(--fs-12,12px);color:var(--sub);margin:10px 0 4px}
+  .qa-hist{
+    background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:9px 11px;font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:8px;cursor:pointer;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sec-head .sec-arrow{transition:none}
+  }
 </style>
 <script>
   /* 首屏即应用主题，避免深色/字号闪烁 */
@@ -846,12 +1017,15 @@
   <!-- 顶部栏 -->
   <header class="topbar">
     <button class="menu-btn" id="menuBtn" aria-label="菜单">☰</button>
-    <div class="top-title">💧 工作台</div>
+    <div class="top-mid">
+      <div class="top-title">💧 工作台</div>
+      <span class="done-count" id="doneCount">今日完成 0/0</span>
+    </div>
     <div class="top-right">
+      <button class="top-search" id="searchBtn" aria-label="搜索">🔍</button>
       <span class="mood-emoji" data-mood="happy" title="开心">😊</span>
       <span class="mood-emoji" data-mood="neutral" title="一般">😣</span>
       <span class="mood-emoji" data-mood="bad" title="糟糕">😫</span>
-      <span class="done-count" id="doneCount">今日完成 0/0</span>
     </div>
   </header>
 
@@ -899,8 +1073,10 @@
       </div>
       <!-- 减肥：今日称重（一步直达，不用翻抽屉） -->
       <div class="fit-quick" id="fitQuick" role="button" aria-label="今日称重"></div>
+      <div class="fit-quick fqv hidden" id="fitVidQuick" role="button" aria-label="今日跟练"></div>
       <div class="input-row">
-        <input id="taskInput" placeholder="添加待办…" autocomplete="off" enterkeyhint="done">
+        <button class="tpl-btn" id="tplBtn" title="清单模板">📋</button>
+        <input id="taskInput" placeholder="添加待办…试试「明天9点交周报」" autocomplete="off" enterkeyhint="done">
         <button class="add-btn" id="addBtn" title="添加">＋</button>
         <button class="mic-btn hidden" id="micBtn" title="语音输入">🎤</button>
       </div>
@@ -917,6 +1093,7 @@
       <div class="task-tabs" id="taskTabs">
         <button class="ttab on" data-tt="todo" id="tabTodo">待办 <span class="cnt" id="tabTodoCnt">0</span></button>
         <button class="ttab" data-tt="done" id="tabDone">已完成 <span class="cnt" id="tabDoneCnt">0</span></button>
+        <button class="ttab ttab-act" id="batchBtn">☑ 多选</button>
       </div>
       <div class="task-list" id="taskList">
         <div class="tt-group" id="ttTodo"></div>
@@ -926,7 +1103,7 @@
 
       <div class="water-phrase" id="waterPhrase"></div>
 
-      <div class="habits">
+      <div class="habits" id="habitBox">
         <div class="drink-progress hidden" id="drinkProgress">
           <div class="dp-row"><span>💧 今日喝水</span><span class="dp-txt" id="dpTxt">0/2000ml</span></div>
           <div class="dp-bar"><div class="dp-fill" id="dpFill"></div></div>
@@ -989,6 +1166,16 @@
       </div>
       <div class="view-sub" id="rvListLabel">本周已完成</div>
       <div id="reviewList"></div>
+
+      <div class="stat-card">
+        <div class="stat-row"><span>🏅 成就徽章</span><span class="w-streak" id="achCount"></span></div>
+        <div class="badge-wall" id="badgeWall"></div>
+      </div>
+      <div class="stat-card insight-card">
+        <div class="stat-row"><span>🔍 我的规律（近 30 天）</span></div>
+        <div id="insightBox"></div>
+      </div>
+      <button class="setting-btn" id="weekRepBtn" style="margin-top:12px">📊 生成本周小结</button>
     </section>
 
     <!-- 吃啥 -->
@@ -1056,7 +1243,15 @@
           <button id="habitAddBtn">添加</button>
         </div>
       </div>
+      <div class="setting-block">
+        <div class="setting-label">🧪 提醒 · 回收站 · 快照</div>
+        <button class="setting-btn" id="remBtn">⏰ 提醒设置（日报 / 称重）</button>
+        <button class="setting-btn" id="trashBtn">回收站（误删可恢复）</button>
+        <button class="setting-btn" id="snapBtn">🕑 从自动快照恢复数据</button>
+        <button class="setting-btn" id="archBtn">📦 归档 30 天前的已完成任务</button>
+      </div>
       <button class="setting-btn" id="exportBtn">导出数据（JSON）</button>
+      <button class="setting-btn" id="exportMdBtn">📝 导出 Markdown（可读版）</button>
       <div class="backup-tip" id="backupTip"></div>
       <input type="file" id="importFile" accept=".json,application/json" class="hidden">
       <button class="setting-btn" id="importBtn">导入恢复备份</button>
@@ -1091,19 +1286,13 @@
       <button class="drawer-item" data-view="review"><span>📊</span>回顾统计</button>
       <button class="drawer-item" data-view="eat"><span>🍜</span>吃啥</button>
       <button class="drawer-item" data-view="settings"><span>⚙️</span>设置</button>
-      <div class="drawer-group">小组件</div>
-      <button class="drawer-item" data-widget="每日计划"><span>📅</span>每日计划</button>
-      <button class="drawer-item" data-widget="天气"><span>🌤️</span>天气</button>
-      <button class="drawer-item" data-widget="练字打卡"><span>✍️</span>练字打卡</button>
-      <button class="drawer-item" data-widget="减肥运动"><span>🏃</span>减肥运动</button>
-      <button class="drawer-item" data-widget="英语学习"><span>📖</span>英语学习</button>
-      <button class="drawer-item" data-widget="表达能力"><span>🗣️</span>表达能力</button>
-      <button class="drawer-item" data-widget="读书推荐"><span>📚</span>读书推荐</button>
-      <button class="drawer-item" data-widget="爆款二创"><span>🎬</span>爆款二创</button>
-      <button class="drawer-item" data-widget="AI 学习"><span>🤖</span>AI 学习</button>
-      <button class="drawer-item" data-widget="新闻资讯"><span>📰</span>新闻资讯</button>
+      <div class="drawer-group">小组件<button class="dg-act" id="wManageBtn">管理</button></div>
+      <div id="drawerWidgets"></div>
     </div>
   </aside>
+
+  <!-- #3 批量操作条（多选模式才出现） -->
+  <div class="batch-bar hidden" id="batchBar"></div>
 
   <!-- 右下角悬浮：今日日报（上）+ 保存复盘（下） -->
   <button class="fab fab-secondary" id="reportBtn" aria-label="今日日报">📋 日报</button>
@@ -1140,18 +1329,211 @@ function fmtDate(s){ // 'YYYY-MM-DD' → '8月13日 周四'
   return (d.getMonth()+1) + '月' + d.getDate() + '日 ' + WEEK[d.getDay()];
 }
 function fmtDist(m){ return m < 1000 ? Math.round(m)+'m' : (m/1000).toFixed(1)+'km'; }
-/* 朗读单词：Web Speech API，系统自带语音，无需 Key 也无需联网 */
+/* =====================================================================
+ * 朗读引擎 · Web Speech API 兼容层
+ * 已知的坑（全部在这里兜住）：
+ *  ① iOS Safari：首次 speak 必须发生在用户手势的同步调用栈内，
+ *     await / setTimeout 之后再 speak 会静默失败 → 首个手势时静音预热解锁
+ *  ② Chrome / Android：getVoices() 首次返回空数组，必须等 voiceschanged，
+ *     部分 ROM 不触发该事件 → 加 10 次轮询兜底
+ *  ③ Chrome 桌面：cancel() 之后可能停在 paused 状态 → 需 resume()
+ *  ④ 微信 / QQ / UC 等内置内核没有 TTS 或调用静默失败 → 明确提示换浏览器
+ *  ⑤ iOS 侧边静音键打开时无声（API 无法检测）→ 失败时给针对性提示
+ *  ⑥ 系统没装英文语音包时会用中文引擎念英文 → 检测并提示去装
+ *  ⑦ TTS 完全不可用时 → 退到网络发音（有道 dictvoice，走 <audio>）
+ * ===================================================================== */
+const SP = {
+  ok: (typeof window !== 'undefined') && ('speechSynthesis' in window) && typeof window.SpeechSynthesisUtterance === 'function',
+  unlocked: false,
+  voices: [],
+  enVoice: null,
+  hasEn: false,
+  lastFail: 0,
+  netUsed: false
+};
+
+function spUA(){
+  const ua = navigator.userAgent || '';
+  return {
+    wechat: /MicroMessenger/i.test(ua),
+    qq:     /QQBrowser|\bQQ\//i.test(ua),
+    uc:     /UCBrowser/i.test(ua),
+    qqnews: /NewsArticle|QQNews/i.test(ua),
+    ios:    /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1),
+    android:/Android/i.test(ua)
+  };
+}
+
+/* 返回不可用原因；空字符串表示可用 */
+function spBlockReason(){
+  const u = spUA();
+  if(!SP.ok){
+    if(u.wechat) return '微信内置浏览器不支持朗读，点右上角「···」→ 用 Safari/Chrome 打开';
+    if(u.qq || u.uc || u.qqnews) return '这个浏览器内核不支持朗读，请用系统浏览器打开';
+    return '这个浏览器不支持朗读（缺 Web Speech API）';
+  }
+  return '';
+}
+
+/* 收集语音列表，挑出最合适的英文发音人 */
+function spLoadVoices(){
+  if(!SP.ok) return 0;
+  let v = [];
+  try{ v = window.speechSynthesis.getVoices() || []; }catch(e){ v = []; }
+  if(!v.length) return 0;
+  SP.voices = v;
+  const en = v.filter(x => /^en(-|_|$)/i.test(x.lang || ''));
+  SP.hasEn = en.length > 0;
+  const rank = x => {
+    const n = (x.name || '') + ' ' + (x.voiceURI || '');
+    if(/Samantha|Alex|Karen|Daniel|Moira/i.test(n)) return 0;
+    if(/Google US English|Microsoft (Aria|Zira|Jenny|Guy|Ryan)/i.test(n)) return 1;
+    if(/^en-US/i.test(x.lang || '')) return 2;
+    if(/^en-GB/i.test(x.lang || '')) return 3;
+    return 4;
+  };
+  en.sort((a, b) => rank(a) - rank(b));
+  const acc = localStorage.getItem('shuiji_sp_accent') || 'us';
+  const pref = acc === 'uk' ? en.filter(x => /en-GB/i.test(x.lang || ''))
+                            : en.filter(x => /en-US/i.test(x.lang || ''));
+  SP.enVoice = pref[0] || en[0] || null;
+  return v.length;
+}
+
+function spInitVoices(){
+  if(!SP.ok) return;
+  spLoadVoices();
+  try{ window.speechSynthesis.onvoiceschanged = () => { spLoadVoices(); }; }catch(e){}
+  let n = 0;                                   /* 兜底轮询：部分内核不触发 voiceschanged */
+  const t = setInterval(() => {
+    n++;
+    if(spLoadVoices() || n >= 10) clearInterval(t);
+  }, 400);
+}
+
+/* iOS 关键：必须在用户手势的同步栈里空播一次，之后才能正常朗读 */
+function spUnlock(){
+  if(!SP.ok || SP.unlocked) return;
+  try{
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0; u.rate = 2;
+    window.speechSynthesis.speak(u);
+    SP.unlocked = true;
+  }catch(e){}
+}
+
+function spBindUnlock(){
+  if(!SP.ok) return;
+  const evs = ['touchend', 'click', 'pointerdown'];
+  const once = () => {
+    spUnlock(); spLoadVoices();
+    evs.forEach(ev => document.removeEventListener(ev, once, true));
+  };
+  evs.forEach(ev => document.addEventListener(ev, once, { capture: true, passive: true }));
+}
+
+/* 网络兜底：有道公开发音接口（type=1 英音 / 2 美音），不依赖系统 TTS */
+function spNetUrl(word, uk){
+  const w = encodeURIComponent(String(word || '').trim());
+  return 'https://dict.youdao.com/dictvoice?type=' + (uk ? 1 : 2) + '&audio=' + w;
+}
+function spSpeakNet(word){
+  try{
+    const url = spNetUrl(word, (localStorage.getItem('shuiji_sp_accent') || 'us') === 'uk');
+    if(typeof safeUrl === 'function' && safeUrl(url) === '#') return false;
+    const a = new Audio(url);
+    a.play().then(() => { SP.netUsed = true; }).catch(() => { spSoftFail(word, true); });
+    return true;
+  }catch(e){ return false; }
+}
+
+/* 失败提示：8 秒内不重复打扰 */
+function spSoftFail(word, net){
+  const now = Date.now();
+  if(now - SP.lastFail < 8000) return;
+  SP.lastFail = now;
+  const u = spUA();
+  if(net){ toast('网络发音也失败了，检查一下网络'); return; }
+  toast(u.ios ? '没听到？检查手机侧边的静音键是不是开着'
+              : (SP.hasEn ? '没听到？可能浏览器拦截了自动播放' : '系统缺英文语音包，发音可能不准'));
+}
+
+function spFallback(word, reason){
+  if(reason){ toast(reason); return false; }
+  if(spSpeakNet(word)){ toast('已改用网络发音'); return true; }
+  spSoftFail(word, true);
+  return false;
+}
+
+/* 朗读入口：中文走中文引擎，英文优先挑到的英文发音人 */
 function speakWord(w){
   const word = String(w || '').trim();
-  if(!word) return;
+  if(!word) return false;
+  const reason = spBlockReason();
+  if(reason){ return spFallback(word, reason); }
+  if(!SP.unlocked) spUnlock();
+  const isZh = /[\u4e00-\u9fa5]/.test(word);
+  const rate = parseFloat(localStorage.getItem('shuiji_sp_rate') || '0.9') || 0.9;
   try{
-    if(!('speechSynthesis' in window)){ toast('这个浏览器不支持朗读'); return; }
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(word);
-    u.lang = /[\u4e00-\u9fa5]/.test(word) ? 'zh-CN' : 'en-US';
-    u.rate = 0.9;
-    speechSynthesis.speak(u);
-  }catch(e){ toast('朗读失败'); }
+    const ss = window.speechSynthesis;
+    ss.cancel();
+    if(ss.paused){ try{ ss.resume(); }catch(e){} }
+    const voice = isZh ? null : SP.enVoice;
+    if(!isZh && !voice && !SP.voices.length) spLoadVoices();
+
+    const fire = () => {
+      let u;
+      try{ u = new SpeechSynthesisUtterance(word); }catch(e){ spFallback(word, ''); return; }
+      u.lang = isZh ? 'zh-CN' : (voice ? voice.lang : 'en-US');
+      if(voice) u.voice = voice;
+      u.rate  = isZh ? 1 : rate;
+      u.pitch = 1;
+      let started = false;
+      u.onstart = () => { started = true; };
+      u.onerror = e => {
+        const err = (e && e.error) || '';
+        if(err === 'interrupted' || err === 'canceled') return;   /* 被打断不算失败 */
+        if(err === 'not-allowed'){ toast('浏览器拦截了自动朗读，请点 🔊 手动触发'); return; }
+        spFallback(word, '');
+      };
+      try{ ss.speak(u); }catch(e){ spFallback(word, ''); return; }
+      /* 1.2 秒内没触发 onstart → 大概率静默失败 */
+      setTimeout(() => { if(!started && !ss.speaking) spSoftFail(word, false); }, 1200);
+    };
+
+    /* iOS 必须同步 speak，不能 setTimeout；其它平台 cancel 后稍等片刻更稳 */
+    if(!spUA().ios && ss.speaking) setTimeout(fire, 70); else fire();
+    return true;
+  }catch(e){ return spFallback(word, ''); }
+}
+
+/* 是否具备「无需手势」的自动朗读条件（拼写答对后的自动发音用） */
+function spCanAuto(){ return SP.ok && SP.unlocked && !spBlockReason(); }
+
+/* 英语组件里的发音状态卡 */
+function spStatusHtml(){
+  const reason = spBlockReason();
+  const rate = localStorage.getItem('shuiji_sp_rate') || '0.9';
+  const acc  = localStorage.getItem('shuiji_sp_accent') || 'us';
+  let state, tip;
+  if(reason){ state = '⚠️ 不可用'; tip = reason; }
+  else if(!SP.voices.length){ state = '⏳ 检测中'; tip = '正在读取系统发音人…'; }
+  else if(!SP.hasEn){ state = '⚠️ 缺英文语音包'; tip = '系统里没找到英文发音人，会用默认语音念，可能不准。安卓：设置 → 系统 → 语言和输入法 → 文字转语音，安装英文语音。'; }
+  else { state = '✅ ' + (SP.enVoice ? String(SP.enVoice.name).slice(0, 20) : '系统默认'); tip = ''; }
+
+  const seg = (key, opts) => opts.map(o =>
+    '<button class="w-btn' + (localStorage.getItem('shuiji_sp_' + key) === o.v ? ' on' : '') +
+    '" data-wact="sp-set" data-k="sp_' + key + '" data-v="' + o.v + '">' + o.l + '</button>').join('');
+
+  return '<div class="w-row"><span class="w-row-t"><b>' + esc(state) + '</b>' +
+    (tip ? '<div style="font-size:var(--fs-12,12px);color:var(--sub);margin-top:4px;line-height:1.5">' + esc(tip) + '</div>' : '') +
+    '</span></div>' +
+    '<div class="w-row" style="flex-wrap:wrap;gap:6px">' +
+      '<span class="w-row-s">语速</span>' + seg('rate', [{l:'慢',v:'0.75'},{l:'正常',v:'0.9'},{l:'快',v:'1.05'}]) +
+      '<span class="w-row-s">口音</span>' + seg('accent', [{l:'美音',v:'us'},{l:'英音',v:'uk'}]) +
+      '<button class="w-btn" data-wact="sp-test">🔊 试听 apple</button>' +
+      '<button class="w-btn" data-wact="sp-net">🌐 用网络发音</button>' +
+    '</div>';
 }
 /* 分钟数 → 紧凑可读："45m" / "1h15m" / "2h" */
 function fmtHm(m){ return !m ? '0m' : (m < 60 ? m + 'm' : Math.floor(m/60) + 'h' + (m % 60 ? (m % 60) + 'm' : '')); }
@@ -1253,7 +1635,7 @@ function phraseOfDay(){
 let db = null;
 function openDB(){
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('shuiji', 2);
+    const req = indexedDB.open('shuiji', 3);
     req.onupgradeneeded = e => {
       const d = e.target.result;
       if(!d.objectStoreNames.contains('tasks'))  d.createObjectStore('tasks',  {keyPath:'id', autoIncrement:true});
@@ -1261,6 +1643,10 @@ function openDB(){
       if(!d.objectStoreNames.contains('moods'))  d.createObjectStore('moods',  {keyPath:'id', autoIncrement:true});
       if(!d.objectStoreNames.contains('eats'))   d.createObjectStore('eats',   {keyPath:'id', autoIncrement:true});
       if(!d.objectStoreNames.contains('focus'))  d.createObjectStore('focus',  {keyPath:'id', autoIncrement:true});
+      /* V4：回收站 / 每日快照 / 测试日报存档 */
+      if(!d.objectStoreNames.contains('trash'))     d.createObjectStore('trash',     {keyPath:'id'});
+      if(!d.objectStoreNames.contains('snapshots')) d.createObjectStore('snapshots', {keyPath:'date'});
+      if(!d.objectStoreNames.contains('qarep'))     d.createObjectStore('qarep',     {keyPath:'date'});
     };
     req.onsuccess = e => { db = e.target.result; resolve(db); };
     req.onerror = e => reject(e);
@@ -1344,7 +1730,7 @@ function triggerCooldown(){
 const MAX_ACTIVE = 3;                            /* 今日同时进行的最大任务数 */
 function getActiveToday(){
   return getAll('tasks').then(list => list.filter(t =>
-    t.date === todayStr() && !t.completed && !t.delayed));
+    t.date === todayStr() && !t.completed && !t.delayed && !t.repeatTpl));   /* repeatTpl 是模板，不当待办 */
 }
 function getCompletedToday(){
   return getAll('tasks').then(list => list.filter(t => t.date === todayStr() && t.completed));
@@ -1411,7 +1797,9 @@ async function renderMorningCard(){
   const yDone = (await getAll('tasks')).filter(x => x.date === y && x.completed).length;
   const wxTip2 = localStorage.getItem('shuiji_w_tip') || '';
   $('mcFoot').textContent = (wxTip2 ? wxTip2 + ' · ' : '') + '昨天完成 ' + yDone + ' 件事 · ' + phraseOfDay();
-  card.classList.remove('hidden');
+  /* V4：尊重折叠状态——用户收起后刷新页面不要再弹开 */
+  if(typeof secIsOpen === 'function' && !secIsOpen('morningCard')) card.classList.add('hidden');
+  else card.classList.remove('hidden');
 }
 /* 睡眠时长（分钟）：入睡 date+time → 起床 wakeDate+wake，跨午夜自动处理 */
 function sleepMins(rec){
@@ -1501,6 +1889,7 @@ async function renderTodayProgress(){
     tip.style.display = left > 0 ? '' : 'none';
   }
   renderWeightQuick();      /* 首页称重条跟着数据一起刷新 */
+  renderFitVidQuick();      /* #13 首页今日跟练入口 */
 }
 /* 完成时：水面中心扩散一圈涟漪（克制，0.8s，不打断操作） */
 function waterRipple(){
@@ -1530,12 +1919,14 @@ async function renderTaskList(){
   allFocus.forEach(f => { if(f.taskId) fSum[String(f.taskId)] = (fSum[String(f.taskId)] || 0) + (f.duration || 0); });
   const mkCard = t => {
     const card = document.createElement('div');
-    card.className = 'task-card' + (t.important ? ' important' : '');
+    card.className = 'task-card' + (t.important ? ' important' : '') + (batchMode && batchHas(t.id) ? ' picked' : '');
     card.dataset.id = t.id;
     card.innerHTML =
       '<button class="task-check" aria-label="完成"></button>' +
       '<span class="task-dot ' + t.category + '"></span>' +
       '<span class="task-text">' + esc(t.text) + '</span>' +
+      (t.time ? '<span class="task-time">' + esc(t.time) + '</span>' : '') +
+      (t.repeat ? '<span class="task-rep">↻' + (REPEAT_LABEL[t.repeat] || '') + '</span>' : '') +
       (fSum[String(t.id)] ? '<span class="task-focus">\u23F1 ' + fmtHm(Math.round(fSum[String(t.id)] / 60)) + '</span>' : '') +
       '<button class="task-star' + (t.important ? ' on' : '') + '">' + (t.important ? '⭐' : '☆') + '</button>';
     return card;
@@ -1586,15 +1977,23 @@ async function togglePriority(id){
 /* ---------- 任务卡片触摸：左滑完成 / 右滑延期 / 点按编辑 ---------- */
 function bindCard(card){
   let startX = 0, startY = 0, startT = 0, dx = 0, swiping = false, moved = false;
+  let lpTimer = null, longPressed = false;
   card.addEventListener('touchstart', e => {
     const t = e.touches[0];
     startX = t.clientX; startY = t.clientY; startT = Date.now();
-    dx = 0; swiping = false; moved = false;
+    dx = 0; swiping = false; moved = false; longPressed = false;
+    clearTimeout(lpTimer);
+    lpTimer = setTimeout(() => {                       /* 长按 → 任务操作菜单（重复 / 删除） */
+      longPressed = true;
+      try{ if(navigator.vibrate) navigator.vibrate(15); }catch(err){}
+      openTaskMenu(card.dataset.id);
+    }, 600);
   }, {passive:true});
   card.addEventListener('touchmove', e => {
     const t = e.touches[0];
     dx = t.clientX - startX;
     const dy = t.clientY - startY;
+    if(Math.abs(dx) > 8 || Math.abs(dy) > 8) clearTimeout(lpTimer);
     if(!swiping && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)){ swiping = true; card.classList.add('swiping'); }
     if(swiping){
       card.style.transform = 'translateX(' + dx + 'px)';
@@ -1602,25 +2001,33 @@ function bindCard(card){
     }
   }, {passive:true});
   card.addEventListener('touchend', e => {
+    clearTimeout(lpTimer);
     card.classList.remove('swiping');
+    if(longPressed){ longPressed = false; return; }     /* 长按已弹菜单，不再触发编辑 */
     if(swiping){
       card.style.transform = ''; card.style.opacity = '';
-      if(dx < -80) completeTask(card.dataset.id);          // 左滑 → 完成
+      if(batchMode){ if(Math.abs(dx) > 80) toggleBatchPick(card.dataset.id); }
+      else if(dx < -80) completeTask(card.dataset.id);     // 左滑 → 完成
       else if(dx > 80) delayTask(card.dataset.id);          // 右滑 → 延期
     } else if(!moved && Date.now() - startT < 450 && !e.target.closest('.inline-input')){
       if(e.target.closest('.task-check') || e.target.closest('.task-star')) return;  // 交给 click 处理
+      if(batchMode){ toggleBatchPick(card.dataset.id); return; }   // #3 多选模式下点正文 = 选中
       startEdit(card.dataset.id);                                       // 点按正文 → 编辑
     }
   }, {passive:true});
   /* 勾选框 → 完成；星标 → 优先级。用 click：手机点按和鼠标点击都能触发 */
   card.querySelector('.task-check').addEventListener('click', e => {
     e.stopPropagation();
+    if(batchMode){ toggleBatchPick(card.dataset.id); return; }   /* #3 多选模式下点圆圈=选中 */
     completeTask(card.dataset.id);
   });
   card.querySelector('.task-star').addEventListener('click', e => {
     e.stopPropagation();
     togglePriority(card.dataset.id);
   });
+  /* 桌面右键 / 触摸取消 */
+  card.addEventListener('contextmenu', e => { e.preventDefault(); openTaskMenu(card.dataset.id); });
+  card.addEventListener('touchcancel', () => clearTimeout(lpTimer));
 }
 
 /* 左滑完成 → “叮” 音效 + 卡片淡出 */
@@ -1698,28 +2105,310 @@ function showPerfectBanner(){
 }
 
 /* ---------- 添加任务（入口：+ 按钮 / 语音填入后回车） ---------- */
+/* ---------------- #2 小组件排序与隐藏 ---------------- */
+const WIDGET_META = [
+  { k:'每日计划', i:'📅' }, { k:'天气', i:'🌤️' }, { k:'练字打卡', i:'✍️' }, { k:'减肥运动', i:'🏃' },
+  { k:'测试日报', i:'🧪' }, { k:'英语学习', i:'📖' }, { k:'表达能力', i:'🗣️' }, { k:'读书推荐', i:'📚' },
+  { k:'爆款二创', i:'🎬' }, { k:'AI 学习', i:'🤖' }, { k:'新闻资讯', i:'📰' }
+];
+function wOrder(){
+  let o = [];
+  try{ o = JSON.parse(localStorage.getItem('shuiji_worder') || '[]'); }catch(e){ o = []; }
+  if(!Array.isArray(o)) o = [];
+  const all = WIDGET_META.map(x => x.k);
+  const out = o.filter(k => all.indexOf(k) >= 0);
+  all.forEach(k => { if(out.indexOf(k) < 0) out.push(k); });
+  return out;
+}
+function wHidden(){
+  try{ const h = JSON.parse(localStorage.getItem('shuiji_whide') || '[]'); return Array.isArray(h) ? h : []; }
+  catch(e){ return []; }
+}
+function renderDrawerWidgets(){
+  const box = $('drawerWidgets'); if(!box) return;
+  const hid = wHidden();
+  box.innerHTML = wOrder().map(k => {
+    if(hid.indexOf(k) >= 0) return '';
+    const m = WIDGET_META.find(x => x.k === k) || { k: k, i: '✨' };
+    return '<button class="drawer-item" data-widget="' + esc(k) + '"><span>' + m.i + '</span>' + esc(k) + '</button>';
+  }).join('');
+}
+let wmClickH = null;
+function openWidgetManager(){
+  const order = wOrder().slice(), hid = wHidden().slice();
+  const draw = () => {
+    const box = $('modalBody'); if(!box) return;
+    box.innerHTML = order.map((k, i) => {
+      const m = WIDGET_META.find(x => x.k === k) || { k: k, i: '✨' };
+      const off = hid.indexOf(k) >= 0;
+      return '<div class="wm-row"><span class="wm-i">' + m.i + '</span>' +
+        '<span class="wm-n"' + (off ? ' style="opacity:.42;text-decoration:line-through"' : '') + '>' + esc(k) + '</span>' +
+        '<button class="wm-b" data-wm="hide" data-k="' + esc(k) + '">' + (off ? '🚫 已隐藏' : '👁 显示') + '</button>' +
+        '<button class="wm-b" data-wm="up" data-k="' + esc(k) + '"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button class="wm-b" data-wm="down" data-k="' + esc(k) + '"' + (i === order.length - 1 ? ' disabled' : '') + '>↓</button></div>';
+    }).join('') + '<div class="w-note" style="margin-top:12px">隐藏只是不在抽屉里显示，数据都还在。排序只影响抽屉顺序。</div>';
+  };
+  return new Promise(res => {
+    showModal('⚙ 管理小组件', '', [{ label:'完成', value:1, primary:true }]).then(res);
+    draw();
+    const box = $('modalBody');
+    if(wmClickH) box.removeEventListener('click', wmClickH);
+    wmClickH = e => {
+      const b = e.target.closest && e.target.closest('[data-wm]');
+      if(!b) return;
+      const k = b.dataset.k, act = b.dataset.wm, i = order.indexOf(k);
+      if(act === 'hide'){
+        const p = hid.indexOf(k);
+        if(p >= 0) hid.splice(p, 1); else hid.push(k);
+        localStorage.setItem('shuiji_whide', JSON.stringify(hid));
+      }else if(act === 'up' && i > 0){
+        order.splice(i, 1); order.splice(i - 1, 0, k);
+        localStorage.setItem('shuiji_worder', JSON.stringify(order));
+      }else if(act === 'down' && i >= 0 && i < order.length - 1){
+        order.splice(i, 1); order.splice(i + 1, 0, k);
+        localStorage.setItem('shuiji_worder', JSON.stringify(order));
+      }
+      renderDrawerWidgets();
+      draw();
+    };
+    box.addEventListener('click', wmClickH);
+  });
+}
+/* ---------------- #4 清单模板 ---------------- */
+const BUILTIN_TPLS = [
+  { id:'b1', name:'🌅 上班前', items:['整理桌面','看今天日程','列今天最重要的事'] },
+  { id:'b2', name:'🌙 下班收尾', items:['写今日日报','整理明天待办','今天哪里可以更好'] },
+  { id:'b3', name:'🧳 出门前', items:['手机 钥匙 钱包','充电器','关窗 关电源'] },
+  { id:'b4', name:'🧹 周末打扫', items:['换床单','拖地','清理冰箱'] },
+  { id:'b5', name:'🏃 训练日', items:['热身 5 分钟','跟练视频 15 分钟','拉伸放松','称重记录'] }
+];
+function tplCustom(){
+  try{ const u = JSON.parse(localStorage.getItem('shuiji_tpls') || '[]'); return Array.isArray(u) ? u : []; }
+  catch(e){ return []; }
+}
+function tplAll(){ return BUILTIN_TPLS.concat(tplCustom()); }
+async function applyTpl(id){
+  const t = tplAll().find(x => String(x.id) === String(id));
+  if(!t || !(t.items || []).length){ toast('这个模板是空的'); return; }
+  const active = await getActiveToday();
+  const room = MAX_ACTIVE - active.length;
+  if(room <= 0){ toast('今天已经排满 ' + MAX_ACTIVE + ' 件，先完成一件'); return; }
+  const list = t.items.slice(0, room);
+  for(const it of list){
+    const p = parseTaskInput(it);
+    await add('tasks', { text: p.text, category: detectCategory(p.text), completed:false,
+      date: p.date || todayStr(), delayed:false, important:p.important, time: p.time || '',
+      createdAt: new Date().toISOString() });
+  }
+  await refreshToday();
+  toast('📋 已加入 ' + list.length + ' 件' + (t.items.length > list.length ? '（还剩 ' + (t.items.length - list.length) + ' 件排不进来）' : ''));
+}
+let tplClickH = null;
+function openTplPanel(){
+  return new Promise(res => {
+    const inp = 'style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:var(--fs-15,15px);color:var(--text);box-sizing:border-box;font-family:inherit"';
+    const body = tplAll().map(t => '<div class="tpl-item" data-tpl="' + esc(String(t.id)) + '">' +
+      '<div style="flex:1;min-width:0"><div class="tpl-name">' + esc(t.name) + '</div>' +
+      '<div class="tpl-preview">' + esc((t.items || []).join(' · ')) + '</div></div>' +
+      '<span class="tpl-cnt">' + (t.items || []).length + ' 项</span></div>').join('') +
+      '<div class="w-note" style="margin-top:12px">点模板直接加入今天（受「今天最多 ' + MAX_ACTIVE + ' 件」限制）。</div>' +
+      '<div class="qa-lab">新建模板</div>' +
+      '<input id="tplNewName" placeholder="模板名，如：出差清单" ' + inp + '>' +
+      '<div style="height:8px"></div>' +
+      '<textarea id="tplNewItems" rows="2" placeholder="事项，用「、」分隔" ' + inp + '></textarea>';
+    showModal('📋 清单模板', body, [{label:'关闭', value:0}, {label:'存为模板', value:2, primary:true}]).then(v => {
+      if(v === 2){
+        const n = ($('tplNewName') ? $('tplNewName').value : '').trim();
+        const items = ($('tplNewItems') ? $('tplNewItems').value : '').split(/[、,，\n]/).map(x => x.trim()).filter(Boolean);
+        if(!n || !items.length){ toast('名字和事项都要填'); return; }
+        const u = tplCustom();
+        u.push({ id: 'u' + Date.now(), name: n, items: items });
+        localStorage.setItem('shuiji_tpls', JSON.stringify(u));
+        toast('✅ 模板已保存');
+        setTimeout(openTplPanel, 260);
+      }
+    });
+    const box = $('modalBody');
+    if(tplClickH) box.removeEventListener('click', tplClickH);
+    tplClickH = e => {
+      const it = e.target.closest && e.target.closest('[data-tpl]');
+      if(!it) return;
+      hideModal();
+      applyTpl(it.dataset.tpl);
+    };
+    box.addEventListener('click', tplClickH);
+  });
+}
+/* ---------------- #3 批量操作 ---------------- */
+let batchMode = false, batchSel = null;
+function batchHas(id){ return !!(batchSel && batchSel.has(String(id))); }
+function toggleBatchPick(id){
+  if(!batchSel) batchSel = new Set();
+  const k = String(id);
+  if(batchSel.has(k)) batchSel.delete(k); else batchSel.add(k);
+  const c = document.querySelector('.task-card[data-id="' + k + '"]');
+  if(c) c.classList.toggle('picked', batchSel.has(k));
+  renderBatchBar();
+}
+function renderBatchBar(){
+  const bar = $('batchBar'); if(!bar) return;
+  if(!batchMode){ bar.classList.add('hidden'); bar.innerHTML = ''; return; }
+  bar.classList.remove('hidden');
+  bar.innerHTML = '<span class="bb-n">已选 ' + (batchSel ? batchSel.size : 0) + ' 件</span>' +
+    '<button data-bact="done">完成</button>' +
+    '<button data-bact="tmr">改到明天</button>' +
+    '<button data-bact="del" class="danger">删除</button>' +
+    '<button data-bact="exit">退出</button>';
+}
+async function setBatchMode(on){
+  batchMode = !!on; batchSel = new Set();
+  const b = $('batchBtn');
+  if(b){ b.classList.toggle('on', batchMode); b.textContent = batchMode ? '退出多选' : '☑ 多选'; }
+  renderBatchBar();
+  await refreshToday();
+}
+async function batchAct(act){
+  if(act === 'exit'){ await setBatchMode(false); return; }
+  const ids = batchSel ? Array.from(batchSel) : [];
+  if(!ids.length){ toast('先点圆圈选几件'); return; }
+  if(act === 'done'){
+    for(const id of ids) await completeTask(id);
+    toast('✅ 已完成 ' + ids.length + ' 件');
+  }else if(act === 'tmr'){
+    const d = new Date(); d.setDate(d.getDate() + 1);
+    const ds = todayStr(d);
+    for(const id of ids){ const t = await getById('tasks', id); if(t){ t.date = ds; await put('tasks', t); } }
+    toast('已改到明天 · ' + ids.length + ' 件');
+  }else if(act === 'del'){
+    const ok = await confirmBox('删除选中的 ' + ids.length + ' 件？\n7 天内可在回收站恢复。');
+    if(!ok) return;
+    for(const id of ids) await deleteTaskSoft(id);
+    toast('已删除 ' + ids.length + ' 件（可撤销）');
+  }
+  await setBatchMode(false);
+}
+/* #1 自然语言解析：支持「明天9点交周报」「每天8点吃药」「每周一写周报 !」 */
+const WD_CN = { '日':0, '天':0, '末':6, '一':1, '二':2, '三':3, '四':4, '五':5, '六':6 };
+function parseTaskInput(raw){
+  const out = { text:'', date:'', time:'', repeat:'', repeatWd:null, important:false };
+  let s = String(raw || '').trim();
+  if(!s) return out;
+  const src = s;
+  const midnight = new Date(new Date().toDateString());
+  /* 1) 重要标记 */
+  if(/[!！]/.test(s) || /(重要|紧急|优先)/.test(s)){
+    out.important = true;
+    s = s.replace(/^[!！]+/, ' ').replace(/[!！]+$/, ' ').replace(/(重要|紧急|优先)/g, ' ');
+  }
+  /* 2) 时间：15:30 / 下午3点 / 9点半 / 晚上8点 */
+  let m = s.match(/(上午|中午|下午|晚上|今晚|明晚|早上|凌晨)?\s*(\d{1,2})\s*[:：]\s*(\d{2})/);
+  if(m){
+    let h = parseInt(m[2], 10);
+    if(/下午|晚上|今晚|明晚/.test(m[1] || '') && h < 12) h += 12;
+    if(h > 23) h = 23;
+    out.time = ('0' + h).slice(-2) + ':' + m[3];
+    s = s.replace(m[0], ' ');
+  }else{
+    m = s.match(/(上午|中午|下午|晚上|今晚|明晚|早上|凌晨)?\s*(\d{1,2})\s*点\s*(半|一刻|三刻)?/);
+    if(m){
+      let h = parseInt(m[2], 10);
+      const ap = m[1] || '';
+      if(/下午|晚上|今晚|明晚/.test(ap) && h < 12) h += 12;
+      if(/凌晨|早上|上午/.test(ap) && h === 12) h = 0;
+      if(h > 23) h = 23;
+      const mi = m[3] === '半' ? '30' : (m[3] === '一刻' ? '15' : (m[3] === '三刻' ? '45' : '00'));
+      out.time = ('0' + h).slice(-2) + ':' + mi;
+      s = s.replace(m[0], ' ');
+    }
+  }
+  /* 3) 重复（必须早于日期，否则「每周一」会被当成日期） */
+  m = s.match(/(每个?工作日|工作日|上班日|每天|每日|天天|每周\s*([一二三四五六日天末])|每星期\s*([一二三四五六日天])|每周|每星期)/);
+  if(m){
+    const w = m[2] || m[3];
+    if(/工作日|上班日/.test(m[1])) out.repeat = 'weekday';
+    else if(w){ out.repeat = 'weekly'; out.repeatWd = WD_CN[w]; }
+    else if(/每天|每日|天天/.test(m[1])) out.repeat = 'daily';
+    else { out.repeat = 'weekly'; out.repeatWd = new Date().getDay(); }
+    s = s.replace(m[0], ' ');
+  }
+  /* 4) 日期 */
+  m = s.match(/(今天|今日|今晚|明天|明日|明早|明晚|大后天|后天|下周([一二三四五六日天])|本周([一二三四五六日天])|周([一二三四五六日天])|星期([一二三四五六日天])|礼拜([一二三四五六日天])|(\d{1,2})月(\d{1,2})[日号]|(\d{1,2})[\/\-](\d{1,2})|(\d{1,2})号)/);
+  if(m){
+    const d = new Date();
+    let hit = true;
+    if(/今天|今日|今晚/.test(m[1])){ /* 今天 */ }
+    else if(/明/.test(m[1])) d.setDate(d.getDate() + 1);
+    else if(/大后天/.test(m[1])) d.setDate(d.getDate() + 3);
+    else if(/后天/.test(m[1])) d.setDate(d.getDate() + 2);
+    else{
+      const w = m[2] || m[3] || m[4] || m[5] || m[6];
+      if(w){
+        const target = WD_CN[w];
+        let diff = (target - d.getDay() + 7) % 7;
+        if(/下周/.test(m[1]) && diff === 0) diff = 7;
+        d.setDate(d.getDate() + diff);
+      }else if(m[7] && m[8]){
+        d.setMonth(parseInt(m[7], 10) - 1, parseInt(m[8], 10));
+        if(d < midnight) d.setFullYear(d.getFullYear() + 1);
+      }else if(m[9] && m[10]){
+        d.setMonth(parseInt(m[9], 10) - 1, parseInt(m[10], 10));
+        if(d < midnight) d.setFullYear(d.getFullYear() + 1);
+      }else if(m[11]){
+        d.setDate(parseInt(m[11], 10));
+        if(d < midnight) d.setMonth(d.getMonth() + 1);
+      }else hit = false;
+    }
+    if(hit){ out.date = todayStr(d); s = s.replace(m[0], ' '); }
+  }
+  out.text = s.replace(/\s+/g, ' ').replace(/^[，,、\s]+/, '').replace(/[，,、\s]+$/, '').trim();
+  if(!out.text) out.text = src;
+  return out;
+}
 async function handleAdd(){
   const input = $('taskInput');
-  const text = input.value.trim();
-  if(!text){ toast('写点什么吧'); return; }
+  const raw = input.value.trim();
+  if(!raw){ toast('写点什么吧'); return; }
+  const p = parseTaskInput(raw);
+  const future = !!(p.date && p.date !== todayStr());
   ensureCoolDay();
-  if(inCooldown()){ updateCooldownUI(); return; }        // 冷却期内禁止添加
-  const active = await getActiveToday();
-  if(active.length >= MAX_ACTIVE){ toast('今天最多同时 ' + MAX_ACTIVE + ' 件，先完成一件再加'); return; }
-  await add('tasks', {
-    text, category: detectCategory(text),
-    completed: false, date: todayStr(), delayed: false, important: false,
-    createdAt: new Date().toISOString()
-  });
-  const doneToday = (await getCompletedToday()).length;
-  if(doneToday === 0){                                   // 当日尚无完成 → 计入冷却
-    cool.adds++;
-    if(cool.adds > 3) triggerCooldown();
-    saveCool();
+  if(!future){                                          // 未来的事不占今天的三件名额
+    if(inCooldown()){ updateCooldownUI(); return; }      // 冷却期内禁止添加
+    const active = await getActiveToday();
+    if(active.length >= MAX_ACTIVE){ toast('今天最多同时 ' + MAX_ACTIVE + ' 件，先完成一件再加'); return; }
+  }
+  const base = {
+    text: p.text, category: detectCategory(p.text),
+    completed: false, delayed: false, important: p.important,
+    time: p.time || '', createdAt: new Date().toISOString()
+  };
+  if(p.repeat){
+    const wd = (p.repeatWd == null) ? new Date().getDay() : p.repeatWd;
+    const tplId = await add('tasks', Object.assign({}, base, {
+      date: p.date || todayStr(), repeat: p.repeat, repeatTpl: true, repeatWd: wd }));
+    if(!future && repeatDueToday({ repeat: p.repeat, repeatWd: wd }, todayStr())){
+      await add('tasks', Object.assign({}, base, {
+        date: todayStr(), repeat: p.repeat, repeatTpl: false, repeatOf: tplId }));
+    }
+  }else{
+    await add('tasks', Object.assign({}, base, { date: p.date || todayStr() }));
+  }
+  if(!future){
+    const doneToday = (await getCompletedToday()).length;
+    if(doneToday === 0){                                 // 当日尚无完成 → 计入冷却
+      cool.adds++;
+      if(cool.adds > 3) triggerCooldown();
+      saveCool();
+    }
   }
   input.value = '';
   await refreshToday();
   $('oldPanel').classList.add('hidden');                 // 添加后收起昨日面板
+  const bits = [];
+  if(future) bits.push(fmtDate(p.date));
+  if(p.time) bits.push(p.time);
+  if(p.repeat) bits.push((REPEAT_LABEL[p.repeat] || '') + '重复');
+  if(p.important) bits.push('重要');
+  toast(bits.length ? ('✅ 已添加 · ' + bits.join(' · ')) : '✅ 已添加');
 }
 
 /* ========================= 昨日重现（下拉触发） ========================= */
@@ -1853,7 +2542,31 @@ function pomoTick(){
   if(Date.now() >= pomo.end){ pomo.running = false; pomo.remaining = pomoDur(); pomo.end = 0; savePomo(); renderPomo(); completeFocus(); }
   else renderPomo();
 }
+/* F1：后台/锁屏期间定时器被节流，回到前台立刻补一次判定 */
+function bindPomoWake(){
+  const wake = () => { pomoTick(); checkDayChange(); };
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) wake(); });
+  window.addEventListener('pageshow', wake);
+  window.addEventListener('focus', wake);
+}
+/* F2：跨零点自动刷新今日视图 */
+let lastDayKey = '';
+async function checkDayChange(){
+  const k = todayStr();
+  if(!lastDayKey){ lastDayKey = k; return; }
+  if(k === lastDayKey) return;
+  lastDayKey = k;
+  try{
+    if(typeof refreshToday === 'function') await refreshToday();
+    if(typeof renderMorningCard === 'function') await renderMorningCard();
+  }catch(e){}
+  try{ if(typeof renderHabits === 'function') renderHabits(); }catch(e){}
+  try{ if(typeof renderTodayHero === 'function') await renderTodayHero(); }catch(e){}
+  try{ localStorage.removeItem('shuiji_rem_fired'); }catch(e){}
+  toast('🌅 新的一天，页面已刷新');
+}
 function renderPomo(){
+  if(pomo.running) ensureFocusVisible();               /* 跑起来就别让它折叠着 */
   const left = pomo.running ? Math.max(0, Math.round((pomo.end - Date.now()) / 1000)) : pomo.remaining;
   $('focusTime').textContent = String(Math.floor(left/60)).padStart(2,'0') + ':' + String(left%60).padStart(2,'0');
   $('focusBox').classList.toggle('running', pomo.running);
@@ -1867,6 +2580,7 @@ async function completeFocus(){
   playTone(659,0.16,0.2); playTone(784,0.16,0.2,0.16); playTone(1046,0.35,0.2,0.32);
   buzz([60, 90, 60]);
   waterRipple();
+  fireNotify('🍅 番茄结束', tk ? ('「' + tk.text + '」这一轮结束了，休息 5 分钟') : '专注结束，起来喝口水');
   toast(tk ? ('\u23F1 专注完成 · ' + tk.text) : '专注完成 🌊');
   await refreshToday();                    /* 让任务卡上的累计投入立即刷新 */
   if(isView('review')) renderReview();
@@ -2137,6 +2851,12 @@ async function renderReview(){
   const rl = $('rvListLabel'); if(rl) rl.textContent = rg.label + '已完成';
   renderWeekStats(monStr, t, rvPrevRange(monStr), rg);
   renderMoodHeatmap();
+  /* V4：成就与洞察跟着回顾页一起刷新 */
+  const got = await evalAchievements(false);
+  const ac = $('achCount');
+  if(ac) ac.innerHTML = '已解锁 <b>' + Object.keys(got || {}).length + '</b>/' + ACHIEVEMENTS.length;
+  renderBadges();
+  renderInsights();
 }
 /* 情绪热力图：有记录就显示本周分布；无记录给引导 */
 async function renderMoodHeatmap(){
@@ -2603,6 +3323,68 @@ async function exportData(){
   renderBackupStatus();
   toast('✅ 已导出备份（数据与设置，不含 API Key）');
 }
+/* #12 导出可读性 Markdown：按天罗列，能直接存备忘录或发给自己 */
+function mdDateSet(){
+  const set = new Set();
+  const push = arr => (arr || []).forEach(x => { if(x && x.date) set.add(String(x.date).slice(0, 10)); });
+  return { set: set, push: push };
+}
+async function buildMarkdown(n){
+  const s = mdDateSet();
+  s.push(await getAll('tasks'));
+  s.push(await getAll('habits'));
+  s.push(await getAll('moods'));
+  s.push(await getAll('focus'));
+  s.push(qaAll());
+  s.push(wget('ex_w'));
+  s.push(wget('ex'));
+  const days = Array.from(s.set).sort().reverse();
+  const asc = (n > 0 ? days.slice(0, n) : days).slice().reverse();
+  const L = [];
+  L.push('# 水机 · 数据导出');
+  L.push('');
+  L.push('- 导出时间：' + new Date().toLocaleString('zh-CN'));
+  L.push('- 有记录的天数：' + asc.length + (n > 0 ? '（最近 ' + n + ' 天）' : '（全部）'));
+  L.push('');
+  for(const d of asc){
+    L.push('## ' + d);
+    L.push('');
+    try{ L.push(await buildReport(d)); }
+    catch(e){ L.push('（这天的数据读取失败）'); }
+    L.push('');
+  }
+  return L.join('\n');
+}
+async function exportMarkdown(){
+  const v = await showModal('📝 导出 Markdown',
+    '<div class="w-note" style="margin-bottom:10px">生成一份人能直接读的 .md 文件：按天列出任务、习惯、专注、心情、复盘、测试日报、减脂记录。可以存备忘录或发给自己。</div>' +
+    '<div class="qa-lab">导出范围</div>' +
+    '<select id="mdDays" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:var(--fs-15,15px);color:var(--text);box-sizing:border-box">' +
+      [[7, '最近 7 天'], [30, '最近 30 天'], [90, '最近 90 天'], [0, '全部']].map(o =>
+        '<option value="' + o[0] + '"' + (o[0] === 30 ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>' +
+    '<label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:var(--fs-13,13px);color:var(--text)">' +
+      '<input type="checkbox" id="mdCopy" checked style="width:16px;height:16px"> 同时复制到剪贴板（内容过大时自动跳过）</label>',
+    [{label:'取消', value:0}, {label:'生成', value:1, primary:true}]);
+  if(v !== 1) return;
+  const n = parseInt(($('mdDays') || {}).value || '30', 10);
+  const wantCopy = !$('mdCopy') || $('mdCopy').checked;
+  toast('正在生成…');
+  let md = '';
+  try{ md = await buildMarkdown(n); }
+  catch(e){ toast('❌ 生成失败：' + e.message); return; }
+  try{
+    const blob = new Blob([md], { type:'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'shuiji-' + todayStr() + '.md';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }catch(e){ toast('❌ 下载失败：' + e.message); return; }
+  if(wantCopy && md.length < 60000){
+    try{ await copyText(md); toast('✅ 已下载 .md，并复制到剪贴板'); return; }catch(e){}
+  }
+  toast('✅ 已导出 Markdown（' + Math.max(1, Math.round(md.length / 1024)) + ' KB）');
+}
 function importData(){
   const f = $('importFile').files[0];
   if(!f) return;
@@ -2729,6 +3511,167 @@ const DEBATES = ['「钱和理想，哪个更重要？」','「朋友之间该�
 /* ================= 减肥：计算 ================= */
 /* MET 代谢当量：按真实体重算运动消耗。80kg 与 50kg 跑同样的时间消耗不同 */
 const EX_MET = { '跳绳':11, '跑步':8.3, '骑行':7, '力量':5, '深蹲':5, '快走':4.3, '瑜伽':3 };
+
+/* ---------- 跟练视频库 ----------
+ * B 站真实视频，逐条用 api.bilibili.com/x/web-interface/view 验证过有效
+ * 标题 / UP / 封面取自接口返回，min 为人工校准的实际跟练时长，met 用于按体重估算消耗
+ */
+const FIT_PARTS = [
+  { k:'腹', n:'腰腹核心' }, { k:'腿', n:'臀腿' }, { k:'臂', n:'上肢' },
+  { k:'背', n:'肩背' }, { k:'氧', n:'有氧燃脂' }, { k:'舒', n:'舒展放松' }
+];
+const FIT_VIDS = [
+  { bv:'BV1ax411y7zQ', t:'五分钟在家瘦腰 · 马甲线入门', up:'周六野Zoey', min:5, part:'腹', lv:1, met:3.5, pic:'https://i0.hdslb.com/bfs/archive/e161008a0355e91901a8cf518becfa47261c607b.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1Lx41177uf', t:'5分钟瘦下腹 · 减顽固小肚子', up:'周六野Zoey', min:5, part:'腹', lv:2, met:3.5, pic:'https://i1.hdslb.com/bfs/archive/262c6a4126ff539e7e5765cafab1d2a4deea5c81.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1rb411x7W5', t:'10分钟站立马甲线 · 膝盖友好', up:'周六野Zoey', min:10, part:'腹', lv:1, met:4, pic:'https://i2.hdslb.com/bfs/archive/6cf961be2b8bb25ac7d668c0b3b9f8bcdcb5cd51.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1Sg4y1n7bW', t:'15min 站立瘦腰瘦肚子 · 无跑跳', up:'韩小四AprilHan', min:15, part:'腹', lv:1, met:4, pic:'https://i2.hdslb.com/bfs/archive/52c609f1be314d63dcfc2de49624330d8eb5dd89.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1ht4y117rX', t:'初学者10分钟腹肌 · 带休息', up:'FireLady', min:10, part:'腹', lv:2, met:4, pic:'https://i0.hdslb.com/bfs/archive/a505398501e7b8ec13ed1c2a250a428260f97087.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1rt4y1k7Wq', t:'10min 下腹部 · 紧致平坦小腹', up:'帕梅拉PamelaReif', min:10, part:'腹', lv:2, met:4, pic:'https://i2.hdslb.com/bfs/archive/35f173da3790afe49ff2582457f92890640d9b0b.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1DT4y1u7s7', t:'10分钟袜子瘦腰', up:'wzfcat', min:10, part:'腹', lv:2, met:4, pic:'https://i1.hdslb.com/bfs/archive/c45b58de2110fa9dd74f50a836057a37bc58a293.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1jx411Q72A', t:'马甲线进阶 · 一周见效', up:'周六野Zoey', min:12, part:'腹', lv:3, met:4.5, pic:'https://i0.hdslb.com/bfs/archive/7da217367676be4ce5a004d86150821f6bfe374b.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1jf4y1D7QM', t:'10分钟改善膝超伸 · 膝盖友好', up:'韩小四AprilHan', min:10, part:'腿', lv:1, met:4.5, pic:'https://i0.hdslb.com/bfs/archive/5bde44dbdc5cc8f20263a8a04a2d83efcb781bf7.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1UE411W71S', t:'10分钟高效瘦大腿 · 无跑跳', up:'韩小四AprilHan', min:10, part:'腿', lv:1, met:4.5, pic:'https://i2.hdslb.com/bfs/archive/ed099cb9e77faf0f07a2dac01115cb6d44a36039.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1yx411z7PJ', t:'9分钟瘦大腿内侧 + HIIT', up:'周六野Zoey', min:9, part:'腿', lv:2, met:5.5, pic:'https://i0.hdslb.com/bfs/archive/5633628fc855564fe5cb0dfdd8756c97b0b1ace8.jpg@240w_135h_1c.jpg' },
+  { bv:'BV16a4y1e7jG', t:'15分钟瘦腿 · 内侧+外侧', up:'烤鸭两万', min:15, part:'腿', lv:3, met:5.5, pic:'https://i0.hdslb.com/bfs/archive/3c9616ca51232d4bff904613736b8b47da6b23df.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1gE411A7pL', t:'12分钟无跑跳瘦小腿', up:'韩小四AprilHan', min:12, part:'腿', lv:1, met:4, pic:'https://i1.hdslb.com/bfs/archive/3a92becc63212e7726d5a5324b8633f35c1e5f2e.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1Ax41117D1', t:'快速瘦小腿 + 拉伸', up:'周六野Zoey', min:10, part:'腿', lv:1, met:3.5, pic:'https://i2.hdslb.com/bfs/archive/7dcd5d51e6f7b19d806f3dea1630f656b5134984.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1Ja4y1479a', t:'12分钟瘦腿内外侧 + 小腿', up:'FireLady', min:12, part:'腿', lv:3, met:5, pic:'https://i2.hdslb.com/bfs/archive/72830fc231de1b35153d567560a33b4035aeea63.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1yW411N7uG', t:'5分钟瘦手臂 · 坐着完成', up:'周六野Zoey', min:5, part:'臂', lv:1, met:3.5, pic:'https://i2.hdslb.com/bfs/archive/05672d6827fe1eb98932e703a103022afd4b2395.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1W7411c7rH', t:'8分钟瘦胳膊 · 直角肩', up:'韩小四AprilHan', min:8, part:'臂', lv:1, met:3.5, pic:'https://i1.hdslb.com/bfs/archive/7e031b649d8bb61bf2da8db729380a289b02d9d2.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1Xx411a7bi', t:'10分钟瘦手臂显锁骨', up:'周六野Zoey', min:10, part:'臂', lv:2, met:3.8, pic:'https://i0.hdslb.com/bfs/archive/9ba78e282554da44b553e491cffda0dea92e7e69.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1KK4y1k7ho', t:'10分钟高强度瘦手臂', up:'一个好玩的昵称', min:10, part:'臂', lv:3, met:4.5, pic:'https://i2.hdslb.com/bfs/archive/e74bfecbac6c9f6afb62879cfab365af58042c1f.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1FT4y177G8', t:'10分钟负重手臂 · 拜拜肉', up:'BaByBoy呀', min:10, part:'臂', lv:2, met:4.5, pic:'https://i1.hdslb.com/bfs/archive/59248055aa8a6242da25110d2417525eed7e50bf.jpg@240w_135h_1c.jpg' },
+  { bv:'BV12x411D7q1', t:'11分钟矫正驼背圆肩 · 美背', up:'周六野Zoey', min:11, part:'背', lv:1, met:3.5, pic:'https://i0.hdslb.com/bfs/archive/555d7daa3929a28afd290c3e698c234ab71ddc26.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1Jt4y117dG', t:'11分钟美背训练', up:'太好了是Kiki', min:11, part:'背', lv:2, met:4, pic:'https://i0.hdslb.com/bfs/archive/3fea692eaa2c78cbf0bd020f60a0f4a9cc993cc9.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1AE41157EK', t:'10分钟提胸 · 消副乳', up:'周六野Zoey', min:10, part:'背', lv:2, met:3.8, pic:'https://i2.hdslb.com/bfs/archive/f55f2f6815c8cd2a34d7eb9cd4eb12671aa4f4ff.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1sK4y1t7fs', t:'17分钟全身有氧燃脂舞蹈', up:'玖拾伍呀', min:17, part:'氧', lv:2, met:6.5, pic:'https://i1.hdslb.com/bfs/archive/cf7aedda4a22242153eccc8c444e647081bcbfe0.jpg@240w_135h_1c.jpg' },
+  { bv:'BV1Cz4y197bz', t:'10分钟晨间舒展', up:'Ludannn_', min:10, part:'舒', lv:1, met:3, pic:'https://i1.hdslb.com/bfs/archive/86f3d452552832560ada4820d58db806905f3e26.jpg@240w_135h_1c.jpg' }
+];
+let vidPart = '腹';
+let curVideo = null;
+function partName(k){ const p = FIT_PARTS.find(x => x.k === k); return p ? p.n : '全身'; }
+function lvStars(lv){ return '★'.repeat(lv) + '☆'.repeat(Math.max(0, 3 - lv)); }
+function daySeed(){ return Math.floor(new Date(todayStr() + 'T00:00:00').getTime() / 86400000); }
+function partByWeekday(){ return ['氧','腹','腿','臂','腹','腿','背'][new Date(todayStr() + 'T00:00:00').getDay()]; }
+function guessPart(s){
+  const t = String(s || '');
+  if(/腹|腰|核心|卷腹|马甲线|肚/.test(t)) return '腹';
+  if(/腿|臀|深蹲|小腿|大腿/.test(t)) return '腿';
+  if(/背|驼背|圆肩|斜方|体态/.test(t)) return '背';
+  if(/臂|手|肩|拜拜肉|胸|副乳/.test(t)) return '臂';
+  if(/跑|跳|有氧|燃脂|HIIT|波比|开合/i.test(t)) return '氧';
+  if(/拉伸|舒展|放松|热身/.test(t)) return '舒';
+  return '';
+}
+function vidKcal(v){
+  const p = loadProfile();
+  const w = p && p.w ? p.w : 60;
+  return Math.round(v.met * w * (v.min / 60));
+}
+function vidDoneToday(bv){ return wget('vlog').some(x => x.date === todayStr() && x.bv === bv); }
+function pickVids(part, n, exclude){
+  const pool = FIT_VIDS.filter(v => v.part === part && v.bv !== exclude);
+  if(!pool.length) return [];
+  const s = daySeed(), out = [];
+  for(let i = 0; i < Math.min(n, pool.length); i++) out.push(pool[(s + i) % pool.length]);
+  return out;
+}
+/* 今日推荐：有 AI 训练就按 AI 的动作部位匹配，否则按星期轮换 */
+function todayFitVids(){
+  const rec = wget('ds_fit').find(x => x.date === todayStr());
+  const ai = (rec && rec.items) || [];
+  const parts = [];
+  (ai.length ? ai : [{ name: partName(partByWeekday()) }]).forEach(it => {
+    const p = String(it.part || '').trim() || guessPart(it.name + ' ' + (it.detail || ''));
+    if(p && parts.indexOf(p) < 0) parts.push(p);
+  });
+  const wd = partByWeekday();
+  if(parts.length < 2 && parts.indexOf(wd) < 0) parts.push(wd);
+  const out = [];
+  parts.slice(0, 3).forEach(p => {
+    const v = pickVids(p, 1)[0];
+    if(v && !out.some(x => x.bv === v.bv)) out.push(v);
+  });
+  return out;
+}
+function vidCardHtml(v){
+  const done = vidDoneToday(v.bv);
+  return '<div class="vid-card" data-vplay="' + v.bv + '">' +
+    '<img class="vid-thumb" src="' + safeUrl(v.pic) + '" alt="" loading="lazy" onerror="this.remove()">' +
+    '<div class="vid-main"><div class="vid-t">' + esc(v.t) + '</div>' +
+    '<div class="vid-s">' + v.min + ' 分钟 · ' + lvStars(v.lv) + ' · ' + esc(v.up) + '</div></div>' +
+    (done ? '<span class="vid-ok">已练 ✓</span>' : '<span class="vid-go">▶</span>') + '</div>';
+}
+function fitVideoCardHtml(){
+  const vs = todayFitVids();
+  if(!vs.length) return '';
+  const rec = wget('ds_fit').find(x => x.date === todayStr());
+  const byAi = !!((rec && rec.items) || []).length;
+  const wk = wget('vlog').filter(x => x.date >= weekStartStr());
+  const wkMin = wk.reduce((s, x) => s + (x.min || 0), 0);
+  const WD = ['日','一','二','三','四','五','六'];
+  const wd = WD[new Date(todayStr() + 'T00:00:00').getDay()];
+  return wCard(byAi ? '🤖 AI 为你挑的跟练' : '▶️ 今日跟练',
+    vs.map(vidCardHtml).join('') +
+    '<div class="w-note">点卡片直接播放，练完点「完成」自动记入今日运动。' +
+    (byAi ? '按 AI 今日动作的部位匹配' : '按周' + wd + '的部位轮换，可点「换一个」') + '</div>',
+    wk.length ? '<span class="vid-tag">本周 ' + wk.length + ' 次 / ' + wkMin + ' 分</span>' : '');
+}
+function fitVideoLibHtml(){
+  const list = FIT_VIDS.filter(v => v.part === vidPart);
+  return wCard('📺 跟练视频库',
+    '<div class="vid-seg">' + FIT_PARTS.map(p => '<button data-wact="vpart" data-p="' + p.k + '" class="' + (p.k === vidPart ? 'on' : '') + '">' + p.n + '</button>').join('') + '</div>' +
+    list.map(vidCardHtml).join('') +
+    '<div class="w-note">共 ' + FIT_VIDS.length + ' 个 B 站跟练，已逐个验证有效 · 全部无器械居家可做</div>');
+}
+function openVideo(bv){
+  const v = FIT_VIDS.find(x => x.bv === bv);
+  if(!v) return;
+  curVideo = bv;
+  let el = $('vidPanel');
+  if(!el){ el = document.createElement('div'); el.id = 'vidPanel'; el.className = 'vp-wrap'; document.body.appendChild(el); }
+  const done = vidDoneToday(bv);
+  el.innerHTML =
+    '<div class="vp-top"><button class="vp-back" id="vpBack">‹ 返回</button><div class="vp-tt">' + esc(v.t) + '</div></div>' +
+    '<div class="vp-frame"><iframe src="' + safeUrl('https://player.bilibili.com/player.html?bvid=' + v.bv + '&autoplay=1&high_quality=1&danmaku=0') + '" allowfullscreen frameborder="0" scrolling="no"></iframe></div>' +
+    '<a class="vp-open" href="' + safeUrl('https://www.bilibili.com/video/' + v.bv) + '" target="_blank" rel="noopener">播放不出来？在 B 站打开 ↗</a>' +
+    '<div class="vp-meta">' + esc(v.up) + ' · ' + partName(v.part) + ' · ' + v.min + ' 分钟 · ' + lvStars(v.lv) +
+    '<br>预计消耗 <b>' + vidKcal(v) + '</b> kcal（按你当前体重估算）</div>' +
+    '<div class="vp-bar"><button class="vp-btn ghost" id="vpSwap">换一个</button>' +
+    '<button class="vp-btn" id="vpDone">' + (done ? '已完成 ✓' : '完成，记入今日') + '</button></div>';
+  el.style.display = 'flex';
+  $('vpBack').onclick = closeVideo;
+  $('vpDone').onclick = () => finishVideo(bv);
+  $('vpSwap').onclick = () => {
+    const n = pickVids(v.part, 3, bv).find(x => x.bv !== bv);
+    if(n) openVideo(n.bv); else toast('这个部位暂时只有这一个');
+  };
+}
+function closeVideo(){
+  const el = $('vidPanel');
+  if(el){ el.innerHTML = ''; el.style.display = 'none'; }
+  curVideo = null;
+}
+function finishVideo(bv){
+  const v = FIT_VIDS.find(x => x.bv === bv);
+  if(!v) return;
+  if(vidDoneToday(bv)){ toast('这个今天已经记过了'); return; }
+  const kc = vidKcal(v);
+  const logs = wget('vlog');
+  logs.push({ id: Date.now(), date: todayStr(), bv: bv, t: v.t, min: v.min, kcal: kc });
+  wset('vlog', logs);
+  const exs = wget('ex');
+  exs.push({ id: Date.now() + 1, date: todayStr(), type: '跟练·' + partName(v.part), minutes: v.min, kcal: kc, from: 'video', bv: bv, vt: v.t });
+  wset('ex', exs);
+  closeVideo(); ding(); renderTodayHero();
+  if(curWidget === '减肥运动') openWidget(curWidget);
+  toast('🔥 已记入今日运动 · 约 ' + kc + ' kcal');
+}
+function openVideoByPart(txt){
+  const p = guessPart(txt) || '腹';
+  const v = pickVids(p, 1)[0];
+  if(v) openVideo(v.bv); else toast('暂时没有匹配的视频');
+}
 function fitKcal(type, min){
   const p = loadProfile();
   if(!p || !p.w) return Math.round(min * (EX_MET[type] ? EX_MET[type] * 1.2 : 6));
@@ -3271,6 +4214,33 @@ function planProgressHtml(){
     '<div class="w-row"><span class="w-row-t">预计达标</span><span class="w-row-s">约 ' + weeks + ' 周（按计划坚持）</span></div>';
   return wCard('📈 计划进度', rows + (remaining <= 0 ? '<div class="w-empty">🎉 已达到目标 ' + goal + 'kg，继续保持！</div>' : ''));
 }
+/* 当前体重（kg）：优先最近一次称重，其次资料里的体重，兜底 60 */
+function curWeightKg(){
+  try{
+    const ws = wget('ex_w');
+    if(ws.length){ const last = ws[ws.length - 1]; if(last && last.weight) return Number(last.weight); }
+    const p = JSON.parse(localStorage.getItem('shuiji_w_profile') || 'null');
+    if(p && p.w) return Number(p.w);
+  }catch(e){}
+  return 60;
+}
+/* #13 首页「今日跟练」快捷入口：一步直达播放器 */
+function renderFitVidQuick(){
+  const el = $('fitVidQuick'); if(!el) return;
+  let vs = [];
+  try{ vs = todayFitVids(); }catch(e){ vs = []; }
+  if(!vs.length){ el.classList.add('hidden'); return; }
+  const v = vs.find(x => !vidDoneToday(x.bv)) || vs[0];
+  const allDone = vs.every(x => vidDoneToday(x.bv));
+  const kc = Math.max(1, Math.round(v.met * curWeightKg() * v.min / 60));
+  el.classList.remove('hidden');
+  el.classList.toggle('done', allDone);
+  el.dataset.bv = v.bv;
+  el.innerHTML = '<img class="fqv-thumb" src="' + safeUrl(v.pic) + '" alt="" loading="lazy" onerror="this.remove()">' +
+    '<div class="fqv-body"><div class="fqv-t">' + esc(v.t) + '</div>' +
+    '<div class="fqv-s">今日跟练 · ' + v.min + ' 分钟 · 约 ' + kc + ' kcal' + (allDone ? ' · 已完成 ✓' : '') + '</div></div>' +
+    '<span class="fqv-go">' + (allDone ? '再练' : '▶') + '</span>';
+}
 /* ================= 首页：今日称重入口 ================= */
 function renderWeightQuick(){
   const el = $('fitQuick'); if(!el) return;
@@ -3470,6 +4440,7 @@ WIDGETS['减肥运动'] = {
         '<div class="w-streak">本周 <b>' + totalMin + '</b> 分钟 · <b>' + totalKcal + '</b> kcal</div>') +
       '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">记录运动</div><div class="w-add"><select id="w-type"><option>跑步</option><option>跳绳</option><option>深蹲</option><option>瑜伽</option><option>骑行</option><option>力量</option><option>快走</option></select><input id="w-min" type="number" class="w-min" value="20" min="1" max="600"><button class="w-btn" data-wact="ex-add">＋</button></div>' +
         '<div class="w-note" style="margin-top:6px">消耗按你的体重和运动类型估算。</div></div>' +
+      (needStart ? '' : fitVideoCardHtml() + fitVideoLibHtml()) +
       chartCard(l, x => x.minutes) +
       dsFitCardHtml() +
       (needStart ? '' : wCard('📋 我的计划', planCardHtml())) +
@@ -3533,6 +4504,14 @@ WIDGETS['减肥运动'] = {
       toast('计划已生成 · 目标同步为 ' + goal + 'kg');
     },
     'plan-edit': async () => { planEdit = true; openWidget(curWidget); },
+    'vpart': async b => { vidPart = b.dataset.p; openWidget(curWidget); },
+    'fit-vid': async b => {
+      const today = wget('ds_fit').find(x => x.date === todayStr());
+      if(!today) return;
+      const it = today.items[parseInt(b.dataset.i, 10)];
+      if(!it) return;
+      openVideoByPart((it.part || '') + ' ' + (it.name || ''));
+    },
     'ds-fit': async () => { await dsFitGen(); }
   }
 };
@@ -3573,7 +4552,7 @@ async function dsFitGen(){
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: '你是专业健身教练。根据用户的减肥计划参数和当天天气，推荐今天在家或户外能完成的具体训练动作。严格只输出 JSON 数组，不要任何其他文字或代码标记，格式：[{"name":"动作名","detail":"组数×次数/时长+动作要点","min":"大约耗时分钟"}]，包含热身+3-4个动作+拉伸，总耗时约 20-30 分钟，动作适合新手，强度匹配当前体重和减脂目标。' },
+          { role: 'system', content: '你是专业健身教练。根据用户的减肥计划参数和当天天气，推荐今天在家能完成的具体训练动作。严格只输出 JSON 数组，不要任何其他文字或代码标记，格式：[{"name":"动作名","part":"部位","detail":"组数×次数/时长+动作要点","min":"大约耗时分钟"}]。其中 part 只能取这六个值之一：腹（腰腹核心）、腿（臀腿）、臂（上肢手臂）、背（肩背体态）、氧（有氧燃脂）、舒（拉伸放松）。包含热身+3-4个动作+拉伸，总耗时约 20-30 分钟，动作适合新手、无需器械，强度匹配当前体重和减脂目标。' },
           { role: 'user', content: '今天是 ' + todayStr() + wx + '。我的情况：身高 ' + p.h + 'cm，体重 ' + p.w + 'kg，目标 ' + p.goal + 'kg，年龄 ' + p.age + '，性别 ' + (p.gender === 'male' ? '男' : '女') + '，活动系数 ' + p.activity + '。请推荐今天的具体训练动作清单。' }
         ],
         max_tokens: 600,
@@ -3606,9 +4585,12 @@ function dsFitCardHtml(){
       ? today.items.map((x, i) => {
           const exs = wget('ex');
           const done = exs.some(e => e.date === todayStr() && e.type === x.name);
-          return '<div class="w-row"><span class="w-row-t"><b>' + esc(x.name) + '</b><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-top:2px">' + esc(x.detail) + '</div></span>' +
+          return '<div class="w-row" style="flex-wrap:wrap;row-gap:6px"><span class="w-row-t"><b>' + esc(x.name) + '</b><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-top:2px">' + esc(x.detail) + '</div></span>' +
             '<span class="w-row-s">' + (x.min ? '~' + x.min + ' 分' : '') + '</span>' +
-            '<button class="w-btn" data-wact="fit-do" data-i="' + i + '" style="padding:5px 10px;font-size:var(--fs-12,12px)' + (done ? ';opacity:.45' : '') + '">' + (done ? '已记' : '完成 ✓') + '</button></div>';
+            '<div style="width:100%;display:flex;gap:6px;justify-content:flex-end">' +
+            '<button class="w-btn" data-wact="fit-vid" data-i="' + i + '" style="padding:5px 10px;font-size:var(--fs-12,12px)">▶ 跟练视频</button>' +
+            '<button class="w-btn" data-wact="fit-do" data-i="' + i + '" style="padding:5px 10px;font-size:var(--fs-12,12px)' + (done ? ';opacity:.45' : '') + '">' + (done ? '已记' : '完成 ✓') + '</button>' +
+            '</div></div>';
         }).join('')
         + '<div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="ds-fit">🔄 换一套</button></div>'
       : '<div id="w-ds-fit"><div class="w-empty">让 AI 按你的计划生成今天的具体动作</div></div><div style="margin-top:8px;text-align:right"><button class="w-btn" data-wact="ds-fit">✨ 生成今日训练</button></div>',
@@ -3623,6 +4605,78 @@ function ebbingDue(d){
   if(days < 1) return false;
   if([1, 3, 7, 14, 30].includes(days)) return true;   /* 标准遗忘曲线节点 */
   return days > 30 && days % 30 === 0;                /* 超过 30 天：每 30 天再捞一次，避免永久沉底 */
+}
+/* ---------------- #6 间隔重复 SRS（简化 SM-2） ----------------
+   原来的 ebbingDue 只看「添加天数」的固定节点（1/3/7/14/30），
+   不区分你到底记没记住 —— 答对答错都按同一节奏来。
+   改成按掌握程度动态调整：认识 → 间隔 ×ef 拉长；忘记 → 间隔归零重来。 */
+function srsInit(w){
+  if(w.ef == null) w.ef = 2.5;
+  if(w.iv == null) w.iv = 0;
+  if(w.wrong == null) w.wrong = 0;
+  if(!w.due) w.due = w.date || todayStr();
+  return w;
+}
+function srsAddDays(n){
+  const d = new Date(todayStr() + 'T00:00:00');
+  d.setDate(d.getDate() + Math.max(0, n));
+  return todayStr(d);
+}
+function srsDue(w){
+  if(w.known) return false;
+  srsInit(w);
+  return !w.due || w.due <= todayStr();
+}
+const SRS_GRAD_DAYS = 21;                 /* 间隔超过 21 天视为已掌握，毕业 */
+function srsGrade(w, ok){
+  srsInit(w);
+  if(ok){
+    if(!w.iv) w.iv = 1;
+    else if(w.iv === 1) w.iv = 3;
+    else w.iv = Math.round(w.iv * (w.ef || 2.5));
+    w.ef = Math.min(3.0, (w.ef || 2.5) + 0.1);
+    w.times = (w.times || 0) + 1;
+    if(w.iv >= SRS_GRAD_DAYS) w.known = true;
+    w.due = srsAddDays(w.iv);
+  }else{
+    w.iv = 0;
+    w.ef = Math.max(1.3, (w.ef || 2.5) - 0.2);
+    w.wrong = (w.wrong || 0) + 1;
+    w.known = false;
+    w.due = todayStr();                    /* 今天之内再来一遍 */
+  }
+  w.last = todayStr();
+  return w;
+}
+function srsTip(w){
+  srsInit(w);
+  if(w.known) return '已掌握';
+  const bits = ['第 ' + ((w.times || 0) + 1) + ' 次'];
+  if(w.wrong) bits.push('错过 ' + w.wrong + ' 次');
+  if(w.iv) bits.push('间隔 ' + w.iv + ' 天');
+  else if(w.due && w.due > todayStr()) bits.push('下次 ' + w.due.slice(5));
+  return bits.join(' · ');
+}
+function wrongWords(){
+  const out = [];
+  try{
+    getBooks().forEach(b => {
+      bookWords(b.id).forEach(w => {
+        if(!w.known && (w.wrong || 0) > 0) out.push({ id: w.id, word: w.word, def: w.def, wrong: w.wrong, book: b.name, bookId: b.id });
+      });
+    });
+  }catch(e){}
+  return out.sort((a, b) => (b.wrong || 0) - (a.wrong || 0));
+}
+function wrongBookHtml(){
+  const ws = wrongWords();
+  if(!ws.length) return '';
+  return wCard('❌ 错词本（' + ws.length + '）',
+    ws.slice(0, 15).map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.word) + '</b> · ' + esc(x.def || '—') +
+      '<span style="color:var(--sub);font-size:var(--fs-12,12px)"> · 错 ' + x.wrong + ' 次' + (x.book ? ' · ' + esc(x.book) : '') + '</span></span>' +
+      '<button class="w-tag" data-wact="en-speak" data-word="' + esc(x.word) + '">🔊</button>' +
+      '<button class="w-tag" data-wact="en-again" data-id="' + x.id + '" data-book="' + esc(x.bookId || '') + '">重练</button></div>').join('') +
+    '<div class="w-note" style="margin-top:6px">答错的词自动进这里，重练答对就移出。</div>');
 }
 /* 词书管理：每本书独立词表/背词量/复习队列 */
 const BUILTIN_BOOKS = {
@@ -3647,7 +4701,12 @@ function curBookName(){ const b = getBooks().find(x => x.id === curBook()); retu
 function bookWords(id){ return wget('en_words_' + id); }
 function saveBookWords(id, list){ wset('en_words_' + id, list); }
 function bookQuota(id){ return parseInt(localStorage.getItem('shuiji_wg_en_quota_' + id) || '10', 10); }
-function enRevPool(){ const words = bookWords(curBook()); const due = words.filter(w => !w.known && ebbingDue(w.date)); return due.length ? due : words; }
+function enRevPool(){
+  const words = bookWords(curBook());
+  const due = words.filter(w => !w.known && srsDue(w));
+  if(due.length) return due;
+  return words.filter(w => !w.known);          /* 没有到期的就复习还没掌握的 */
+}
 /* 今日新词清单：按「每日背诵量」选还没背过的词，一天一换（当天背过的次日不再排） */
 function enSess(){
   const t = todayStr();
@@ -3744,7 +4803,7 @@ WIDGETS['英语学习'] = {
     const cb = curBook();
     const words = bookWords(cb);
     const quota = bookQuota(cb);
-    const dueCount = words.filter(w => !w.known && ebbingDue(w.date)).length;
+    const dueCount = words.filter(w => !w.known && srsDue(w)).length;
     const pool = enRevPool();
     const rev = pool.length ? pool[revIdx % pool.length] : null;
     const sessDone = enSess().ids.filter(id => { const w = words.find(i => i.id === id); return w && (w.times || 0) > 0; }).length;
@@ -3764,9 +4823,17 @@ WIDGETS['英语学习'] = {
       wCard('🎓 内置词库',
         Object.keys(BUILTIN_BOOKS).map(k => '<div class="w-row"><span class="w-row-t">' + BUILTIN_BOOKS[k].label + '</span><button class="w-tag" data-wact="' + k + '-import">导入</button></div>').join('') +
         '<div class="w-note" style="margin-top:6px">导入进对应词书，已存在自动跳过；数据只存本地。</div>') +
-      (rev ? wCard('🎴 复习卡片 · ' + esc(curBookName()) + (dueCount ? ' · 今日 ' + dueCount + ' 到期' : ''), '<div class="w-flip"><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">第 ' + ((rev.times || 0) + 1) + ' 次背</div><div class="wf-word">' + esc(rev.word) + '</div><div class="wf-def" id="wf-def">' + (revShown ? esc(rev.def) : '点下方查看释义') + '</div><div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="w-btn" data-wact="en-speak" data-word="' + esc(rev.word) + '">\u{1F50A} 朗读</button><button class="w-btn" data-wact="en-spell" data-id="' + rev.id + '">\u270F 拼写</button><button class="w-btn" data-wact="en-flip">查看释义</button><button class="w-btn" data-wact="en-known" data-id="' + rev.id + '">认识 ✓</button><button class="w-btn" data-wact="en-next">换一个</button></div></div>' + (dueCount ? '' : (words.length ? '<div class="w-note" style="margin-top:8px">今天没有到期的复习词，先随意复习一个</div>' : ''))) : '');
+      (rev ? wCard('🎴 复习卡片 · ' + esc(curBookName()) + (dueCount ? ' · 今日 ' + dueCount + ' 到期' : ''), '<div class="w-flip"><div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:4px">' + esc(srsTip(rev)) + '</div><div class="wf-word">' + esc(rev.word) + '</div><div class="wf-def" id="wf-def">' + (revShown ? esc(rev.def) : '点下方查看释义') + '</div><div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="w-btn" data-wact="en-speak" data-word="' + esc(rev.word) + '">\u{1F50A} 朗读</button><button class="w-btn" data-wact="en-spell" data-id="' + rev.id + '">\u270F 拼写</button><button class="w-btn" data-wact="en-flip">查看释义</button><button class="w-btn" data-wact="en-known" data-id="' + rev.id + '">认识 ✓</button><button class="w-btn" data-wact="en-forgot" data-id="' + rev.id + '">忘记了</button><button class="w-btn" data-wact="en-next">换一个</button></div></div>' + (dueCount ? '' : (words.length ? '<div class="w-note" style="margin-top:8px">今天没有到期的复习词，先随意复习一个</div>' : ''))) : '') +
+      wrongBookHtml() +
+      wCard('🔊 发音设置', spStatusHtml());
   },
   acts: {
+    'sp-set': async b => {
+      localStorage.setItem('shuiji_' + b.dataset.k, b.dataset.v);
+      spLoadVoices(); openWidget(curWidget);
+    },
+    'sp-test': async () => { speakWord('apple'); },
+    'sp-net':  async () => { spSpeakNet($('spTestWord') ? $('spTestWord').value : 'apple'); },
     'book-switch': async b => {
       localStorage.setItem('shuiji_w_curbook', b.dataset.id); revIdx = 0; revShown = false; openWidget(curWidget);
     },
@@ -3840,22 +4907,49 @@ WIDGETS['英语学习'] = {
       if(!x){ toast('这个词不在生词本里了'); return; }
       const choice = await showModal('\u270F 拼写练习',
         '<div class="w-note" style="margin-bottom:8px">释义：' + esc(x.def || '（无）') + '</div>' +
-        '<input id="spellInput" type="text" placeholder="拼出这个单词" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-16,16px);color:var(--text);box-sizing:border-box;outline:none">',
+        '<input id="spellInput" type="text" placeholder="拼出这个单词" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:var(--fs-16,16px);color:var(--text);box-sizing:border-box;outline:none">' +
+        '<div style="margin-top:8px;text-align:center"><button class="w-btn" data-sp-play="' + esc(x.word) + '" style="padding:6px 14px">🔊 听发音</button></div>',
         [{label:'取消', value:'c'}, {label:'提交', value:'ok', primary:true}]
       );
       if(choice !== 'ok') return;                  /* 取消则原样留在生词本里 */
       const typed = ((($('spellInput') || {}).value) || '').trim().toLowerCase();
       if(!typed){ toast('没有输入，跳过这个词'); revIdx++; revShown = false; openWidget(curWidget); return; }
       const ok = typed === String(x.word).toLowerCase();
-      if(ok){ x.times = (x.times || 0) + 1; x.known = true; saveBookWords(curBook(), l); revIdx++; revShown = false; }
-      toast(ok ? ('\u2714 拼对了 · ' + x.word) : ('\u2718 正确拼写是 ' + x.word));
-      if(ok){ speakWord(x.word); ding(); }
+      srsGrade(x, ok);                                     /* #6 拼对/拼错都按 SRS 调整间隔 */
+      saveBookWords(curBook(), l);
+      if(ok){ revIdx++; revShown = false; }
+      toast(ok ? ('\u2714 拼对了 · 下次 ' + x.due.slice(5)) : ('\u2718 正确拼写是 ' + x.word + ' · 已进错词本'));
+      /* 注意：这里是 await 之后，iOS 已脱离用户手势栈，自动朗读会静默失败 → 只在确认解锁过时才发 */
+      if(ok && spCanAuto()) speakWord(x.word);
+      ding();
       openWidget(curWidget);
     },
     'en-known': async b => {
       const l = bookWords(curBook()); const x = l.find(i => i.id == b.dataset.id);
-      if(x){ x.times = (x.times || 0) + 1; x.known = true; saveBookWords(curBook(), l); }
+      if(x){
+        srsGrade(x, true);
+        saveBookWords(curBook(), l);
+        toast(x.known ? ('🎉 「' + x.word + '」已掌握') : ('下次复习 ' + x.due.slice(5) + '（' + x.iv + ' 天后）'));
+      }
       revIdx++; revShown = false; openWidget(curWidget);
+    },
+    'en-forgot': async b => {
+      const l = bookWords(curBook()); const x = l.find(i => i.id == b.dataset.id);
+      if(x){
+        srsGrade(x, false);
+        saveBookWords(curBook(), l);
+        toast('已记下 · 今天还会再出现，并进了错词本');
+      }
+      revShown = true; openWidget(curWidget);
+    },
+    'en-again': async b => {
+      const bid = b.dataset.book || curBook();
+      const l = bookWords(bid); const x = l.find(i => i.id == b.dataset.id);
+      if(x){ x.due = todayStr(); x.known = false; saveBookWords(bid, l); }
+      if(bid !== curBook()) localStorage.setItem('shuiji_w_curbook', bid);
+      revIdx = 0; revShown = false;
+      toast('已放回今天的复习队列');
+      openWidget(curWidget);
     },
     'en-next': async () => { revIdx++; revShown = false; openWidget(curWidget); },
     'en-new-flip': async () => {
@@ -4336,6 +5430,7 @@ async function buildReport(dv){
   const wsAll = wget('ex_w').filter(x => x && x.date);
   const wt = wsAll.find(x => x.date === t);
   const exT = todayArr('ex', t);
+  const vlogT = wget('vlog').filter(x => x.date === t);
   const mealT = wget('ex_meal').filter(x => x.date === t);
   if(wt || exT.length || mealT.length){
     L.push('【今日减脂】');
@@ -4351,10 +5446,14 @@ async function buildReport(dv){
         (wt.waist ? ' · 腰围 ' + wt.waist + 'cm' : '') +
         (t === todayStr() ? ' · 连续称重 ' + weightStreak(wsAll) + ' 天' : ''));
     }
+    if(vlogT.length){
+      L.push('  · 跟练 ' + vlogT.length + ' 个视频 · ' + vlogT.reduce((s, x) => s + (x.min || 0), 0) + ' 分钟');
+      vlogT.forEach(x => L.push('    《' + (x.t || '跟练') + '》' + (x.kcal ? ' · 约 ' + x.kcal + ' kcal' : '')));
+    }
     if(exT.length){
       const kc = exT.reduce((s, x) => s + (x.kcal || 0), 0);
       L.push('  · 运动 ' + sumMin(exT) + ' 分钟 · ' + kc + ' kcal');
-      const names = exT.map(x => x.type).filter(Boolean).join('、');
+      const names = exT.filter(x => x.from !== 'video').map(x => x.type).filter(Boolean).join('、');
       if(names) L.push('    ' + names);
     }
     if(mealT.length){
@@ -4403,6 +5502,18 @@ async function buildReport(dv){
   if(news.length){
     L.push('【今日读报】' + news.filter(n => n.read).length + '/' + news.length + ' 篇');
     news.forEach(n => L.push('  · ' + n.title + (n.source ? '（' + n.source + '）' : '')));
+    L.push('');
+  }
+
+  /* 5.5 今日测试工作（有记录才出现） */
+  const qaTodayRec = wget('qarep').find(x => x.date === t);
+  if(qaTodayRec){
+    const r = qaTodayRec;
+    L.push('【今日测试】' + (r.module || '—'));
+    L.push('  · 用例 ' + (r.total || 0) + ' 条：通过 ' + (r.pass || 0) + ' / 失败 ' + (r.fail || 0) + ' / 阻塞 ' + (r.block || 0));
+    L.push('  · Bug ' + (r.bugTotal || 0) + ' 个（致命 ' + (r.bugFatal || 0) + ' / 严重 ' + (r.bugMajor || 0) + ' / 一般 ' + (r.bugMinor || 0) + ' / 建议 ' + (r.bugIdea || 0) + '）');
+    if((r.risk || '').trim()) L.push('  · 风险：' + r.risk.trim());
+    if((r.plan || '').trim()) L.push('  · 明日：' + r.plan.trim());
     L.push('');
   }
 
@@ -4491,8 +5602,14 @@ function showUpdateBar(worker){
 async function init(){
   loadCool();
   await openDB();
+  await initV4();
   $('waterPhrase').textContent = phraseOfDay();
-  setupSpeech();
+  spInitVoices(); spBindUnlock(); setupSpeech();
+  /* 全局发音按钮：modal 内的按钮不走组件委托，这里兜住（含 iOS 手势栈） */
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-sp-play]');
+    if(b){ e.stopPropagation(); speakWord(b.dataset.spPlay || ''); }
+  }, true);
   applyTheme();
   loadSettings();
   loadPomo(); renderPomo();
@@ -4501,6 +5618,10 @@ async function init(){
   await refreshToday();
 
   /* 事件绑定 */
+  document.addEventListener('click', e => {
+    const c = e.target.closest && e.target.closest('[data-vplay]');
+    if(c) openVideo(c.dataset.vplay);
+  });
   $('addBtn').addEventListener('click', handleAdd);
   $('taskInput').addEventListener('keydown', e => { if(e.key === 'Enter') handleAdd(); });
   $('tabTodo').addEventListener('click', () => { taskTab = 'todo'; switchTaskTab(); });
@@ -4518,13 +5639,17 @@ async function init(){
   $('menuBtn').addEventListener('click', openDrawer);
   $('drawerMask').addEventListener('click', closeDrawer);
   $('widgetBack').addEventListener('click', () => { curWidget = null; switchTab('today'); refreshToday(); });
-  document.querySelectorAll('.drawer-item').forEach(it => {
-    it.addEventListener('click', () => {
+  /* #2 抽屉改成事件委托：小组件列表会被重排/隐藏，直接绑定会失效 */
+  { const dm = document.querySelector('.drawer-menu');
+    if(dm) dm.addEventListener('click', e => {
+      const it = e.target.closest && e.target.closest('.drawer-item');
+      if(!it) return;
       closeDrawer();
       if(it.dataset.widget) openWidget(it.dataset.widget);
-      else switchTab(it.dataset.view);
-    });
-  });
+      else if(it.dataset.view) switchTab(it.dataset.view);
+    }); }
+  { const b = $('wManageBtn'); if(b) b.addEventListener('click', e => { e.stopPropagation(); openWidgetManager(); }); }
+  renderDrawerWidgets();
   $('calPrev').addEventListener('click', () => { cal.m--; if(cal.m < 0){ cal.m = 11; cal.y--; } renderCalendar(); });
   $('calNext').addEventListener('click', () => { cal.m++; if(cal.m > 11){ cal.m = 0; cal.y++; } renderCalendar(); });
   $('calGrid').addEventListener('click', async e => {
@@ -4536,6 +5661,13 @@ async function init(){
   });
   $('saveReviewBtn').addEventListener('click', saveReview);
   { const fq = $('fitQuick'); if(fq) fq.addEventListener('click', openWeightQuick); }
+  { const fv = $('fitVidQuick'); if(fv) fv.addEventListener('click', () => { if(fv.dataset.bv) openVideo(fv.dataset.bv); }); }
+  { const b = $('tplBtn'); if(b) b.addEventListener('click', () => openTplPanel()); }          /* #4 */
+  { const b = $('batchBtn'); if(b) b.addEventListener('click', () => setBatchMode(!batchMode)); } /* #3 */
+  { const bar = $('batchBar'); if(bar) bar.addEventListener('click', e => {                      /* #3 */
+      const b = e.target.closest && e.target.closest('[data-bact]');
+      if(b) batchAct(b.dataset.bact);
+    }); }
   $('reportBtn').addEventListener('click', showReport);
   $('oldClose').addEventListener('click', () => $('oldPanel').classList.add('hidden'));
   $('shakeBtn').addEventListener('click', pickRandom);
@@ -4571,6 +5703,7 @@ async function init(){
   }));
   if(window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
   $('exportBtn').addEventListener('click', exportData);
+  { const b = $('exportMdBtn'); if(b) b.addEventListener('click', exportMarkdown); }
   $('importBtn').addEventListener('click', () => $('importFile').click());
   $('importFile').addEventListener('change', importData);
   $('clearBtn').addEventListener('click', clearAll);
@@ -4641,6 +5774,13 @@ async function init(){
   setInterval(updateSoftReminder, 60000);
   updateCooldownUI();
 
+  /* F1：手机锁屏 / 切后台时 setInterval 会被节流甚至冻结，
+     仅靠定时器会导致番茄钟到点不响铃、不记录。回到前台立刻补判一次。 */
+  bindPomoWake();
+  /* F2：跨过零点后自动刷新（否则新任务会记到前一天） */
+  lastDayKey = todayStr();
+  setInterval(checkDayChange, 20000);
+
   /* 数据提醒：手机端存储可能被系统清理，超过 7 天没备份就提示一次 */
   setTimeout(() => {
     const d = backupDays();
@@ -4648,7 +5788,789 @@ async function init(){
     else if(d >= 7) toast('距上次备份已 ' + d + ' 天，建议再导出一份');
   }, 4000);
 }
-init();
+/* =====================================================================
+ * V4 新增模块（2026-09-15）
+ *   #1 首屏折叠  #2 周报  #3 备份增强  #4 装到主屏幕  #5 误删撤销
+ *   #6 重复任务  #7 搜索归档  #8 成就徽章  #9 定时提醒  #10 规律洞察
+ *   #11 测试工作日报
+ * ===================================================================== */
+
+/* ---------------- 通用：带「撤销」按钮的 toast ---------------- */
+function hideToast(){ $('toast').classList.remove('show'); }
+let toastUndoTimer = null;
+function toastUndo(msg, label, cb){
+  const t = $('toast');
+  t.textContent = '';
+  const span = document.createElement('span');
+  span.textContent = msg;
+  const btn = document.createElement('button');
+  btn.className = 'toast-undo';
+  btn.textContent = label;
+  btn.onclick = () => { hideToast(); try{ cb && cb(); }catch(e){} };
+  t.appendChild(span); t.appendChild(btn);
+  t.classList.add('show');
+  clearTimeout(toastTimer); clearTimeout(toastUndoTimer);
+  toastUndoTimer = setTimeout(hideToast, 5000);
+}
+
+/* ---------------- #5 回收站：删除可撤销，保留 7 天 ---------------- */
+const TRASH_KEEP_DAYS = 7;
+async function deleteTaskSoft(id){
+  const t = await getById('tasks', id);
+  if(!t) return;
+  const snap = JSON.parse(JSON.stringify(t));
+  await del('tasks', id);
+  await put('trash', Object.assign({}, snap, { _store:'tasks', deletedAt:new Date().toISOString() }));
+  await refreshToday();
+  toastUndo('已删除「' + String(t.text || '').slice(0, 10) + '」', '撤销', async () => {
+    await del('trash', snap.id);
+    await add('tasks', snap);
+    await refreshToday();
+    toast('已恢复');
+  });
+}
+async function trashPurge(){
+  const all = await getAll('trash');
+  const cut = Date.now() - TRASH_KEEP_DAYS * 86400000;
+  for(const r of all){
+    if(new Date(r.deletedAt || 0).getTime() < cut) await del('trash', r.id);
+  }
+}
+async function trashRestore(id){
+  const r = await getById('trash', id);
+  if(!r) return;
+  const back = JSON.parse(JSON.stringify(r));
+  delete back.deletedAt; delete back._store;
+  await add('tasks', back);
+  await del('trash', r.id);
+  await refreshToday();
+  toast('已恢复 1 条');
+  openTrash();
+}
+async function openTrash(){
+  await trashPurge();
+  const list = await getAll('trash');
+  if(!list.length){ toast('回收站是空的'); return; }
+  const rows = list.sort((a, b) => String(b.deletedAt || '').localeCompare(String(a.deletedAt || '')))
+    .map(r => '<div class="sp-item" data-tr="' + r.id + '">' + esc(r.text || '(无标题)') +
+      '<div class="sp-meta">删除于 ' + String(r.deletedAt || '').slice(0, 10) + ' · 点此恢复</div></div>').join('');
+  showModal('回收站（' + list.length + ' 条 · 保留 ' + TRASH_KEEP_DAYS + ' 天）', rows, [{label:'关闭', value:0}]);
+  $('modalBody').querySelectorAll('[data-tr]').forEach(el => {
+    el.onclick = () => { hideModal(); trashRestore(el.dataset.tr); };
+  });
+}
+
+/* ---------------- #3 备份增强：每日自动快照 + 恢复 ---------------- */
+function getSnap(date){
+  return new Promise(res => {
+    try{
+      const r = db.transaction('snapshots').objectStore('snapshots').get(date);
+      r.onsuccess = () => res(r.result || null);
+      r.onerror = () => res(null);
+    }catch(e){ res(null); }
+  });
+}
+async function saveSnapshot(){
+  try{
+    const localState = {};
+    for(const k of Object.keys(localStorage)) if(k.indexOf('shuiji_') === 0 && SECRET_KEYS.indexOf(k) < 0) localState[k] = localStorage.getItem(k);
+    await put('snapshots', { date: todayStr(), localState: localState, at: new Date().toISOString() });
+    const all = (await getAll('snapshots')).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    while(all.length > 7){ const old = all.shift(); await del('snapshots', old.date); }
+  }catch(e){ /* 快照失败不影响使用 */ }
+}
+async function openSnapshots(){
+  const all = (await getAll('snapshots')).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  if(!all.length){ toast('还没有自动快照'); return; }
+  const rows = all.map(s => {
+    let w = 0;
+    try{ w = (JSON.parse(s.localState['shuiji_w_ex_w'] || '[]')).length; }catch(e){}
+    return '<div class="sp-item" data-sn="' + s.date + '">' + s.date +
+      '<div class="sp-meta">含体重记录 ' + w + ' 条 · 点此恢复小组件与减肥数据</div></div>';
+  }).join('');
+  showModal('自动快照（最近 ' + all.length + ' 天）',
+    rows + '<div class="w-note" style="margin-top:8px">只覆盖小组件与减肥等本地数据，不动任务与习惯。</div>',
+    [{label:'关闭', value:0}]);
+  $('modalBody').querySelectorAll('[data-sn]').forEach(el => {
+    el.onclick = async () => {
+      const s = await getSnap(el.dataset.sn);
+      if(!s) return;
+      const ok = await confirmBox('用 ' + s.date + ' 的快照覆盖当前小组件与减肥数据？');
+      if(!ok) return;
+      for(const [k, v] of Object.entries(s.localState || {})) localStorage.setItem(k, v);
+      toast('已恢复 ' + s.date + ' 的本地数据');
+      refreshToday();
+    };
+  });
+}
+
+/* ---------------- #4 添加到主屏幕 ---------------- */
+let deferredPrompt = null;
+function isStandalone(){
+  try{
+    return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+           window.navigator.standalone === true;
+  }catch(e){ return false; }
+}
+function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent); }
+function showInstallBar(){
+  if(isStandalone() || localStorage.getItem('shuiji_install_hide')) return;
+  let bar = $('installBar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.className = 'install-bar';
+    bar.id = 'installBar';
+    const hero = document.querySelector('.today-hero');
+    if(!hero || !hero.parentNode) return;
+    hero.parentNode.insertBefore(bar, hero.nextSibling);
+  }
+  bar.innerHTML = '<span>📲</span><span>装到桌面：打开更快、全屏、可收提醒</span>' +
+    '<button class="ib-btn" id="ibGo">' + (isIOS() ? '查看方法' : '安装') + '</button>' +
+    '<button class="ib-close" id="ibClose" aria-label="不再提示">×</button>';
+  $('ibGo').onclick = isIOS() ? showIOSGuide : doInstall;
+  $('ibClose').onclick = () => { localStorage.setItem('shuiji_install_hide', '1'); bar.remove(); };
+}
+async function doInstall(){
+  if(!deferredPrompt){ showIOSGuide(); return; }
+  try{
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    if(choice && choice.outcome === 'accepted') toast('正在添加到桌面…');
+  }catch(e){ showIOSGuide(); }
+  deferredPrompt = null;
+  const bar = $('installBar'); if(bar) bar.remove();
+}
+function showIOSGuide(){
+  showModal('📲 添加到主屏幕',
+    '<div style="font-size:var(--fs-13,13px);line-height:1.9">' +
+    '1. 点底部中间的 <b>分享</b> 按钮（方框带向上箭头）<br>' +
+    '2. 向下滑，找到 <b>添加到主屏幕</b><br>' +
+    '3. 点右上角 <b>添加</b><br>' +
+    '<span style="color:var(--sub)">之后从桌面图标打开即为全屏应用，提醒也能正常送达。</span></div>',
+    [{label:'知道了', value:1, primary:true}]);
+}
+
+/* ---------------- #1 首页分区折叠（状态记住） ---------------- */
+const SEC_DEFS = [
+  { id:'morningCard', title:'早安摘要', def:false },
+  { id:'focusBox',    title:'番茄钟',   def:true  },
+  { id:'habitBox',    title:'习惯打卡', def:true  },
+  { id:'calCard',     title:'日历复盘', def:false }
+];
+function secIsOpen(id){
+  const s = SEC_DEFS.filter(x => x.id === id)[0] || { def:true };
+  const v = localStorage.getItem('shuiji_sec_' + id);
+  return v === null ? !!s.def : v === '1';
+}
+function setSecOpen(id, open){ localStorage.setItem('shuiji_sec_' + id, open ? '1' : '0'); applySection(id); }
+function applySection(id){
+  const el = $(id); if(!el) return;
+  const head = document.querySelector('.sec-head[data-sec="' + id + '"]');
+  const open = secIsOpen(id);
+  el.classList.toggle('hidden', !open);
+  if(head) head.classList.toggle('open', open);
+}
+function initSections(){
+  SEC_DEFS.forEach(s => {
+    const el = $(s.id);
+    if(!el || document.querySelector('.sec-head[data-sec="' + s.id + '"]')) return;
+    const head = document.createElement('button');
+    head.className = 'sec-head';
+    head.dataset.sec = s.id;
+    head.innerHTML = '<span>' + s.title + '</span><span class="sec-arrow">›</span>';
+    el.parentNode.insertBefore(head, el);
+    head.addEventListener('click', () => setSecOpen(s.id, !secIsOpen(s.id)));
+    applySection(s.id);
+  });
+}
+/* 番茄钟跑起来时自动展开，否则倒计时看不见 */
+function ensureFocusVisible(){
+  if(secIsOpen('focusBox')) return;
+  setSecOpen('focusBox', true);
+}
+
+/* ---------------- #6 重复任务 ---------------- */
+const REPEAT_LABEL = { daily:'每天', weekly:'每周', weekday:'工作日' };
+function repeatDueToday(tpl, t){
+  const d = new Date(t + 'T00:00:00');
+  const wd = d.getDay();
+  if(tpl.repeat === 'daily') return true;
+  if(tpl.repeat === 'weekday') return wd >= 1 && wd <= 5;
+  if(tpl.repeat === 'weekly') return (tpl.repeatWd == null ? wd : Number(tpl.repeatWd)) === wd;
+  return false;
+}
+async function expandRepeats(){
+  const t = todayStr();
+  if(localStorage.getItem('shuiji_repeat_last') === t) return;
+  localStorage.setItem('shuiji_repeat_last', t);
+  const all = await getAll('tasks');
+  const tpls = all.filter(x => x.repeat && x.repeatTpl && !x.archived);
+  if(!tpls.length) return;
+  const active = await getActiveToday();
+  const todayTexts = all.filter(x => x.date === t && !x.archived).map(x => x.text);
+  let added = 0, skipped = 0;
+  for(const tpl of tpls){
+    if(!repeatDueToday(tpl, t)) continue;
+    if(todayTexts.indexOf(tpl.text) >= 0) continue;
+    if(active.length + added >= MAX_ACTIVE){ skipped++; continue; }
+    await add('tasks', {
+      text: tpl.text, date: t, category: tpl.category || detectCategory(tpl.text),
+      important: !!tpl.important, repeat: tpl.repeat, repeatTpl: false, repeatOf: tpl.id,
+      createdAt: new Date().toISOString()
+    });
+    added++;
+  }
+  if(added){ await refreshToday(); setTimeout(() => toast('↻ 已自动添加 ' + added + ' 件重复任务'), 600); }
+  else if(skipped) setTimeout(() => toast('还有 ' + skipped + ' 件重复任务排不进来，先完成一件'), 800);
+}
+async function setTaskRepeat(id, mode){
+  const t = await getById('tasks', id);
+  if(!t) return;
+  t.repeat = mode || null;
+  t.repeatTpl = !!mode;
+  t.repeatWd = new Date().getDay();
+  await put('tasks', t);
+  await refreshToday();
+  toast(mode ? ('↻ 已设为' + (REPEAT_LABEL[mode] || '重复') + '重复') : '已取消重复');
+}
+/* 长按任务卡 → 操作菜单（重复 / 删除） */
+async function openTaskMenu(id){
+  const t = await getById('tasks', id);
+  if(!t) return;
+  const body =
+    '<div class="w-note">「' + esc(t.text) + '」</div>' +
+    '<div class="qa-grid" style="margin-top:10px">' +
+      '<button class="modal-btn" data-m="daily">↻ 每天</button>' +
+      '<button class="modal-btn" data-m="weekly">↻ 每周这天</button>' +
+      '<button class="modal-btn" data-m="weekday">↻ 工作日</button>' +
+      '<button class="modal-btn" data-m="off">✕ 取消重复</button>' +
+    '</div>' +
+    (t.repeat ? '<div class="w-note" style="margin-top:8px">当前：' + (REPEAT_LABEL[t.repeat] || '重复') + '，每天打开时自动生成</div>' : '') +
+    '<div style="margin-top:12px"><button class="modal-btn" id="tmDel" style="color:#c0392b">删除任务</button></div>';
+  showModal('任务操作', body, [{label:'关闭', value:0}]);
+  $('modalBody').querySelectorAll('[data-m]').forEach(b => {
+    b.onclick = () => { hideModal(); setTaskRepeat(id, b.dataset.m === 'off' ? null : b.dataset.m); };
+  });
+  const db = $('tmDel');
+  if(db) db.onclick = async () => {
+    hideModal();
+    const ok = await confirmBox('删除这条任务？\n7 天内可从「设置 → 回收站」恢复。');
+    if(ok) await deleteTaskSoft(id);
+  };
+}
+
+/* ---------------- #7 全局搜索 + 归档 ---------------- */
+function bindSearchPanel(){
+  const btn = $('searchBtn');
+  if(btn) btn.addEventListener('click', openSearch);
+}
+async function openSearch(){
+  let panel = $('searchPanel');
+  if(!panel){
+    panel = document.createElement('div');
+    panel.className = 'search-panel';
+    panel.id = 'searchPanel';
+    panel.innerHTML =
+      '<div class="sp-top"><input class="sp-input" id="spInput" placeholder="搜任务 / 复盘 / 测试日报…" autocomplete="off">' +
+      '<button class="sp-cancel" id="spCancel">取消</button></div>' +
+      '<div class="sp-list" id="spList"></div>';
+    document.body.appendChild(panel);
+    $('spCancel').onclick = () => panel.remove();
+    $('spInput').addEventListener('input', () => runSearch($('spInput').value));
+  }
+  setTimeout(() => { const i = $('spInput'); if(i) i.focus(); }, 60);
+  runSearch('');
+}
+async function runSearch(kw){
+  const box = $('spList'); if(!box) return;
+  kw = (kw || '').trim().toLowerCase();
+  const tasks = await getAll('tasks');
+  const qa = wget('qarep');
+  const rows = [];
+  tasks.forEach(t => {
+    if(kw && String(t.text || '').toLowerCase().indexOf(kw) < 0) return;
+    rows.push({ kind:'任务', text:t.text,
+      meta:t.date + (t.completed ? ' · 已完成' : ' · 未完成') + (t.repeat ? ' · ' + (REPEAT_LABEL[t.repeat] || '重复') : '') + (t.archived ? ' · 已归档' : '') });
+  });
+  qa.forEach(r => {
+    if(kw && JSON.stringify(r).toLowerCase().indexOf(kw) < 0) return;
+    rows.push({ kind:'测试日报', text:(r.module || '测试') + ' · 执行 ' + (r.total || 0) + ' 用例 · Bug ' + (r.bugTotal || 0) + ' 个', meta:r.date });
+  });
+  for(const k of Object.keys(localStorage)){
+    if(k.indexOf('shuiji_review_') !== 0) continue;
+    const txt = localStorage.getItem(k) || '';
+    if(!txt.trim()) continue;
+    if(kw && txt.toLowerCase().indexOf(kw) < 0) continue;
+    rows.push({ kind:'复盘', text:txt.slice(0, 80), meta:k.replace('shuiji_review_', '') });
+  }
+  rows.sort((a, b) => String(b.meta).localeCompare(String(a.meta)));
+  if(!rows.length){ box.innerHTML = '<div class="sp-empty">没有找到相关内容</div>'; return; }
+  box.innerHTML = rows.slice(0, 80).map(r =>
+    '<div class="sp-item"><span style="color:var(--sub)">[' + r.kind + ']</span> ' + esc(r.text) +
+    '<div class="sp-meta">' + esc(r.meta) + '</div></div>').join('');
+}
+async function archiveOldTasks(){
+  const all = await getAll('tasks');
+  const cut = daysAgoStr(30);
+  let n = 0;
+  for(const t of all){
+    if(t.completed && !t.archived && t.date < cut){ t.archived = true; await put('tasks', t); n++; }
+  }
+  toast(n ? ('已归档 ' + n + ' 条 30 天前的已完成任务') : '没有需要归档的任务');
+}
+
+/* ---------------- #9 定时提醒 ---------------- */
+function remCfg(){ try{ return JSON.parse(localStorage.getItem('shuiji_rem') || '{}'); }catch(e){ return {}; } }
+function bindReminderUI(){
+  const btn = $('remBtn');
+  if(btn) btn.addEventListener('click', openReminderSetting);
+  setInterval(checkReminders, 30000);
+  setTimeout(checkReminders, 3000);
+}
+async function openReminderSetting(){
+  const c = remCfg();
+  const v = await showModal('⏰ 提醒设置',
+    '<div class="qa-lab">喝水提醒（间隔，没喝够才提醒）</div><select id="remDrink" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:var(--fs-15,15px);color:var(--text);box-sizing:border-box">' +
+      [[0,'不提醒'],[1,'每 1 小时'],[2,'每 2 小时'],[3,'每 3 小时'],[4,'每 4 小时']].map(o =>
+        '<option value="' + o[0] + '"' + (String(c.drink || 0) === String(o[0]) ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>' +
+    '<div class="qa-lab">写日报提醒</div><input id="remReport" type="time" value="' + (c.report || '21:00') + '" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:var(--fs-15,15px);color:var(--text);box-sizing:border-box">' +
+    '<div class="qa-lab">称重提醒</div><input id="remWeight" type="time" value="' + (c.weight || '08:00') + '" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:var(--fs-15,15px);color:var(--text);box-sizing:border-box">' +
+    '<div class="w-note" style="margin-top:10px">提醒只在这个页面开着时生效（浏览器限制）。装到桌面 + 允许通知后更靠谱。</div>',
+    [{label:'关闭', value:0}, {label:'保存并开启', value:1, primary:true}]);
+  if(v !== 1) return;
+  localStorage.setItem('shuiji_rem', JSON.stringify({ report: $('remReport').value, weight: $('remWeight').value, drink: $('remDrink').value, on: 1 }));
+  const ok = await askNotify();
+  toast(ok ? '提醒已开启' : '已保存，但通知权限没拿到');
+}
+async function askNotify(){
+  if(!('Notification' in window)){ toast('这个浏览器不支持通知'); return false; }
+  if(Notification.permission === 'granted') return true;
+  if(Notification.permission === 'denied'){ toast('通知被系统禁用了，去浏览器设置里打开'); return false; }
+  try{ const p = await Notification.requestPermission(); return p === 'granted'; }catch(e){ return false; }
+}
+async function checkReminders(){
+  const c = remCfg(); if(!c || !c.on) return;
+  const now = new Date();
+  const cur = ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
+  const day = todayStr();
+  let fired = {};
+  try{ fired = JSON.parse(localStorage.getItem('shuiji_rem_fired') || '{}'); }catch(e){ fired = {}; }
+  if(fired.day !== day) fired = { day: day, list: [] };
+  [['report', c.report, '今天的日报写了吗？点开右下角一键生成'], ['weight', c.weight, '早上称个体重，数据才准']].forEach(p => {
+    if(!p[1] || p[1] !== cur) return;
+    if((fired.list || []).indexOf(p[0]) >= 0) return;
+    fired.list.push(p[0]);
+    localStorage.setItem('shuiji_rem_fired', JSON.stringify(fired));
+    fireNotify('💧 水机', p[2]);
+  });
+  await checkDrinkReminder(c, day);
+}
+/* 喝水提醒：按间隔提醒，当天已喝够就静默跳过（不打扰） */
+async function checkDrinkReminder(c, day){
+  const gap = parseFloat(c.drink || 0);
+  if(!(gap > 0)) return;
+  const now = Date.now();
+  const last = parseInt(localStorage.getItem('shuiji_drinkrem_at') || '0', 10);
+  const midnight = new Date(day + 'T00:00:00').getTime();
+  if(last && last < midnight){ localStorage.setItem('shuiji_drinkrem_at', String(now)); return; }  /* 昨天的记录，今天从头计 */
+  if(last && now - last < gap * 3600000) return;
+  let ml = 0;
+  try{
+    const hs = await getAll('habits');
+    ml = hs.filter(h => h.date === day && h.type === 'drink').reduce((s, h) => s + (h.ml || 0), 0);
+  }catch(e){}
+  localStorage.setItem('shuiji_drinkrem_at', String(now));
+  const target = waterTarget();
+  if(ml >= target) return;                                  /* 已喝够，不打扰 */
+  fireNotify('💧 该喝水了', '今天才 ' + ml + 'ml / ' + target + 'ml，起来接一杯');
+}
+function fireNotify(title, body){
+  try{
+    if('Notification' in window && Notification.permission === 'granted'){ new Notification(title, { body: body }); return; }
+  }catch(e){}
+  toast(body);
+}
+
+/* ---------------- #2 周报 ---------------- */
+function weekKeyOf(){
+  const x = new Date();
+  const wd = (x.getDay() + 6) % 7;
+  x.setDate(x.getDate() - wd);
+  return todayStr(x);
+}
+async function buildWeekReport(){
+  const mon = weekKeyOf();
+  const days = [];
+  for(let i = 0; i < 7; i++){ const d = new Date(mon + 'T00:00:00'); d.setDate(d.getDate() + i); days.push(todayStr(d)); }
+  const today = todayStr();
+  const span = days.filter(d => d <= today);
+  const tasks = await getAll('tasks');
+  const focus = await getAll('focus');
+  const habits = await getAll('habits');
+  const ws = wget('ex_w');
+  const qa = wget('qarep');
+  const inSpan = r => span.indexOf(r.date) >= 0;
+  const tAll = tasks.filter(inSpan), tDone = tAll.filter(x => x.completed);
+  const fAll = focus.filter(inSpan);
+  const fMin = Math.round(fAll.reduce((s, x) => s + (x.duration || 0), 0) / 60);
+  const drinkDays = new Set(habits.filter(x => x.type === 'drink' && inSpan(x)).map(x => x.date)).size;
+  const L = [];
+  L.push('本周小结（' + span[0] + ' ~ ' + span[span.length - 1] + '）');
+  L.push('');
+  L.push('· 任务完成 ' + tDone.length + '/' + tAll.length + '（' + (tAll.length ? Math.round(tDone.length / tAll.length * 100) : 0) + '%）');
+  L.push('· 专注 ' + fAll.length + ' 次 / 约 ' + fMin + ' 分钟');
+  L.push('· 喝水打卡 ' + drinkDays + ' 天');
+  if(ws.length >= 2){
+    const a = ws[0].weight, b = ws[ws.length - 1].weight;
+    L.push('· 体重 ' + a + ' → ' + b + ' kg（' + (b - a >= 0 ? '+' : '') + (b - a).toFixed(1) + '）');
+  }
+  const qaWeek = qa.filter(r => span.indexOf(r.date) >= 0);
+  if(qaWeek.length){
+    const sum = k => qaWeek.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+    L.push('· 测试：执行 ' + sum('total') + ' 用例 · 提交 Bug ' + sum('bugTotal') + ' 个');
+  }
+  L.push('');
+  L.push('每日完成：');
+  days.forEach(d => {
+    if(d > today) return;
+    const a = tasks.filter(x => x.date === d), c = a.filter(x => x.completed);
+    L.push('  ' + d.slice(5) + '  ' + c.length + '/' + a.length + (a.length && c.length === a.length ? '  ✅' : ''));
+  });
+  return L.join('\n');
+}
+async function showWeekReport(){
+  const txt = await buildWeekReport();
+  showModal('📊 本周小结',
+    '<textarea id="weekText" rows="14" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:var(--fs-13,13px);line-height:1.7;color:var(--text);resize:vertical;font-family:inherit;box-sizing:border-box">' + esc(txt) + '</textarea>',
+    [{label:'关闭', value:0}, {label:'📋 复制全文', value:1, primary:true}]
+  ).then(v => { if(v === 1) copyText(txt); });
+}
+function checkWeekReport(){
+  const wd = new Date().getDay();
+  if(wd !== 0 && wd !== 1) return;
+  const key = 'shuiji_weekrep_' + weekKeyOf();
+  if(localStorage.getItem(key)) return;
+  localStorage.setItem(key, '1');
+  setTimeout(() => showWeekReport(), 1800);
+}
+
+/* ---------------- #8 成就徽章 ---------------- */
+const ACHIEVEMENTS = [
+  { id:'first_done', ic:'✅', nm:'开了个头', ds:'完成第 1 件任务' },
+  { id:'done10',     ic:'🔟', nm:'小有积累', ds:'累计完成 10 件' },
+  { id:'done50',     ic:'💪', nm:'五十件',   ds:'累计完成 50 件' },
+  { id:'streak3',    ic:'🔥', nm:'三天连续', ds:'连续 3 天有完成' },
+  { id:'streak7',    ic:'🌊', nm:'一周不断', ds:'连续 7 天有完成' },
+  { id:'focus5',     ic:'🍅', nm:'专注 5 次', ds:'累计专注 5 次' },
+  { id:'focus20',    ic:'🎯', nm:'专注 20 次', ds:'累计专注 20 次' },
+  { id:'weight7',    ic:'⚖️', nm:'称重 7 次', ds:'累计记录 7 天体重' },
+  { id:'water7',     ic:'💧', nm:'喝水达人', ds:'连续 7 天喝水打卡' },
+  { id:'perfect',    ic:'🏆', nm:'圆满一天', ds:'某天任务 100% 完成' },
+  { id:'qa1',        ic:'🧪', nm:'首份日报', ds:'提交 1 份测试日报' },
+  { id:'qa5',        ic:'📈', nm:'测试周更', ds:'提交 5 份测试日报' }
+];
+function achGot(){ try{ return JSON.parse(localStorage.getItem('shuiji_ach') || '{}'); }catch(e){ return {}; } }
+async function evalAchievements(silent){
+  try{
+    const tasks = await getAll('tasks');
+    const focus = await getAll('focus');
+    const habits = await getAll('habits');
+    const qa = wget('qarep');
+    const ws = wget('ex_w');
+    const doneAll = tasks.filter(x => x.completed);
+    const doneDates = Array.from(new Set(doneAll.map(x => x.date))).sort();
+    const drinkDates = Array.from(new Set(habits.filter(x => x.type === 'drink').map(x => x.date))).sort();
+    const byDay = {};
+    tasks.forEach(t => { byDay[t.date] = byDay[t.date] || { a:0, c:0 }; byDay[t.date].a++; if(t.completed) byDay[t.date].c++; });
+    const hasPerfect = Object.keys(byDay).some(k => byDay[k].a > 0 && byDay[k].a === byDay[k].c);
+    const vals = {
+      first_done: doneAll.length >= 1,
+      done10: doneAll.length >= 10,
+      done50: doneAll.length >= 50,
+      streak3: calcStreak(doneDates) >= 3,
+      streak7: calcStreak(doneDates) >= 7,
+      focus5: focus.length >= 5,
+      focus20: focus.length >= 20,
+      weight7: ws.length >= 7,
+      water7: calcStreak(drinkDates) >= 7,
+      perfect: hasPerfect,
+      qa1: qa.length >= 1,
+      qa5: qa.length >= 5
+    };
+    const got = achGot();
+    const fresh = [];
+    ACHIEVEMENTS.forEach(a => { if(vals[a.id] && !got[a.id]){ got[a.id] = todayStr(); fresh.push(a); } });
+    if(fresh.length){
+      localStorage.setItem('shuiji_ach', JSON.stringify(got));
+      if(!silent) fresh.forEach((a, i) => setTimeout(() => toast('🏅 解锁成就：' + a.nm), i * 1500));
+    }
+    return got;
+  }catch(e){ return achGot(); }
+}
+function renderBadges(){
+  const box = $('badgeWall'); if(!box) return;
+  const got = achGot();
+  box.innerHTML = ACHIEVEMENTS.map(a =>
+    '<div class="badge' + (got[a.id] ? ' on' : '') + '"><span class="b-ic">' + a.ic + '</span>' +
+    '<div class="b-nm">' + a.nm + '</div>' +
+    '<div class="b-ds">' + (got[a.id] ? (got[a.id].slice(5) + ' 解锁') : a.ds) + '</div></div>').join('');
+}
+
+/* ---------------- #10 个人规律洞察 ---------------- */
+async function renderInsights(){
+  const box = $('insightBox'); if(!box) return;
+  try{
+    const tasks = await getAll('tasks');
+    const moods = await getAll('moods');
+    const since = daysAgoStr(30);
+    const recent = tasks.filter(x => x.date >= since);
+    if(recent.length < 5){
+      box.innerHTML = '<div class="ins-line">再积累几天，我就能告诉你什么时候效率最高。</div>';
+      return;
+    }
+    const wk = [0,0,0,0,0,0,0], wkDone = [0,0,0,0,0,0,0];
+    recent.forEach(t => {
+      const d = new Date(t.date + 'T00:00:00').getDay();
+      wk[d]++; if(t.completed) wkDone[d]++;
+    });
+    const rate = i => wk[i] ? wkDone[i] / wk[i] : -1;
+    const names = ['周日','周一','周二','周三','周四','周五','周六'];
+    let best = 1, worst = 1;
+    for(let i = 1; i < 7; i++){
+      if(rate(i) > rate(best)) best = i;
+      if(wk[i] > 0 && (rate(worst) < 0 || rate(i) < rate(worst))) worst = i;
+    }
+    const seg = { morning:0, afternoon:0, evening:0 };
+    recent.filter(t => t.completed && t.completedAt).forEach(t => {
+      const h = new Date(t.completedAt).getHours();
+      if(h < 12) seg.morning++; else if(h < 18) seg.afternoon++; else seg.evening++;
+    });
+    const segName = { morning:'上午', afternoon:'下午', evening:'晚上' };
+    const topSeg = Object.keys(seg).sort((a, b) => seg[b] - seg[a])[0];
+    const L = [];
+    L.push('<b>' + names[best] + '</b> 完成率最高（' + Math.round(rate(best) * 100) + '%），' + names[worst] + ' 最容易拖。');
+    if(seg[topSeg] > 0) L.push('完成的任务大多落在<b>' + segName[topSeg] + '</b>（' + seg[topSeg] + ' 件），难事排在那会儿更稳。');
+    const byDay = {};
+    moods.forEach(m => { byDay[String(m.date).slice(0, 10)] = m.mood; });
+    const good = { a:0, c:0 }, bad = { a:0, c:0 };
+    recent.forEach(t => {
+      const m = byDay[t.date]; if(!m) return;
+      if(m === 'happy'){ good.a++; if(t.completed) good.c++; }
+      else if(m === 'bad'){ bad.a++; if(t.completed) bad.c++; }
+    });
+    if(good.a >= 3 && bad.a >= 3){
+      L.push('心情好时完成率 <b>' + Math.round(good.c / good.a * 100) + '%</b>，心情糟时 <b>' + Math.round(bad.c / bad.a * 100) + '%</b>——状态差那天先把任务砍到 1 件。');
+    }
+    box.innerHTML = L.map(s => '<div class="ins-line">· ' + s + '</div>').join('');
+  }catch(e){ box.innerHTML = '<div class="ins-line">数据还不够，过几天再看。</div>'; }
+}
+
+/* ---------------- #11 测试工作日报 ---------------- */
+function qaAll(){ return wget('qarep'); }
+function qaToday(){ return qaAll().find(x => x.date === todayStr()) || null; }
+function qaNum(v){ const n = parseInt(v, 10); return isNaN(n) || n < 0 ? 0 : n; }
+/* 自定义日报模板：占位符 {模块} {总数} {通过} {失败} {阻塞} {Bug总数} {致命} {严重} {一般} {建议} {产出} {风险} {计划} {日期} */
+function qaTpl(){ try{ return localStorage.getItem('shuiji_qa_tpl') || ''; }catch(e){ return ''; } }
+function qaTplKeys(){
+  return { '日期': 'date', '模块': 'module', '总数': 'total', '通过': 'pass', '失败': 'fail', '阻塞': 'block',
+    'Bug总数': 'bugTotal', '致命': 'bugFatal', '严重': 'bugMajor', '一般': 'bugMinor', '建议': 'bugIdea',
+    '产出': 'output', '风险': 'risk', '计划': 'plan' };
+}
+function qaRenderTpl(tpl, r, date){
+  const map = qaTplKeys();
+  const vals = {};                                   /* 中文名和英文名都放一份，两种写法都能用 */
+  Object.keys(map).forEach(k => {
+    const v = (r && r[map[k]] != null && r[map[k]] !== '') ? r[map[k]] : '—';
+    vals[k] = v; vals[map[k]] = v;
+  });
+  const d = date || todayStr();
+  vals['日期'] = d; vals.date = d;
+  return String(tpl).replace(/\{([^}]{1,8})\}/g, (m, k) => (k in vals ? String(vals[k]) : m));
+}
+function qaText(rec, date){
+  const tpl = qaTpl();
+  if(tpl && tpl.trim()) return qaRenderTpl(tpl, rec || {}, date);
+  const r = rec || {};
+  const L = [];
+  L.push((date || todayStr()) + ' · 测试工作日报');
+  L.push('');
+  L.push('【负责模块】' + (r.module || '—'));
+  L.push('【用例执行】共 ' + (r.total || 0) + ' 条：通过 ' + (r.pass || 0) + ' / 失败 ' + (r.fail || 0) + ' / 阻塞 ' + (r.block || 0));
+  L.push('【Bug 提交】' + (r.bugTotal || 0) + ' 个（致命 ' + (r.bugFatal || 0) + ' / 严重 ' + (r.bugMajor || 0) + ' / 一般 ' + (r.bugMinor || 0) + ' / 建议 ' + (r.bugIdea || 0) + '）');
+  L.push('【今日产出】' + (r.output || '—'));
+  L.push('【风险与阻塞】' + (r.risk || '—'));
+  L.push('【明日计划】' + (r.plan || '—'));
+  return L.join('\n');
+}
+function qaInput(id, ph, val, type){
+  return '<input id="' + id + '" type="' + (type || 'number') + '" inputmode="' + (type === 'text' ? 'text' : 'numeric') +
+    '" min="0" placeholder="' + ph + '" value="' + (val != null && val !== '' ? esc(String(val)) : '') + '">';
+}
+function qaArea(id, ph, val){
+  return '<textarea id="' + id + '" rows="3" placeholder="' + ph + '" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:var(--fs-14,14px);color:var(--text);font-family:inherit;box-sizing:border-box;resize:vertical">' + esc(val || '') + '</textarea>';
+}
+function qaWeekSummary(){
+  const mon = weekKeyOf();
+  const list = qaAll().filter(x => x.date >= mon);
+  if(!list.length) return '本周还没有测试日报';
+  const sum = k => list.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+  return '本周 ' + list.length + ' 天 · 执行 ' + sum('total') + ' 用例 · Bug ' + sum('bugTotal') + ' 个';
+}
+/* #9 近 7 天趋势：用例执行柱 + 本周 Bug 等级分布 */
+function qaTrendHtml(){
+  const all = qaAll();
+  const days = [];
+  for(let i = 6; i >= 0; i--){ const d = new Date(); d.setDate(d.getDate() - i); days.push(todayStr(d)); }
+  const map = {};
+  all.forEach(r => { if(r && r.date) map[r.date] = r; });
+  const rows = days.map(d => map[d] || { date: d, total: 0, bugTotal: 0 });
+  const max = Math.max(1, ...rows.map(r => Number(r.total) || 0));
+  const today = todayStr();
+  const bars = rows.map(r => {
+    const tv = Number(r.total) || 0;
+    const h = tv ? Math.max(6, Math.round(tv / max * 100)) : 3;
+    return '<div class="qa-tb' + (r.date === today ? ' today' : '') + '">' +
+      '<span class="qa-tnum">' + (tv || '') + '</span>' +
+      '<div class="qa-tbar' + (tv ? '' : ' zero') + '" style="height:' + h + '%" title="用例 ' + tv + '"></div>' +
+      '<span class="qa-td">' + r.date.slice(8) + '日</span></div>';
+  }).join('');
+  const mon = weekKeyOf();
+  const wk = all.filter(x => x && x.date >= mon);
+  const lv = [['致命', 'bugFatal', '#C0392B'], ['严重', 'bugMajor', '#E57368'], ['一般', 'bugMinor', '#E8A33D'], ['建议', 'bugIdea', '#7C9C8A']];
+  const sum = k => wk.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+  const lvMax = Math.max(1, ...lv.map(x => sum(x[1])));
+  const lvRows = lv.map(x => {
+    const v = sum(x[1]);
+    return '<div class="qa-lv"><span class="qa-lv-n">' + x[0] + '</span>' +
+      '<span class="qa-lv-bar"><i style="width:' + Math.round(v / lvMax * 100) + '%;background:' + x[2] + '"></i></span>' +
+      '<span class="qa-lv-v">' + v + '</span></div>';
+  }).join('');
+  const has = rows.some(r => Number(r.total) || Number(r.bugTotal));
+  if(!has) return '<div class="w-empty">填几天数据，这里会出现趋势图</div>';
+  return '<div class="qa-trend">' + bars + '</div>' +
+    '<div class="qa-legend"><i style="background:color-mix(in srgb, var(--accent) 70%, transparent)"></i>每日用例执行数（近 7 天）</div>' +
+    (wk.length ? '<div style="margin-top:10px;font-size:var(--fs-12,12px);color:var(--sub)">本周 Bug 等级分布</div>' + lvRows : '');
+}
+WIDGETS['测试日报'] = {
+  render(){
+    const t = todayStr();
+    const rec = qaToday() || {};
+    const hist = qaAll().filter(x => x.date !== t).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
+    return wCard('🧪 今日测试日报',
+      '<div class="qa-lab">负责模块</div>' +
+      '<div class="qa-grid" style="grid-template-columns:1fr">' + qaInput('qa-module', '如：订单中心 / 支付链路', rec.module, 'text') + '</div>' +
+      '<div class="qa-lab">用例执行（条）</div>' +
+      '<div class="qa-grid">' + qaInput('qa-total', '总数', rec.total) + qaInput('qa-pass', '通过', rec.pass) +
+        qaInput('qa-fail', '失败', rec.fail) + qaInput('qa-block', '阻塞', rec.block) + '</div>' +
+      '<div class="qa-lab">提交 Bug（个）</div>' +
+      '<div class="qa-grid">' + qaInput('qa-fatal', '致命', rec.bugFatal) + qaInput('qa-major', '严重', rec.bugMajor) +
+        qaInput('qa-minor', '一般', rec.bugMinor) + qaInput('qa-idea', '建议', rec.bugIdea) + '</div>' +
+      '<div class="qa-lab">今日产出</div>' + qaArea('qa-output', '用例 / 报告 / 脚本…', rec.output) +
+      '<div class="qa-lab">风险与阻塞</div>' + qaArea('qa-risk', '卡在哪、需要谁支持', rec.risk) +
+      '<div class="qa-lab">明日计划</div>' + qaArea('qa-plan', '明天要做什么', rec.plan) +
+      '<div style="margin-top:12px;display:flex;gap:8px">' +
+        '<button class="w-btn" data-wact="qa-save">保存</button>' +
+        '<button class="w-btn" data-wact="qa-gen">生成日报</button>' +
+        '<button class="w-btn" data-wact="qa-copy">直接复制</button>' +
+      '</div>',
+      '<div class="w-streak">' + qaWeekSummary() + '</div>') +
+      wCard('📈 近 7 天趋势', qaTrendHtml(),
+        '<div style="margin-top:8px;text-align:right"><button class="w-tag" data-wact="qa-tpl">⚙ 自定义日报模板</button></div>') +
+      wCard('📚 历史日报',
+        hist.length ? hist.map(r => '<div class="qa-hist" data-wact="qa-view" data-date="' + r.date + '">' +
+          '<b style="font-weight:500">' + r.date + '</b> · ' + (r.module || '—') + ' · 用例 ' + (r.total || 0) + ' · Bug ' + (r.bugTotal || 0) + '</div>').join('')
+          : '<div class="w-empty">还没有历史记录，保存一份就有了</div>');
+  },
+  acts: {
+    'qa-save': async () => {
+      const g = id => ($(id) ? $(id).value : '');
+      const rec = {
+        date: todayStr(),
+        module: g('qa-module').trim(),
+        total: qaNum(g('qa-total')), pass: qaNum(g('qa-pass')), fail: qaNum(g('qa-fail')), block: qaNum(g('qa-block')),
+        bugFatal: qaNum(g('qa-fatal')), bugMajor: qaNum(g('qa-major')), bugMinor: qaNum(g('qa-minor')), bugIdea: qaNum(g('qa-idea')),
+        output: g('qa-output').trim(), risk: g('qa-risk').trim(), plan: g('qa-plan').trim(),
+        updatedAt: new Date().toISOString()
+      };
+      rec.bugTotal = rec.bugFatal + rec.bugMajor + rec.bugMinor + rec.bugIdea;
+      const l = qaAll().filter(x => x.date !== rec.date);
+      l.push(rec);
+      wset('qarep', l);
+      toast('✅ 已保存今天的测试日报');
+      openWidget(curWidget);
+      evalAchievements(false);
+    },
+    'qa-gen': async () => {
+      const g = id => ($(id) ? $(id).value : '');
+      const rec = {
+        module: g('qa-module').trim(),
+        total: qaNum(g('qa-total')), pass: qaNum(g('qa-pass')), fail: qaNum(g('qa-fail')), block: qaNum(g('qa-block')),
+        bugFatal: qaNum(g('qa-fatal')), bugMajor: qaNum(g('qa-major')), bugMinor: qaNum(g('qa-minor')), bugIdea: qaNum(g('qa-idea')),
+        output: g('qa-output').trim(), risk: g('qa-risk').trim(), plan: g('qa-plan').trim()
+      };
+      rec.bugTotal = rec.bugFatal + rec.bugMajor + rec.bugMinor + rec.bugIdea;
+      const txt = qaText(rec, todayStr());
+      showModal('今日测试日报',
+        '<textarea id="qaText" rows="14" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:var(--fs-13,13px);line-height:1.7;color:var(--text);resize:vertical;font-family:inherit;box-sizing:border-box">' + esc(txt) + '</textarea>' +
+        '<div class="w-note" style="margin-top:6px">可直接改完再发出去。</div>',
+        [{label:'关闭', value:0}, {label:'📋 复制全文', value:1, primary:true}]
+      ).then(v => { if(v === 1) copyText(txt); });
+    },
+    'qa-copy': async () => {
+      const r = qaToday();
+      if(!r){ toast('先保存一份，或直接点「生成日报」'); return; }
+      await copyText(qaText(r, r.date));
+    },
+    'qa-view': async b => {
+      const r = qaAll().find(x => x.date === b.dataset.date);
+      if(!r) return;
+      const txt = qaText(r, r.date);
+      showModal(r.date + ' 测试日报',
+        '<textarea id="qaText" rows="14" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:var(--fs-13,13px);line-height:1.7;color:var(--text);resize:vertical;font-family:inherit;box-sizing:border-box">' + esc(txt) + '</textarea>',
+        [{label:'关闭', value:0}, {label:'📋 复制全文', value:1, primary:true}]
+      ).then(v => { if(v === 1) copyText(txt); });
+    },
+    'qa-tpl': async () => {
+      const cur = qaTpl();
+      const ph = Object.keys(qaTplKeys()).map(k => '{' + k + '}').join(' ');
+      const v = await showModal('⚙ 日报模板',
+        '<div class="w-note" style="margin-bottom:8px">留空 = 用默认格式。可用占位符：<br><span style="color:var(--accent)">' + esc(ph) + '</span></div>' +
+        '<textarea id="qaTpl" rows="8" placeholder="例如：&#10;{日期} 测试日报&#10;模块：{模块}&#10;执行 {总数} 条，失败 {失败}&#10;Bug {Bug总数}（致命 {致命}）&#10;明日：{计划}" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:var(--fs-13,13px);line-height:1.7;color:var(--text);resize:vertical;font-family:inherit;box-sizing:border-box">' + esc(cur) + '</textarea>',
+        [{label:'清空用默认', value:2}, {label:'取消', value:0}, {label:'保存', value:1, primary:true}]);
+      if(v === 0) return;
+      const t = ($('qaTpl') ? $('qaTpl').value : '');
+      if(v === 2 || !t.trim()){ localStorage.removeItem('shuiji_qa_tpl'); toast('已恢复默认格式'); }
+      else { localStorage.setItem('shuiji_qa_tpl', t); toast('模板已保存'); }
+      openWidget(curWidget);
+    }
+  }
+};
+
+function initV4(){
+  initSections();
+  showInstallBar();
+  expandRepeats();
+  trashPurge();
+  saveSnapshot();
+  bindSearchPanel();
+  bindReminderUI();
+  checkWeekReport();
+  evalAchievements(true);
+  setTimeout(() => { renderBadges(); renderInsights(); }, 300);
+  const bind = (id, fn) => { const el = $(id); if(el) el.addEventListener('click', fn); };
+  bind('trashBtn', openTrash);
+  bind('snapBtn', openSnapshots);
+  bind('archBtn', archiveOldTasks);
+  bind('weekRepBtn', showWeekReport);
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; showInstallBar(); });
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    localStorage.setItem('shuiji_installed', '1');
+    const bar = $('installBar'); if(bar) bar.remove();
+  });
+}
+
+  init();
 </script>
 </body>
 </html>
