@@ -481,6 +481,20 @@
   .mc-lb{color:var(--sub);}
   .mc-item b{font-size:var(--fs-13,13px);margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap;}
   .mc-foot{font-size:var(--fs-11,11px);color:var(--sub);margin-top:9px;padding-top:8px;border-top:1px dashed color-mix(in srgb, var(--accent) 25%, transparent);}
+  .advice-card{background:var(--card);border:1px solid color-mix(in srgb, var(--accent) 22%, transparent);border-radius:16px;padding:12px 14px;margin-bottom:14px;}
+  .adv-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px;}
+  .adv-title{font-size:var(--fs-13,13px);font-weight:700;color:var(--accent);white-space:nowrap;}
+  .adv-sub{font-size:var(--fs-11,11px);color:var(--sub);text-align:right;}
+  .adv-item{display:flex;align-items:stretch;gap:8px;padding:8px 0;border-top:1px solid var(--line);}
+  .adv-item:first-of-type{border-top:none;}
+  .adv-bar{flex:none;width:3px;border-radius:2px;background:var(--accent);opacity:.5;}
+  .adv-main{flex:1;min-width:0;}
+  .adv-t{font-size:var(--fs-13,13px);font-weight:600;color:var(--text);line-height:1.35;}
+  .adv-r{font-size:var(--fs-11,11px);color:var(--sub);margin-top:2px;line-height:1.4;}
+  .adv-add{flex:none;align-self:center;font-size:var(--fs-11,11px);padding:6px 10px;min-height:32px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--accent);}
+  .adv-hb{font-size:var(--fs-11,11px);color:var(--sub);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);line-height:1.5;}
+  .adv-foot{margin-top:10px;}
+  .adv-all{width:100%;font-size:var(--fs-12,12px);font-weight:600;padding:10px;min-height:40px;border-radius:10px;border:1px solid var(--accent);background:var(--accentSoft);color:var(--accent);}
   .hero-date{font-size:var(--fs-21,21px);font-weight:800;color:var(--text);letter-spacing:.5px;}
   .hero-line{font-size:var(--fs-13,13px);color:var(--sub);margin-top:5px;}
   /* ================= 今日进度 · 水体主视觉 =================
@@ -1056,6 +1070,9 @@
         <div class="mc-foot" id="mcFoot"></div>
       </div>
 
+      <!-- 今日建议：从各模块数据收敛出今天该做的 3 件 -->
+      <div class="advice-card hidden" id="adviceCard"></div>
+
       <!-- 今日进度 = 水位（点整块区域跳「每日计划」） -->
       <div class="water-hero" id="todayProgress" role="button" aria-label="今日进度">
         <div class="wh-plan">今日计划 ›</div>
@@ -1364,12 +1381,29 @@ function spUA(){
   };
 }
 
-/* 返回不可用原因；空字符串表示可用 */
+/* 运行环境探针：协议 / 是否主屏独立窗口（PWA） */
+function spProto(){
+  try{ return (typeof location !== 'undefined' && location.protocol) ? String(location.protocol) : ''; }catch(e){ return ''; }
+}
+function spStandalone(){
+  try{
+    if(window.navigator && window.navigator.standalone) return true;
+    if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+  }catch(e){}
+  return false;
+}
+/* 返回不可用原因；空字符串表示可用。按"最可能 + 最可操作"排序 */
 function spBlockReason(){
   const u = spUA();
   if(!SP.ok){
     if(u.wechat) return '微信内置浏览器不支持朗读，点右上角「···」→ 用 Safari/Chrome 打开';
     if(u.qq || u.uc || u.qqnews) return '这个浏览器内核不支持朗读，请用系统浏览器打开';
+    const p = spProto();
+    if(p === 'file:') return '你是直接打开本地文件（file://），浏览器会停用朗读。请用 https:// 网址访问。';
+    if(p && p !== 'https:' && p !== 'file:') return '当前是 ' + p + ' 明文页面，浏览器停用了朗读。改用 https:// 打开即可。';
+    if(u.ios && spStandalone()) return '从主屏图标启动时 iOS 会限制朗读。在 Safari 地址栏打开同一网址即可发音。';
+    if(u.android) return '这个安卓浏览器内核不含语音引擎，换 Chrome 或系统自带浏览器打开。';
+    if(u.ios) return '这个 iOS 浏览器不支持朗读，请用 Safari 打开。';
     return '这个浏览器不支持朗读（缺 Web Speech API）';
   }
   return '';
@@ -1459,8 +1493,10 @@ function spSoftFail(word, net){
 }
 
 function spFallback(word, reason){
+  /* 系统 TTS 不可用 / 失败时，先试网络发音（有道 dictvoice，联网即可，不依赖系统 TTS）。
+     注意：不可用时更要试网络发音，所以这一步必须排在 toast(reason) 之前。 */
+  if(spSpeakNet(word)){ toast(reason ? '系统朗读不可用，已改用网络发音' : '已改用网络发音'); return true; }
   if(reason){ toast(reason); return false; }
-  if(spSpeakNet(word)){ toast('已改用网络发音'); return true; }
   spSoftFail(word, true);
   return false;
 }
@@ -1511,12 +1547,22 @@ function speakWord(w){
 function spCanAuto(){ return SP.ok && SP.unlocked && !spBlockReason(); }
 
 /* 英语组件里的发音状态卡 */
+/* 环境标签：附在不可用提示后，便于定位（"iOS · 主屏 · https:"） */
+function spEnvTag(){
+  const u = spUA();
+  const bits = [];
+  bits.push(u.ios ? 'iOS' : u.android ? 'Android' : '桌面');
+  if(spStandalone()) bits.push('主屏独立窗口');
+  const p = spProto();
+  if(p) bits.push(p.replace(':', ''));
+  return bits.length ? '<span style="color:var(--sub)">（' + esc(bits.join(' · ')) + '）</span>' : '';
+}
 function spStatusHtml(){
   const reason = spBlockReason();
   const rate = localStorage.getItem('shuiji_sp_rate') || '0.9';
   const acc  = localStorage.getItem('shuiji_sp_accent') || 'us';
   let state, tip;
-  if(reason){ state = '⚠️ 不可用'; tip = reason; }
+  if(reason){ state = '⚠️ 不可用'; tip = reason + spEnvTag(); }
   else if(!SP.voices.length){ state = '⏳ 检测中'; tip = '正在读取系统发音人…'; }
   else if(!SP.hasEn){ state = '⚠️ 缺英文语音包'; tip = '系统里没找到英文发音人，会用默认语音念，可能不准。安卓：设置 → 系统 → 语言和输入法 → 文字转语音，安装英文语音。'; }
   else { state = '✅ ' + (SP.enVoice ? String(SP.enVoice.name).slice(0, 20) : '系统默认'); tip = ''; }
@@ -1748,6 +1794,7 @@ function getOldTasks(){
 async function refreshToday(){
   await migrateDelayed();
   renderTodayHero();
+  await renderAdvice();
   await renderMorningCard();
   await renderTaskList();
   await refreshCounts();
@@ -1756,6 +1803,101 @@ async function refreshToday(){
   await renderCalendar();
   updateSoftReminder();
 }
+/* ————— 今日建议：把散在各模块的数据收敛成今天该做的 3 件 ————— */
+function advDueWords(){
+  let n = 0;
+  try{
+    getBooks().forEach(b => {
+      const ws = bookWords(b.id);
+      (Array.isArray(ws) ? ws : []).forEach(w => { if(w && (w.wrong || 0) > 0 && srsDue(w)) n++; });
+    });
+  }catch(e){}
+  return n;
+}
+function advWeakDim(){
+  try{
+    const r = tcRadar().filter(x => x.n > 0).sort((a, b) => a.pct - b.pct);
+    return r.length ? r[0] : null;
+  }catch(e){ return null; }
+}
+/* 同步可算的候选，按紧急度 s 降序取前 3 */
+function advList(){
+  const out = [], t = todayStr();
+  const dw = advDueWords();
+  if(dw > 0) out.push({ t: '复习 ' + dw + ' 个到期错词', r: '间隔复习到期，断了就前功尽弃', s: dw >= 20 ? 3 : 2 });
+  const c = chGet();
+  if(c && c.name && !(c.days && c.days[t])){
+    const n = chDays();
+    out.push({ t: '「' + c.name + '」第 ' + (n + 1) + ' 天打卡', r: n ? ('已坚持 ' + n + ' 天，今天别断') : '还没开始，今天做第一次', s: 3 });
+  }
+  const wd = advWeakDim();
+  if(wd && wd.pct < 80) out.push({ t: '练 5 道' + wd.dim + '题', r: '能力雷达最薄弱：' + wd.dim + ' ' + wd.pct + '%', s: wd.pct < 50 ? 3 : 2 });
+  const og = okrAll().filter(o => okrProgress(o) < 100)[0];
+  if(og) out.push({ t: '推进目标：' + og.obj, r: 'KR 完成度 ' + okrProgress(og) + '%', s: 1 });
+  const sh = wget('sh_scores');
+  if(!sh.some(x => x && x.date === t)) out.push({ t: '今日口语跟读', r: '一句 30 秒，保持语感', s: 1 });
+  return out.sort((a, b) => b.s - a.s).slice(0, 3);
+}
+/* 今日未打卡习惯（IndexedDB，只能异步拿） */
+async function advHabitsPending(){
+  try{
+    const defs = loadHabitDefs() || [];
+    const all = await getAll('habits');
+    const t = todayStr();
+    const done = new Set((all || []).filter(h => h.date === t && !(h.type === 'drink' && !h.ml)).map(h => h.type));
+    return defs.filter(d => !done.has(d.type)).map(d => d.label);
+  }catch(e){ return []; }
+}
+async function renderAdvice(){
+  const box = $('adviceCard');
+  if(!box) return;
+  let list = advList();
+  try{
+    const act = await getActiveToday();
+    const has = new Set((act || []).map(x => (x.text || '').trim()));
+    list = list.filter(x => !has.has(x.t));
+  }catch(e){}
+  const hs = await advHabitsPending();
+  if(!list.length && !hs.length){ box.classList.add('hidden'); box.innerHTML = ''; return; }
+  const items = list.map(x =>
+    '<div class="adv-item"><span class="adv-bar"></span>' +
+    '<div class="adv-main"><div class="adv-t">' + esc(x.t) + '</div>' +
+    '<div class="adv-r">' + esc(x.r) + '</div></div>' +
+    '<button class="adv-add" data-adv-add="' + esc(x.t) + '">加入</button></div>').join('');
+  box.classList.remove('hidden');
+  box.innerHTML = '<div class="adv-head"><span class="adv-title">今日建议</span>' +
+    '<span class="adv-sub">从你的数据里挑出来的</span></div>' + items +
+    (hs.length ? '<div class="adv-hb">今天还没打卡：' + esc(hs.join(' · ')) + '</div>' : '') +
+    (list.length ? '<div class="adv-foot"><button class="adv-all" id="advAll">一键加入今天</button></div>' : '');
+}
+async function advAddTask(text){
+  try{
+    const active = await getActiveToday();
+    if((active || []).length >= MAX_ACTIVE){ toast('今天已经排满 ' + MAX_ACTIVE + ' 件，先完成一件'); return false; }
+    const p = parseTaskInput(text);
+    await add('tasks', { text: p.text, category: detectCategory(p.text), completed: false,
+      date: p.date || todayStr(), delayed: false, important: p.important, time: p.time || '',
+      createdAt: new Date().toISOString() });
+    return true;
+  }catch(e){ return false; }
+}
+async function advAddAll(){
+  const list = advList();
+  let n = 0;
+  for(const x of list){ if(await advAddTask(x.t)) n++; }
+  if(n){ await refreshToday(); toast('已加入今天 ' + n + ' 件'); }
+}
+function bindAdvice(){
+  const box = $('adviceCard');
+  if(!box) return;
+  box.addEventListener('click', e => {
+    if(!e.target.closest) return;
+    const a = e.target.closest('[data-adv-add]');
+    if(a){ const txt = a.dataset.advAdd; advAddTask(txt).then(ok => { if(ok) refreshToday(); }); return; }
+    if(e.target.closest('#advAll')) advAddAll();
+  });
+}
+
 /* 首页：欢迎语 + 日期 + 今日关键词 */
 function renderTodayHero(){
   const now = new Date();
@@ -2110,6 +2252,7 @@ const WIDGET_META = [
   { k:'每日计划', i:'📅' }, { k:'天气', i:'🌤️' }, { k:'练字打卡', i:'✍️' }, { k:'减肥运动', i:'🏃' },
   { k:'测试日报', i:'🧪' }, { k:'测试成长', i:'🎯' }, { k:'口语跟读', i:'🎙️' }, { k:'英语学习', i:'📖' }, { k:'表达能力', i:'🗣️' }, { k:'读书推荐', i:'📚' },
   { k:'结构化复盘', i:'📝' }, { k:'30天挑战', i:'🔥' }, { k:'OKR目标', i:'📌' },
+  { k:'专注节律', i:'📊' }, { k:'费曼输出', i:'🧠' },
   { k:'爆款二创', i:'🎬' }, { k:'AI 学习', i:'🤖' }, { k:'新闻资讯', i:'📰' }
 ];
 function wOrder(){
@@ -2578,6 +2721,7 @@ async function completeFocus(){
   const tk = focusTask();
   await add('focus', { date: todayStr(), duration: pomoDur(), completedAt: new Date().toISOString(),
     taskId: tk ? tk.id : null, taskTitle: tk ? tk.text : '' });
+  focusLogAdd(pomoDur());                  /* 同步镜像，供「专注节律」组件渲染（render 不能读 IndexedDB） */
   playTone(659,0.16,0.2); playTone(784,0.16,0.2,0.16); playTone(1046,0.35,0.2,0.32);
   buzz([60, 90, 60]);
   waterRipple();
@@ -3853,7 +3997,7 @@ WIDGETS['每日计划'] = {
       return '<div style="font-size:var(--fs-13,13px);color:var(--sub);margin:8px 0 4px">' + label + '</div>' +
         (list.length ? list.map(x => '<div class="w-row' + (x.done ? ' done' : '') + '"><button class="w-check' + (x.done ? ' on' : '') + '" data-wact="plan-toggle" data-id="' + x.id + '"></button><span class="w-row-t">' + esc(x.text) + '</span><button class="w-del" data-wact="plan-del" data-id="' + x.id + '">✕</button></div>').join('') : '<div class="w-empty">暂无，在下方添加</div>');
     }).join('');
-    return wCard('📅 今日计划', html + (yLeft ? '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-backfill">📥 补昨日未完成 ' + yLeft + ' 项</button></div>' : '' + '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-import">\u{1F504} 同步今日任务进计划</button></div>'), '<div class="w-streak">已完成 <b>' + done + '</b>/<b>' + items.length + '</b> · 剩 <b>' + (items.length - done) + '</b></div>') +
+    return wCard('📅 今日计划', html + (yLeft ? '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-backfill">📥 补昨日未完成 ' + yLeft + ' 项</button></div>' : '') + '<div class="w-goal-row" style="margin-top:8px"><button class="w-btn" data-wact="plan-import">\u{1F504} 同步今日任务进计划</button></div>', '<div class="w-streak">已完成 <b>' + done + '</b>/<b>' + items.length + '</b> · 剩 <b>' + (items.length - done) + '</b></div>') +
       '<div class="w-card"><div class="w-card-t" style="margin-bottom:8px">添加计划</div><div class="w-add"><select id="w-section"><option value="morning">上午</option><option value="afternoon">下午</option><option value="evening">晚上</option></select><input id="w-input" type="text" placeholder="计划事项…" autocomplete="off"><button class="w-btn" data-wact="plan-add">＋</button></div></div>';
   },
   acts: {
@@ -4377,7 +4521,8 @@ function mealHtml(){
   const rows = MEALS.map(m => {
     const x = ms[m.k];
     const kc = x ? (x.kcal || 0) : 0;
-    return '<div class="fit-meal"><span class="fit-meal-name">' + m.n + '</span>' +
+    return '<div class="fit-meal"><span class="fit-meal-name">' + m.n +
+      (x && x.name ? '<span style="font-weight:400;color:var(--sub);font-size:var(--fs-11,11px)"> · ' + esc(x.name) + '</span>' : '') + '</span>' +
       '<span class="fit-meal-opts">' +
       Object.keys(MEAL_LV).map(lv =>
         '<span class="fit-mo' + (x && x.level === lv ? ' sel' : '') + '" data-wact="meal-set" data-meal="' + m.k + '" data-lv="' + lv + '">' + MEAL_LV[lv].n + '</span>'
@@ -4433,6 +4578,9 @@ WIDGETS['减肥运动'] = {
       (ws.length >= 2 ? fitTrendCard(ws, goalW) : '') +
       energyHtml(todayBurn, p) +
       mealHtml() +
+      dishCardHtml() +
+      buyCardHtml() +
+      dsMealCardHtml() +
       wCard('🏃 今日运动',
         goalCard('ex', todayMin, '分钟', 20) +
         (todayItems.length
@@ -4513,7 +4661,52 @@ WIDGETS['减肥运动'] = {
       if(!it) return;
       openVideoByPart((it.part || '') + ' ' + (it.name || ''));
     },
-    'ds-fit': async () => { await dsFitGen(); }
+    'ds-fit': async () => { await dsFitGen(); },
+    'ds-meal': async () => { await dsMealGen(); },
+    'dish-next': async () => { dishNext(); openWidget(curWidget); },
+    'dish-buy': async () => {
+      const d = dishById(dishToday());
+      if(!d) return;
+      const n = buyAdd(d.ing);
+      openWidget(curWidget);
+      toast(n ? ('加进清单 ' + n + ' 样 · ' + d.name) : ('清单里已经有了 · ' + d.name));
+    },
+    'dish-log': async () => {
+      const d = dishById(dishToday());
+      if(!d) return;
+      const sel = $('w-dish-slot');
+      const meal = sel ? (sel.value || d.slot) : d.slot;
+      dishLogMeal(d.id, meal);
+      blub(); openWidget(curWidget);
+      toast('已记入' + (MEALS.find(m => m.k === meal) || MEALS[1]).n + ' · ' + d.kcal + ' kcal');
+    },
+    'buy-toggle': async b => { buyToggle(parseInt(b.dataset.i, 10)); openWidget(curWidget); },
+    'buy-del': async b => { buyDel(parseInt(b.dataset.i, 10)); openWidget(curWidget); },
+    'buy-clr': async () => { buyClearDone(); openWidget(curWidget); toast('已清除买好的'); },
+    'dis-add': async () => {
+      const el = $('w-dislike');
+      const n = dislikeAdd(el ? (el.value || '') : '');
+      openWidget(curWidget);
+      toast(n ? ('加了 ' + n + ' 样忌口 · 推荐菜已重新挑') : '这个忌口已经有了');
+    },
+    'dis-del': async b => { dislikeDel(parseInt(b.dataset.i, 10)); openWidget(curWidget); toast('已删掉这条忌口'); },
+    'ds-menu': async () => { await dsMenuGen(); },
+    'meal-log': async b => {
+      const t = wget('ds_meal').find(x => x.date === todayStr());
+      if(!t) return;
+      const it = t.items[parseInt(b.dataset.i, 10)];
+      if(!it) return;
+      const sel = $('w-mlog-' + b.dataset.i);
+      const meal = sel ? sel.value : 'lunch';
+      const l = wget('ex_meal');
+      const idx = l.findIndex(x => x.date === todayStr() && x.meal === meal);
+      const rec = { id: Date.now(), date: todayStr(), meal: meal, level: 'normal', kcal: it.kcal || 0, name: it.name };
+      if(idx >= 0) l[idx] = Object.assign({}, l[idx], { kcal: it.kcal || 0, name: it.name });
+      else l.push(rec);
+      wset('ex_meal', l); blub(); openWidget(curWidget);
+      toast('已记入' + (MEALS.find(m => m.k === meal) || MEALS[1]).n + ' · ' + (it.kcal || 0) + ' kcal');
+    },
+    'meal-clear': async () => { wset('ds_meal', wget('ds_meal').filter(x => x.date !== todayStr())); openWidget(curWidget); }
   }
 };
 
@@ -4578,6 +4771,513 @@ async function dsFitGen(){
     out.innerHTML = '<div class="w-empty">AI 调用失败：' + esc(String(e.message || e)).slice(0, 40) + '<br><span style="font-size:var(--fs-12,12px)">检查 Key / 网络后重试</span></div>';
   } finally { clearTimeout(to); }
 }
+/* ================= AI 减脂餐：说食材 → 给做法 ================= */
+/* 无 Key / AI 失败时的本地兜底：常见食材的固定减脂做法 */
+const MEAL_LOCAL = [
+  { key:'鸡胸',  name:'香煎鸡胸',      ing:'鸡胸肉 150g · 蒜 2 瓣 · 黑胡椒 · 盐 · 橄榄油 5g', steps:'横切成 1.5cm 厚片，刀背拍松｜盐+黑胡椒+蒜末腌 10 分钟｜不粘锅刷薄油，中火每面煎 3 分钟｜出锅静置 2 分钟再切', kcal:210, pro:38, tip:'鸡胸最怕柴：拍松断筋 + 出锅静置，比腌多久都管用' },
+  { key:'鸡蛋',  name:'水煮蛋 + 蛋白', ing:'全蛋 1 个 · 蛋白 2 个 · 水', steps:'冷水下蛋，水开后计时｜全蛋 7 分钟、蛋白另煮 3 分钟｜捞出浸冷水 1 分钟好剥壳', kcal:120, pro:13, tip:'多丢一个蛋黄，蛋白质不变、脂肪减半' },
+  { key:'西兰花',name:'蒜蓉焯西兰花',  ing:'西兰花 200g · 蒜 2 瓣 · 盐 · 橄榄油 3g', steps:'掰小朵，淡盐水泡 5 分钟｜水开下锅焯 90 秒，捞出过凉水｜热锅少油爆香蒜末，倒入翻炒 30 秒加盐', kcal:90, pro:6, tip:'焯完过凉水才脆，别煮到发黄——那就没口感了' },
+  { key:'番茄',  name:'番茄鸡蛋汤',    ing:'番茄 1 个 · 鸡蛋 1 个 · 葱 · 盐', steps:'番茄划十字烫 30 秒去皮切块｜少油炒出红汁，加水 400ml 煮开｜蛋液绕圈淋入，关火焖 30 秒', kcal:130, pro:9, tip:'番茄炒出沙再加水，汤才浓，不用勾芡' },
+  { key:'豆腐',  name:'香煎嫩豆腐',    ing:'嫩豆腐 200g · 生抽 5ml · 蒜 · 小米椒（可选）', steps:'豆腐切 2cm 块，厨房纸吸干表面水｜不粘锅少油中火煎至两面金黄｜淋生抽+蒜末翻匀出锅', kcal:160, pro:14, tip:'表面一定要吸干，否则下锅溅油还煎不上色' },
+  { key:'黄瓜',  name:'凉拌黄瓜',      ing:'黄瓜 1 根 · 蒜 · 醋 10ml · 生抽 5ml · 香油 2g', steps:'拍裂切段，撒盐腌 5 分钟倒掉水｜加蒜末、醋、生抽｜最后滴 2 滴香油，多了就白减了', kcal:60, pro:2, tip:'拍比切好吃——断面粗糙更挂汁' },
+  { key:'燕麦',  name:'燕麦牛奶粥',    ing:'燕麦片 40g · 脱脂牛奶 250ml', steps:'燕麦加牛奶小火煮 3 分钟，边煮边搅｜喜欢甜可加半根香蕉压泥', kcal:230, pro:12, tip:'选需要煮的原味燕麦片，即食的升糖快、不耐饿' },
+  { key:'红薯|地瓜',name:'蒸红薯',     ing:'红薯 150g · 水', steps:'洗净不削皮，切段上锅｜水开后蒸 20 分钟，筷子能扎透即可', kcal:130, pro:2, tip:'放凉一点再吃，抗性淀粉上升、饱腹更久' },
+  { key:'虾',    name:'白灼虾',        ing:'鲜虾 200g · 姜 3 片 · 葱 · 生抽', steps:'水加姜葱煮开｜下虾煮 2 分钟至变红卷曲，立刻捞出入冰水｜蘸生抽+姜末', kcal:100, pro:20, tip:'过冰水虾肉才弹，这一步别省' },
+  { key:'牛肉',  name:'黑椒牛柳',      ing:'牛里脊 120g · 彩椒半个 · 黑胡椒 · 生抽 · 淀粉 3g', steps:'牛肉逆纹切条，生抽+淀粉抓匀腌 10 分钟｜大火快炒 90 秒变色即盛出｜同锅炒彩椒，倒回牛肉撒黑胡椒翻匀', kcal:220, pro:26, tip:'逆着纹路切断纤维，嫩的关键，跟腌制时间无关' },
+  { key:'包菜|卷心菜|白菜',name:'醋溜包菜',ing:'包菜 250g · 蒜 · 干辣椒 · 醋 10ml · 生抽 5ml', steps:'手撕成块，梗叶分开｜大火热油爆香蒜和辣椒，先下梗炒 1 分钟｜下叶，沿锅边淋醋，翻炒 1 分钟', kcal:80, pro:3, tip:'全程大火，锅够热才不出水' },
+  { key:'金针菇|蘑菇|香菇',name:'蒜香金针菇',ing:'金针菇 200g · 蒜 4 瓣 · 生抽 5ml · 小米椒', steps:'去根撕散，平铺盘中｜蒜末+生抽+少许水调汁淋上｜蒸 8 分钟，出锅撒葱', kcal:70, pro:5, tip:'蒸比炒省油，味道全靠蒜和生抽' }
+];
+function mealLocalMatch(text){
+  const s = String(text || '');
+  if(!s.trim()) return [];
+  return MEAL_LOCAL.filter(x => { try{ return new RegExp(x.key).test(s); }catch(e){ return false; } });
+}
+function parseDsMeal(content){
+  const m = String(content || '').match(/\{[\s\S]*\}/);
+  if(!m) return null;
+  try{
+    const j = JSON.parse(m[0]);
+    const arr = j && j.dishes ? j.dishes : null;
+    if(!arr || !arr.length) return null;
+    const items = arr.filter(x => x && x.name).map(x => ({
+      name: String(x.name).trim(),
+      ing: x.ing ? String(x.ing).trim() : '',
+      steps: x.steps ? String(x.steps).trim() : '',
+      kcal: parseInt(x.kcal, 10) || 0,
+      pro: parseInt(x.pro, 10) || 0,
+      tip: x.tip ? String(x.tip).trim() : ''
+    }));
+    return items.length ? items : null;
+  }catch(e){ return null; }
+}
+function dsMealSave(ing, items, local){
+  const l = wget('ds_meal');
+  const rec = { date: todayStr(), ing: ing, items: items, local: !!local, t: Date.now() };
+  const i = l.findIndex(x => x.date === todayStr());
+  if(i >= 0) l[i] = rec; else l.unshift(rec);
+  wset('ds_meal', l.slice(0, 20));
+}
+function dsMealItemsHtml(rec){
+  return (rec.local ? '<div class="w-note">本地做法库（未配 AI Key 或 AI 没返回）· 填 Key 后会按你的食材现配</div>' : '') +
+    rec.items.map((x, i) =>
+      '<div class="w-row" style="flex-wrap:wrap;row-gap:6px">' +
+      '<span class="w-row-t"><b>' + esc(x.name) + '</b>' +
+      (x.ing ? '<div style="font-size:var(--fs-12,12px);color:var(--sub);margin-top:2px">' + esc(x.ing) + '</div>' : '') +
+      (x.steps ? '<div style="font-size:var(--fs-12,12px);margin-top:5px;line-height:1.65">' +
+        esc(x.steps).split('｜').map(function(s, n){ return (n + 1) + '. ' + s.trim(); }).join('<br>') + '</div>' : '') +
+      (x.tip ? '<div style="font-size:var(--fs-11,11px);color:var(--sub);margin-top:5px">💡 ' + esc(x.tip) + '</div>' : '') +
+      '</span>' +
+      '<span class="w-row-s">' + (x.kcal ? x.kcal + ' kcal' : '') + (x.pro ? ' · 蛋白 ' + x.pro + 'g' : '') + '</span>' +
+      '<div style="width:100%;display:flex;gap:6px;align-items:center;justify-content:flex-end">' +
+      '<select id="w-mlog-' + i + '" style="font-size:var(--fs-12,12px);padding:5px 6px;min-height:32px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)">' +
+      MEALS.map(m => '<option value="' + m.k + '">' + m.n + '</option>').join('') + '</select>' +
+      '<button class="w-btn" data-wact="meal-log" data-i="' + i + '" style="padding:6px 10px;font-size:var(--fs-12,12px)">记入今日</button>' +
+      '</div></div>').join('') +
+    '<div style="margin-top:6px;text-align:right"><button class="w-btn" data-wact="meal-clear" style="padding:6px 10px;font-size:var(--fs-12,12px)">清空</button></div>';
+}
+function dsMealCardHtml(){
+  const p = loadProfile(), pi = planIntake(p);
+  if(!pi) return '';                       /* 没有计划就不知道这顿能吃多少，跟三餐卡保持一致 */
+  const l = wget('ds_meal');
+  const t = l.find(x => x.date === todayStr());
+  return wCard('🥗 AI 减脂餐 · 说食材给做法',
+    '<div class="w-add" style="flex-wrap:wrap;row-gap:6px">' +
+      '<select id="w-meal-slot" style="font-size:var(--fs-12,12px);padding:6px;min-height:32px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)">' +
+      MEALS.map(m => '<option value="' + m.k + '">' + m.n + '</option>').join('') + '</select>' +
+      '<input id="w-meal-ing" type="text" placeholder="食材，如：鸡胸肉、西兰花、鸡蛋" autocomplete="off" style="flex:1;min-width:130px">' +
+      '<button class="w-btn" data-wact="ds-meal">🍳 配菜</button></div>' +
+    '<div class="w-note" style="margin-top:6px">只用你写的食材 + 家常调料，给精确用量和分步做法。日预算 ' + pi.intake + ' kcal。</div>' +
+    '<div id="w-ds-meal" style="margin-top:8px">' + (t ? dsMealItemsHtml(t) : '') + '</div>');
+}
+async function dsMealGen(){
+  const ingEl = $('w-meal-ing');
+  const ing = ((ingEl && ingEl.value) || '').trim();
+  if(!ing){ toast('先说说你有什么食材'); return; }
+  const slotEl = $('w-meal-slot');
+  const meal = slotEl ? (slotEl.value || 'lunch') : 'lunch';
+  const mealName = (MEALS.find(m => m.k === meal) || MEALS[1]).n;
+  const p = loadProfile(), pi = planIntake(p);
+  if(!pi){ toast('先定制一份减肥计划，才知道这顿能吃多少'); return; }
+  const key = (localStorage.getItem('shuiji_ds_key') || '').trim();
+  const out = $('w-ds-meal');
+  const dis = dislikeGet();
+  const noDis = x => !(dislikeMatch(x.name) || dislikeMatch(x.ing));   /* AI 和本地库都要再过一遍忌口 */
+  const localHit = mealLocalMatch(ing).filter(noDis);
+  const useLocal = reason => {
+    if(localHit.length){ dsMealSave(ing, localHit, true); openWidget(curWidget); toast('本地做法库：匹配到 ' + localHit.length + ' 道'); return true; }
+    if(out) out.innerHTML = '<div class="w-empty">' + esc(reason) + '<br><span style="font-size:var(--fs-12,12px)">没 Key 时也能用：试试写「鸡胸肉」「鸡蛋」「西兰花」「豆腐」这类常见食材</span></div>';
+    return false;
+  };
+  if(!key){ useLocal('先去「设置」页填 DeepSeek API Key，AI 才能按你的食材现配'); return; }
+  if(out) out.innerHTML = '<div class="w-empty">AI 配菜中… <span class="spinner"></span></div>';
+  const budget = Math.round(pi.intake * (MEALS.find(m => m.k === meal) || MEALS[1]).r);
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 25000);
+  try{
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: '你是注册营养师兼减脂餐厨师。根据用户手头有的食材，设计真能在家常厨房做出来的减脂餐。硬性要求：1) 只用用户列出的食材，外加盐、黑胡椒、生抽、醋、蒜、葱、橄榄油这类家常调料，不要引入用户没有的主要食材；2) 给出精确用量（克/毫升）；3) 做法 3-5 步，用｜分隔，每步一句话，说清火候和时间；4) 给出成品总热量和蛋白质克数；5) 附一句减脂上的关键提示（比如怎么处理食材更嫩、哪个步骤容易踩坑）。严格只输出 JSON，不要任何其他文字或代码标记，格式：{"dishes":[{"name":"菜名","ing":"食材与用量","steps":"步骤一｜步骤二｜步骤三","kcal":"总热量数字","pro":"蛋白质克数数字","tip":"一句减脂提示"}]}。最多 2 道菜。' },
+          { role: 'user', content: '我有的食材：' + ing + '。这顿是' + mealName + '，我的' + (pi.intake ? '日热量预算 ' + pi.intake + ' kcal，这顿约 ' + budget + ' kcal' : '情况见下') + '。' +
+            (p ? ('身高 ' + p.h + 'cm，体重 ' + p.w + 'kg，目标 ' + p.goal + 'kg，年龄 ' + p.age + '，性别 ' + (p.gender === 'male' ? '男' : '女') + '，活动系数 ' + p.activity + '。') : '') +
+            '请按这些食材设计减脂餐，热量尽量贴近这顿预算。' +
+            (dis.length ? ('重要：我完全不吃这些东西——' + dis.join('、') + '。任何菜里都不要出现，也不要作为配菜、点缀或调料使用；如果只用剩下的食材实在配不出来，就明确说明而不是硬凑。') : '') }
+        ],
+        max_tokens: 800,
+        temperature: 0.8
+      }),
+      signal: ctl.signal
+    });
+    const j = await res.json();
+    if(!res.ok) throw new Error('HTTP ' + res.status + (j.error && j.error.message ? ' ' + j.error.message : ''));
+    const content = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+    const items = (parseDsMeal(content) || []).filter(noDis);
+    if(!items.length) throw new Error('AI 没给出合忌口的菜');
+    dsMealSave(ing, items, false);
+    openWidget(curWidget);
+    toast('减脂餐已配好');
+  }catch(e){
+    if(!useLocal('AI 调用失败：' + String(e.message || e).slice(0, 30))) return;
+  } finally { clearTimeout(to); }
+}
+
+/* ============ 今日做什么菜 + 买菜清单 ============ */
+/* 本地菜谱库：没 Key、AI 挂了也能用。ing 里的调料会在生成买菜清单时被 PANTRY_RE 滤掉 */
+const DISH_BANK = [
+  { id:'d01', name:'蒜香鸡胸西兰花', slot:'dinner', kcal:300, pro:44, time:20, lv:'简单', ing:['鸡胸肉 150g','西兰花 200g','蒜 3 瓣'],
+    steps:'鸡胸横切 1.5cm 片，刀背拍松，盐+黑胡椒腌 10 分钟｜西兰花掰小朵，水开焯 90 秒捞出｜不粘锅刷薄油中火，鸡胸每面煎 3 分钟｜同锅爆香蒜末，倒西兰花翻 30 秒',
+    tip:'鸡胸最怕柴：拍松断筋 + 出锅静置 2 分钟，比腌多久都管用' },
+  { id:'d02', name:'番茄鸡蛋豆腐汤', slot:'lunch', kcal:230, pro:19, time:15, lv:'简单', ing:['番茄 1 个','鸡蛋 1 个','嫩豆腐 200g'],
+    steps:'番茄划十字烫 30 秒去皮切块｜少油炒出红汁，加水 400ml 煮开｜下豆腐块煮 3 分钟，蛋液绕圈淋入｜关火焖 30 秒，加盐',
+    tip:'番茄炒出沙再加水，汤才浓，不用勾芡' },
+  { id:'d03', name:'白灼虾拌黄瓜', slot:'dinner', kcal:160, pro:22, time:12, lv:'简单', ing:['鲜虾 200g','黄瓜 1 根','姜 3 片'],
+    steps:'水加姜片煮开，下虾煮 2 分钟至卷曲｜立刻捞出入冰水 1 分钟｜黄瓜拍裂切段，加醋+生抽拌匀｜虾摆上，蘸生抽姜末',
+    tip:'过冰水虾肉才弹，这一步别省' },
+  { id:'d04', name:'黑椒牛柳彩椒', slot:'dinner', kcal:240, pro:27, time:15, lv:'中等', ing:['牛里脊 120g','彩椒 1 个'],
+    steps:'牛肉逆纹切条，生抽+淀粉抓匀腌 10 分钟｜大火快炒 90 秒变色立刻盛出｜同锅炒彩椒 1 分钟，倒回牛肉｜撒黑胡椒翻匀出锅',
+    tip:'逆着纹路切断纤维才是嫩的关键，跟腌多久关系不大' },
+  { id:'d05', name:'醋溜包菜鸡丝', slot:'lunch', kcal:220, pro:28, time:12, lv:'简单', ing:['鸡胸肉 100g','包菜 250g'],
+    steps:'鸡胸冷水下锅煮 8 分钟，撕成丝｜包菜手撕，梗叶分开｜大火爆香蒜和干辣椒，先下梗炒 1 分钟｜下叶和鸡丝，沿锅边淋醋翻 1 分钟',
+    tip:'全程大火，锅够热才不出水' },
+  { id:'d06', name:'虾仁蒸蛋', slot:'lunch', kcal:180, pro:22, time:12, lv:'简单', ing:['虾仁 100g','鸡蛋 2 个'],
+    steps:'蛋液加 1.5 倍温水打散，过筛去泡｜盖保鲜膜扎孔，中火蒸 8 分钟｜开盖摆虾仁再蒸 2 分钟｜淋几滴生抽和香油',
+    tip:'加温水 + 过筛 + 盖膜，这三步决定蛋羹光不光滑' },
+  { id:'d07', name:'蒜香金针菇蒸鸡胸', slot:'dinner', kcal:260, pro:41, time:20, lv:'简单', ing:['鸡胸肉 150g','金针菇 200g','蒜 4 瓣'],
+    steps:'金针菇去根撕散铺盘底｜鸡胸切片铺上｜蒜末+生抽+少许水调汁淋上｜水开后蒸 10 分钟，出锅撒葱',
+    tip:'蒸比炒省油，味道全靠蒜和生抽，别怕多放蒜' },
+  { id:'d08', name:'燕麦牛奶香蕉碗', slot:'breakfast', kcal:320, pro:14, time:5, lv:'简单', ing:['燕麦片 40g','脱脂牛奶 250ml','香蕉 1 根'],
+    steps:'燕麦加牛奶小火煮 3 分钟，边煮边搅｜半根香蕉压泥拌进去增甜｜另半根切片铺面',
+    tip:'选需要煮的原味燕麦片，即食的升糖快、不耐饿' },
+  { id:'d09', name:'全麦鸡蛋三明治', slot:'breakfast', kcal:280, pro:16, time:8, lv:'简单', ing:['全麦面包 2 片','鸡蛋 1 个','生菜 30g'],
+    steps:'不粘锅无油煎蛋，蛋黄戳破煎熟｜面包片干锅烘 30 秒至微脆｜夹生菜和蛋，对角切开',
+    tip:'买面包看配料表第一位是"全麦粉"，写"小麦粉"的就是白面包染色' },
+  { id:'d10', name:'蒸红薯 + 水煮蛋', slot:'breakfast', kcal:300, pro:15, time:20, lv:'简单', ing:['红薯 150g','鸡蛋 1 个','脱脂牛奶 200ml'],
+    steps:'红薯洗净不削皮切段上锅｜水开后蒸 20 分钟，筷子能扎透｜鸡蛋同锅蒸 8 分钟',
+    tip:'红薯放凉一点再吃，抗性淀粉上升、饱腹更久' },
+  { id:'d11', name:'豆浆燕麦碗', slot:'breakfast', kcal:300, pro:19, time:6, lv:'简单', ing:['无糖豆浆 300ml','燕麦片 40g','鸡蛋 1 个'],
+    steps:'豆浆煮开下燕麦，小火 3 分钟搅至稠｜另起锅水煮蛋 7 分钟｜燕麦盛碗，配蛋吃',
+    tip:'豆浆一定买"无糖"，市售甜豆浆一碗能多 150 kcal' },
+  { id:'d12', name:'凉拌鸡丝黄瓜', slot:'lunch', kcal:240, pro:36, time:20, lv:'简单', ing:['鸡胸肉 150g','黄瓜 1 根'],
+    steps:'鸡胸冷水下锅，加姜片料酒煮 10 分钟，焖 5 分钟｜捞出撕丝｜黄瓜切丝，蒜末+生抽+醋+少许香油调汁｜拌匀冷藏 10 分钟更爽口',
+    tip:'煮完焖 5 分钟再捞，是鸡胸不柴的第二个关键' },
+  { id:'d13', name:'番茄牛肉滑蛋', slot:'lunch', kcal:260, pro:24, time:15, lv:'中等', ing:['牛肉 100g','番茄 1 个','鸡蛋 1 个'],
+    steps:'牛肉切薄片，生抽+淀粉腌 8 分钟｜番茄炒出汁｜下牛肉大火滑散 1 分钟｜蛋液淋入，凝固即关火',
+    tip:'牛肉要"滑"不要"炒"，油温够、时间够短才嫩' },
+  { id:'d14', name:'清蒸鲈鱼', slot:'dinner', kcal:320, pro:56, time:18, lv:'中等', ing:['鲈鱼 1 条','姜 3 片','葱 2 根'],
+    steps:'鱼身两侧划三刀，姜片塞腹｜水开后大火蒸 8 分钟｜倒掉盘中水，铺葱丝｜淋一勺热油激香，再淋生抽',
+    tip:'蒸鱼一定要倒掉蒸出来的腥水再调味，这是饭店和家庭做法最大的差别' },
+  { id:'d15', name:'虾仁炒蛋', slot:'lunch', kcal:220, pro:30, time:10, lv:'简单', ing:['虾仁 150g','鸡蛋 2 个'],
+    steps:'虾仁用盐抓洗去黏，擦干｜蛋液加少许盐打散｜热锅少油先炒蛋至半凝盛出｜同锅炒虾仁 1 分钟，倒回蛋翻匀',
+    tip:'虾仁下锅前一定擦干，带水会出汤、炒不出香' },
+  { id:'d16', name:'香煎豆腐配菠菜', slot:'dinner', kcal:200, pro:18, time:15, lv:'简单', ing:['嫩豆腐 200g','菠菜 200g','蒜 2 瓣'],
+    steps:'豆腐切 2cm 块，厨房纸吸干表面水｜不粘锅少油中火煎至两面金黄｜菠菜焯 30 秒挤干，蒜末拌｜淋生抽翻匀出锅',
+    tip:'豆腐表面一定要吸干，否则下锅溅油还煎不上色' },
+  { id:'d17', name:'鸡胸蔬菜卷饼', slot:'lunch', kcal:300, pro:33, time:15, lv:'简单', ing:['鸡胸肉 120g','生菜 50g','全麦饼皮 1 张'],
+    steps:'鸡胸切条，黑胡椒+生抽腌 10 分钟｜不粘锅煎熟｜饼皮干锅烘 20 秒｜铺生菜和鸡胸卷起，中间切开',
+    tip:'酱用无糖酸奶+黑胡椒代替沙拉酱，一勺省 80 kcal' },
+  { id:'d18', name:'香菇去皮鸡腿汤', slot:'dinner', kcal:230, pro:30, time:35, lv:'中等', ing:['去皮鸡腿肉 150g','香菇 100g'],
+    steps:'鸡腿去皮，冷水下锅焯去血沫｜换水加姜片，小火炖 25 分钟｜下香菇再炖 8 分钟｜出锅前加盐',
+    tip:'鸡皮是这锅汤 60% 的脂肪来源，去了皮热量直接砍半' },
+  { id:'d19', name:'蒸南瓜 + 水煮蛋', slot:'breakfast', kcal:180, pro:10, time:20, lv:'简单', ing:['南瓜 200g','鸡蛋 1 个'],
+    steps:'南瓜去皮切块上锅蒸 18 分钟｜鸡蛋同锅蒸 8 分钟｜南瓜压泥或直接吃',
+    tip:'南瓜本身有甜味，别加糖，加了就变成主食甜点' },
+  { id:'d20', name:'少油麻辣拌', slot:'dinner', kcal:300, pro:30, time:20, lv:'中等', ing:['鲜虾 100g','西兰花 150g','金针菇 100g','豆皮 50g'],
+    steps:'所有食材分别焯熟，过凉水沥干｜蒜末+生抽+醋+少许辣椒粉装碗｜浇一勺 5g 热油激香｜倒入食材拌匀',
+    tip:'热油只放 5g 够激香就行，麻辣拌的热量陷阱全在那勺油' },
+  { id:'d21', name:'黄瓜鸡蛋沙拉', slot:'lunch', kcal:210, pro:17, time:8, lv:'简单', ing:['黄瓜 1 根','鸡蛋 2 个','无糖酸奶 100g'],
+    steps:'鸡蛋煮 9 分钟切块｜黄瓜拍裂切段｜无糖酸奶+黑胡椒+少许盐调汁｜拌匀即可',
+    tip:'酸奶当沙拉酱，比千岛酱省一大半热量，蛋白质还更高' },
+  { id:'d22', name:'全麦番茄牛肉意面', slot:'lunch', kcal:350, pro:26, time:20, lv:'中等', ing:['全麦意面 60g','牛肉 80g','番茄 1 个'],
+    steps:'意面按包装煮至弹牙，留半碗面汤｜番茄炒出汁｜下牛肉末炒散｜倒意面和面汤收汁 1 分钟',
+    tip:'意面干重 60g 就够一餐，很多人一煮就是 150g，光主食就 500 kcal' },
+  { id:'d23', name:'烤三文鱼芦笋', slot:'dinner', kcal:330, pro:32, time:18, lv:'中等', ing:['三文鱼 120g','芦笋 150g'],
+    steps:'三文鱼擦干，撒盐和黑胡椒｜芦笋去老根铺烤盘｜200 度烤 12 分钟｜出锅挤几滴柠檬',
+    tip:'三文鱼脂肪虽好但密度高，一餐 120g 封顶' },
+  { id:'d24', name:'紫菜蛋花汤', slot:'snack', kcal:110, pro:9, time:5, lv:'简单', ing:['紫菜 5g','鸡蛋 1 个'],
+    steps:'紫菜撕碎放碗底，加盐｜水 300ml 煮开｜蛋液细流淋入｜冲入碗中',
+    tip:'下午嘴馋时来一碗，比任何零食都顶饿' },
+  { id:'d25', name:'希腊酸奶蓝莓', slot:'snack', kcal:130, pro:12, time:2, lv:'简单', ing:['无糖希腊酸奶 150g','蓝莓 50g'],
+    steps:'酸奶盛碗，蓝莓洗净铺上｜喜欢脆口可撒 5g 燕麦',
+    tip:'认准"希腊酸奶"和"无糖"，普通风味酸奶含糖量能到 12g/100g' },
+  { id:'d26', name:'水煮毛豆', slot:'snack', kcal:150, pro:13, time:12, lv:'简单', ing:['毛豆 150g'],
+    steps:'毛豆洗净剪两头，盐水搓一下｜水开下锅煮 8 分钟｜捞出沥干，撒少许盐',
+    tip:'带壳煮比剥好煮更锁味，而且吃壳的过程会让你慢下来' }
+];
+const PANTRY_RE = /^(盐|黑胡椒|胡椒|生抽|老抽|醋|蒜|姜|葱|橄榄油|食用油|料酒|淀粉|小米椒|干辣椒|香油|水$|水\b|代糖|蚝油|柠檬|辣椒)/;
+/* 忌口：用户不吃的东西。影响本地推荐、AI 配菜、买菜清单三处 */
+function dislikeGet(){ const l = wget('ds_dis'); return Array.isArray(l) ? l : []; }
+function dislikeSet(l){ wset('ds_dis', (l || []).filter(Boolean).slice(0, 40)); }
+/* 支持顿号/逗号/空格/分号一次加多个，自动去重 */
+function dislikeAdd(text){
+  const parts = String(text || '').split(/[、,，;；\s]+/).map(s => s.trim()).filter(Boolean);
+  const l = dislikeGet();
+  let n = 0;
+  parts.forEach(function(p){ if(l.indexOf(p) < 0){ l.push(p); n++; } });
+  if(n) dislikeSet(l);
+  return n;
+}
+function dislikeDel(i){ const l = dislikeGet(); l.splice(i, 1); dislikeSet(l); }
+/* 忌口词是食材的子串才算命中（单向匹配：写"香菜"命中"香菜 10g"，写"肉"会命中所有肉） */
+function dislikeMatch(text){
+  const l = dislikeGet();
+  if(!l.length) return '';
+  const s = String(text || '');
+  for(let i = 0; i < l.length; i++){ if(s.indexOf(l[i]) >= 0) return l[i]; }
+  return '';
+}
+function dishBlocked(d){
+  if(!d) return false;
+  if(dislikeMatch(d.name)) return true;
+  return (d.ing || []).some(function(x){ return !!dislikeMatch(x); });
+}
+/* 忌口过滤后候选不足 3 道就不筛——宁可给菜，也不给一张空卡 */
+function dishNoDislike(pool){
+  if(!dislikeGet().length) return pool;
+  const ok = pool.filter(function(x){ return !dishBlocked(x); });
+  return ok.length >= 3 ? ok : pool;
+}
+function dishById(id){ return DISH_BANK.find(x => x.id === id) || null; }
+function dishSeed(){ let h = 0; const s = todayStr(); for(const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function dishLogAll(){ const l = wget('ds_dlog'); return Array.isArray(l) ? l : []; }
+function dishRecentIds(n){ return dishLogAll().slice(-40).map(x => x.id).filter(Boolean).slice(-(n || 6)); }
+function dishBudget(slot){
+  const p = loadProfile(), pi = planIntake(p);
+  if(!pi) return 0;
+  const m = MEALS.find(x => x.k === slot) || MEALS[1];
+  return Math.round(pi.intake * m.r);
+}
+/* 候选池：避开最近做过的 + 避开当前这道 */
+function dishCandidates(){
+  const recent = dishRecentIds(6);
+  let pool = dishNoDislike(DISH_BANK.filter(x => recent.indexOf(x.id) < 0));
+  if(pool.length < 4) pool = dishNoDislike(DISH_BANK.slice());
+  const cur = wget('ds_dish');
+  const curId = (cur && cur.date === todayStr()) ? cur.id : '';
+  if(!curId) return pool;
+  const rest = pool.filter(x => x.id !== curId);
+  return rest.length ? rest : pool;
+}
+/* 按热量预算软过滤：没有计划就不筛，宁可多留候选也不要筛没 */
+function dishFitPool(pool){
+  const p = loadProfile();
+  if(!planIntake(p) || !pool.length) return pool;
+  const ok = pool.filter(function(x){ const b = dishBudget(x.slot); return !b || Math.abs(x.kcal - b) / b < 0.6; });
+  return ok.length >= 2 ? ok : pool;
+}
+function dishToday(){
+  const cur = wget('ds_dish');
+  if(cur && cur.date === todayStr() && dishById(cur.id) && !dishBlocked(dishById(cur.id))) return cur.id;
+  const pool = dishFitPool(dishCandidates());
+  const id = pool[dishSeed() % pool.length].id;
+  wset('ds_dish', { date: todayStr(), id: id });
+  return id;
+}
+function dishNext(){
+  const curId = dishToday();
+  let pool = dishCandidates().filter(x => x.id !== curId);
+  if(!pool.length) pool = DISH_BANK.slice();
+  pool = dishFitPool(pool);
+  const id = pool[Math.floor(Math.random() * pool.length)].id;
+  wset('ds_dish', { date: todayStr(), id: id });
+  return id;
+}
+/* 记入今日三餐 + 记一笔"做过"，让后续推荐避开重复 */
+function dishLogMeal(id, meal){
+  const d = dishById(id);
+  if(!d) return false;
+  const l = wget('ex_meal');
+  const idx = l.findIndex(x => x.date === todayStr() && x.meal === meal);
+  const patch = { kcal: d.kcal || 0, name: d.name };
+  if(idx >= 0) l[idx] = Object.assign({}, l[idx], patch);
+  else l.push({ id: Date.now(), date: todayStr(), meal: meal, level: 'normal', kcal: d.kcal || 0, name: d.name });
+  wset('ex_meal', l);
+  const dl = dishLogAll();
+  dl.push({ date: todayStr(), id: d.id, name: d.name });
+  wset('ds_dlog', dl.slice(-60));
+  return true;
+}
+function buyParse(s){
+  const t = String(s || '').trim();
+  if(!t) return null;
+  const m = t.match(/([0-9]+(?:\.[0-9]+)?)\s*(g|ml|个|根|瓣|片|张|条|只|把|盒|袋|勺|杯|块)$/i);
+  if(!m) return { n: t, num: 0, unit: '' };
+  return { n: t.slice(0, m.index).trim() || t, num: parseFloat(m[1]), unit: m[2].toLowerCase() };
+}
+/* 同名食材合并用量；单位不同就并列显示，不瞎换算 */
+function buyMerge(list){
+  const map = {};
+  (list || []).forEach(function(s){
+    const it = buyParse(s);
+    if(!it || !it.n) return;
+    const k = it.n;
+    if(!map[k]) map[k] = { n: k, num: it.num || 0, unit: it.unit || '', extra: [] };
+    else if(it.unit && map[k].unit && it.unit === map[k].unit) map[k].num += (it.num || 0);
+    else if(it.num) map[k].extra.push(it.num + (it.unit || ''));
+  });
+  return Object.keys(map).map(function(k){
+    const v = map[k];
+    let q = v.num ? (Math.round(v.num * 10) / 10) + v.unit : '';
+    if(v.extra.length) q += (q ? ' + ' : '') + v.extra.join(' + ');
+    return { n: v.n, q: q };
+  });
+}
+function buyGet(){
+  const o = wget('ds_buy');
+  return (o && !Array.isArray(o) && o.items) ? o : { date: todayStr(), items: [] };
+}
+function buySave(o){ wset('ds_buy', o); }
+/* 加入清单：滤掉家常调料，同名累加，已有则置为未买 */
+function buyAdd(list){
+  const o = buyGet();
+  const merged = buyMerge((list || []).filter(function(s){ return !PANTRY_RE.test(String(s || '').trim()); }));
+  let add = 0;
+  merged.forEach(function(m){
+    const i = o.items.findIndex(x => x.n === m.n);
+    if(i >= 0){ o.items[i].q = o.items[i].q && m.q ? (o.items[i].q + ' + ' + m.q) : (o.items[i].q || m.q); o.items[i].done = false; }
+    else { o.items.push({ n: m.n, q: m.q, done: false }); add++; }
+  });
+  buySave(o);
+  return add;
+}
+function buyToggle(i){ const o = buyGet(); if(o.items[i]){ o.items[i].done = !o.items[i].done; buySave(o); } }
+function buyDel(i){ const o = buyGet(); o.items.splice(i, 1); buySave(o); }
+function buyClearDone(){ const o = buyGet(); o.items = o.items.filter(x => !x.done); buySave(o); }
+function dishCardHtml(){
+  const pi = planIntake(loadProfile());
+  const d = dishById(dishToday());
+  if(!d) return '';
+  const b = pi ? dishBudget(d.slot) : 0;
+  const slotName = (MEALS.find(m => m.k === d.slot) || MEALS[2]).n;
+  const cooked = dishLogAll().filter(x => x.id === d.id).length;
+  const steps = String(d.steps).split('｜').map(function(s, i){ return (i + 1) + '. ' + esc(s.trim()); }).join('<br>');
+  return wCard('🍽️ 今天做什么菜',
+    '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">' +
+      '<b style="font-size:var(--fs-15,15px)">' + esc(d.name) + '</b>' +
+      '<span class="w-tag" style="pointer-events:none">' + slotName + '</span></div>' +
+    '<div style="font-size:var(--fs-12,12px);color:var(--sub);margin-top:4px">⏱ ' + d.time + ' 分钟 · 难度 ' + d.lv +
+      ' · 蛋白 ' + d.pro + 'g · ' + d.kcal + ' kcal' +
+      (b ? '（这顿预算 ' + b + '）' : '') + (cooked ? ' · 做过 ' + cooked + ' 次' : '') + '</div>' +
+    '<div class="w-note" style="margin-top:7px">🥕 ' + d.ing.map(function(s){ return esc(s); }).join(' ｜ ') + '</div>' +
+    '<div style="font-size:var(--fs-12,12px);margin-top:8px;line-height:1.75">' + steps + '</div>' +
+    '<div style="font-size:var(--fs-11,11px);color:var(--sub);margin-top:7px">💡 ' + esc(d.tip) + '</div>' +
+    '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center">' +
+      '<button class="w-btn" data-wact="dish-next" style="padding:7px 10px;font-size:var(--fs-12,12px)">🔄 换一道</button>' +
+      '<button class="w-btn" data-wact="dish-buy" style="padding:7px 10px;font-size:var(--fs-12,12px)">🛒 加进买菜清单</button>' +
+      '<select id="w-dish-slot" style="font-size:var(--fs-12,12px);padding:6px;min-height:32px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)">' +
+        MEALS.map(function(m){ return '<option value="' + m.k + '"' + (m.k === d.slot ? ' selected' : '') + '>' + m.n + '</option>'; }).join('') + '</select>' +
+      '<button class="w-btn" data-wact="dish-log" style="padding:7px 10px;font-size:var(--fs-12,12px)">✓ 记入今日</button>' +
+    '</div>' +
+    (function(){
+      const dis = dislikeGet();
+      if(!dis.length) return '';
+      const blocked = DISH_BANK.filter(dishBlocked).length;
+      return '<div style="font-size:var(--fs-11,11px);color:var(--sub);margin-top:7px">🚫 已避开你的忌口：' +
+        dis.map(function(x){ return esc(x); }).join('、') + '（' + blocked + '/' + DISH_BANK.length + ' 道菜被排除）</div>';
+    })(),
+    '<div class="w-streak">每天自动换 · 会避开最近做过的' + (pi ? ' · 按你的热量预算挑' : '') + '</div>');
+}
+function dsMenuHtml(m){
+  return m.days.map(function(day){
+    return '<div style="margin-top:8px"><div style="font-size:var(--fs-12,12px);color:var(--sub)">' + esc(day.label || '') + '</div>' +
+      day.dishes.map(function(x){
+        return '<div class="w-row" style="flex-wrap:wrap;row-gap:4px"><span class="w-row-t"><b>' + esc(x.name) + '</b>' +
+          (x.ing ? '<div style="font-size:var(--fs-11,11px);color:var(--sub);margin-top:2px">' + esc(x.ing) + '</div>' : '') +
+          (x.steps ? '<div style="font-size:var(--fs-11,11px);margin-top:4px;line-height:1.6">' + esc(x.steps) + '</div>' : '') +
+          '</span><span class="w-row-s">' + (x.kcal ? x.kcal + ' kcal' : '') + (x.pro ? ' · ' + x.pro + 'g' : '') + '</span></div>';
+      }).join('') + '</div>';
+  }).join('');
+}
+function buyCardHtml(){
+  const o = buyGet();
+  const hasKey = !!(localStorage.getItem('shuiji_ds_key') || '').trim();
+  const menu = wget('ds_menu');
+  const todayMenu = (menu && menu.date === todayStr() && menu.days) ? menu : null;
+  const doneN = o.items.filter(x => x.done).length;
+  const rows = o.items.length
+    ? o.items.map(function(x, i){
+        return '<div class="w-row"><span class="w-row-t" data-wact="buy-toggle" data-i="' + i + '" style="' +
+          (x.done ? 'opacity:.5;text-decoration:line-through' : '') + '">' + (x.done ? '✅ ' : '⬜ ') + esc(x.n) +
+          (x.q ? ' <span style="color:var(--sub);font-size:var(--fs-12,12px)">' + esc(x.q) + '</span>' : '') + '</span>' +
+          '<button class="w-del" data-wact="buy-del" data-i="' + i + '">✕</button></div>';
+      }).join('')
+    : '<div class="w-empty">清单是空的 · 点上面「加进买菜清单」，或让 AI 一次配 3 天</div>';
+  return wCard('🛒 买菜清单（已买 ' + doneN + '/' + o.items.length + '）',
+    '<div style="font-size:var(--fs-12,12px);color:var(--sub);margin-bottom:6px">🚫 我不吃</div>' +
+    '<div class="w-add" style="flex-wrap:wrap;row-gap:6px">' +
+      '<input id="w-dislike" type="text" placeholder="不吃的，如：香菜、内脏、羊肉" autocomplete="off" style="flex:1;min-width:130px">' +
+      '<button class="w-btn" data-wact="dis-add" style="padding:7px 10px;font-size:var(--fs-12,12px)">＋ 加忌口</button></div>' +
+    (dislikeGet().length
+      ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px">' +
+        dislikeGet().map(function(x, i){
+          return '<span class="w-tag" data-wact="dis-del" data-i="' + i + '" style="display:inline-flex;align-items:center;gap:4px">' +
+            esc(x) + ' ✕</span>';
+        }).join('') + '</div>'
+      : '') +
+    (dislikeGet().length ? '<div class="w-note" style="margin-top:6px">推荐菜、AI 配菜都会避开这些；多个用顿号或逗号隔开一次加完。</div>' : '') +
+    rows +
+    (todayMenu ? dsMenuHtml(todayMenu) : '') +
+    '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">' +
+      '<button class="w-btn" data-wact="ds-menu" style="padding:7px 10px;font-size:var(--fs-12,12px)">✨ AI 配 3 天菜单</button>' +
+      (doneN ? '<button class="w-btn" data-wact="buy-clr" style="padding:7px 10px;font-size:var(--fs-12,12px)">清除已买</button>' : '') +
+    '</div>' +
+    '<div id="w-ds-menu" style="margin-top:6px"></div>',
+    '<div class="w-streak">' + (hasKey ? '调料（盐/油/蒜/葱）不进清单 · 点食材可勾掉' : '没 Key 也能用：从今日推荐加入；配 Key 后可让 AI 一次配 3 天') + '</div>');
+}
+function parseDsMenu(content){
+  const m = String(content || '').match(/\{[\s\S]*\}/);
+  if(!m) return null;
+  try{
+    const j = JSON.parse(m[0]);
+    const days = (Array.isArray(j.days) ? j.days : []).filter(function(d){ return d && Array.isArray(d.dishes); })
+      .map(function(d){
+        return { label: String(d.label || ''), dishes: d.dishes.filter(function(x){ return x && x.name; }).map(function(x){
+          return { name: String(x.name).trim(), ing: String(x.ing || '').trim(), steps: String(x.steps || '').trim(),
+            kcal: parseInt(x.kcal, 10) || 0, pro: parseInt(x.pro, 10) || 0 };
+        }) };
+      }).filter(function(d){ return d.dishes.length; });
+    const buy = (Array.isArray(j.buy) ? j.buy : []).filter(function(x){ return x && x.n; })
+      .map(function(x){ return { n: String(x.n).trim(), q: String(x.q || '').trim() }; })
+      .filter(function(x){ return !PANTRY_RE.test(x.n); });
+    return (days.length || buy.length) ? { days: days, buy: buy } : null;
+  }catch(e){ return null; }
+}
+async function dsMenuGen(){
+  const key = (localStorage.getItem('shuiji_ds_key') || '').trim();
+  const out = $('w-ds-menu');
+  if(!key){
+    if(out) out.innerHTML = '<div class="w-empty">先去「设置」页填 DeepSeek API Key 才能配 3 天菜单。<br><span style="font-size:var(--fs-12,12px)">没 Key 也能用：点上面「🍽️ 今天做什么菜」里的「加进买菜清单」</span></div>';
+    return;
+  }
+  const p = loadProfile(), pi = planIntake(p);
+  if(out) out.innerHTML = '<div class="w-empty">AI 配菜中… <span class="spinner"></span></div>';
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 25000);
+  try{
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: '你是注册营养师兼减脂餐厨师，擅长用少量食材搭配出多天不重样的减脂餐。硬性要求：1) 食材常见，超市或菜市场能一次买齐，尽量让三天食材互相复用，避免买了用一次就闲置；2) 每天给午餐和晚餐各一道，共 3 天 6 道，每道给出菜名、主要食材与精确用量（克/毫升）、一句话关键做法（说清火候或容易踩坑的点）、热量和蛋白质克数；3) 最后给一份合并后的买菜清单，同一食材把三天用量合并成总数，不要列盐、油、蒜、姜、葱等家常调料；4) 做法要真能在家常厨房做出来，不要出现需要特殊设备或难买调料的菜。严格只输出 JSON，不要任何其他文字或代码标记，格式：{"days":[{"label":"第1天","dishes":[{"name":"菜名","ing":"食材与用量","steps":"一句话关键做法","kcal":300,"pro":40}]}],"buy":[{"n":"鸡胸肉","q":"500g"}]}' },
+          { role: 'user', content: '帮我配接下来 3 天的减脂午餐和晚餐，并给一份合并后的买菜清单。' +
+            (pi ? ('我的日热量预算约 ' + pi.intake + ' kcal，午餐约占 ' + Math.round(pi.intake * 0.35) + '、晚餐约占 ' + Math.round(pi.intake * 0.30) + '。') : '') +
+            (p ? ('身高 ' + p.h + 'cm，体重 ' + p.w + 'kg，目标 ' + p.goal + 'kg，' + (p.gender === 'male' ? '男' : '女') + '，' + p.age + ' 岁。') : '') +
+            '最近我做过这些菜，请避开重复：' + (dishRecentIds(6).map(function(id){ const d = dishById(id); return d ? d.name : ''; }).filter(Boolean).join('、') || '暂无记录') + '。' +
+            (dislikeGet().length ? ('重要：我完全不吃这些东西——' + dislikeGet().join('、') + '。三天六道菜里一道都不能出现，也不要作为配菜、点缀或调料；买菜清单里同样不要列。') : '') }
+        ],
+        max_tokens: 1400,
+        temperature: 0.85
+      }),
+      signal: ctl.signal
+    });
+    const j = await res.json();
+    if(!res.ok) throw new Error('HTTP ' + res.status + (j.error && j.error.message ? ' ' + j.error.message : ''));
+    const content = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+    const m = parseDsMenu(content);
+    if(!m) throw new Error('AI 返回格式不对');
+    const days = m.days.map(function(d){
+      return { label: d.label, dishes: d.dishes.filter(function(x){ return !(dislikeMatch(x.name) || dislikeMatch(x.ing)); }) };
+    }).filter(function(d){ return d.dishes.length; });
+    const buy = m.buy.filter(function(x){ return !dislikeMatch(x.n); });
+    if(!days.length && !buy.length) throw new Error('AI 没给出合忌口的菜单');
+    wset('ds_menu', { date: todayStr(), days: days, t: Date.now() });
+    const o = buyGet();
+    buy.forEach(function(x){
+      const i = o.items.findIndex(y => y.n === x.n);
+      if(i >= 0){ o.items[i].q = o.items[i].q && x.q ? (o.items[i].q + ' + ' + x.q) : (x.q || o.items[i].q); o.items[i].done = false; }
+      else o.items.push({ n: x.n, q: x.q, done: false });
+    });
+    buySave(o);
+    openWidget(curWidget);
+    toast('已配 3 天 · 买菜清单加好了');
+  }catch(e){
+    if(out) out.innerHTML = '<div class="w-empty">AI 配菜失败：' + esc(String(e.message || e).slice(0, 40)) +
+      '<br><span style="font-size:var(--fs-12,12px)">可以先从「🍽️ 今天做什么菜」手动加</span></div>';
+  }finally{ clearTimeout(to); }
+}
+
 function dsFitCardHtml(){
   const l = wget('ds_fit');
   const today = l.find(x => x.date === todayStr());
@@ -4673,11 +5373,20 @@ function wrongBookHtml(){
   const ws = wrongWords();
   if(!ws.length) return '';
   return wCard('❌ 错词本（' + ws.length + '）',
-    ws.slice(0, 15).map(x => '<div class="w-row"><span class="w-row-t"><b>' + esc(x.word) + '</b> · ' + esc(x.def || '—') +
+    ws.slice(0, 15).map(x => {
+      const nt = wnoteGet(x.word);
+      return '<div class="w-row"><span class="w-row-t"><b>' + esc(x.word) + '</b> · ' + esc(x.def || '—') +
       '<span style="color:var(--sub);font-size:var(--fs-12,12px)"> · 错 ' + x.wrong + ' 次' + (x.book ? ' · ' + esc(x.book) : '') + '</span></span>' +
       '<button class="w-tag" data-wact="en-speak" data-word="' + esc(x.word) + '">🔊</button>' +
-      '<button class="w-tag" data-wact="en-again" data-id="' + x.id + '" data-book="' + esc(x.bookId || '') + '">重练</button></div>').join('') +
-    '<div class="w-note" style="margin-top:6px">答错的词自动进这里，重练答对就移出。</div>');
+      '<button class="w-tag" data-wact="en-note" data-word="' + esc(x.word) + '" data-def="' + esc(x.def || '') + '">' + (nt ? '💡' : '💡 例句') + '</button>' +
+      '<button class="w-tag" data-wact="en-again" data-id="' + x.id + '" data-book="' + esc(x.bookId || '') + '">重练</button></div>' +
+      (nt ? '<div style="padding:6px 9px 8px;background:var(--accentSoft);border-radius:9px;margin:0 0 6px;font-size:var(--fs-12,12px);line-height:1.65">' +
+        (nt.ex ? '<div>' + esc(nt.ex) + '</div>' : '') +
+        (nt.exZh ? '<div style="color:var(--sub);margin-top:2px">' + esc(nt.exZh) + '</div>' : '') +
+        (nt.tip ? '<div style="margin-top:3px">💡 ' + esc(nt.tip) + (nt.local ? '<span style="color:var(--sub)">（本地口诀）</span>' : '') + '</div>' : '') +
+        '</div>' : '');
+    }).join('') +
+    '<div class="w-note" style="margin-top:6px">答错的词自动进这里，重练答对就移出。点 💡 生成例句和记忆口诀（需 DeepSeek Key，没填则给本地构词口诀）。</div>');
 }
 /* 词书管理：每本书独立词表/背词量/复习队列 */
 const BUILTIN_BOOKS = {
@@ -4952,6 +5661,17 @@ WIDGETS['英语学习'] = {
       toast('已放回今天的复习队列');
       openWidget(curWidget);
     },
+    'en-note': async b => {
+      const w = b.dataset.word || ''; const def = b.dataset.def || '';
+      if(!w) return;
+      const cur = wnoteGet(w);
+      if(cur && !cur.local){ toast('已有 AI 例句，重练一遍更记得住'); return; }
+      toast('AI 生成中…');
+      const d = await wnoteGen(w, def);
+      if(d){ wnoteSet(w, d); toast('例句 + 口诀已生成'); }
+      else { wnoteSet(w, wnoteLocal(w, def)); toast('用本地构词口诀（填 Key 可出 AI 例句）'); }
+      openWidget(curWidget);
+    },
     'en-next': async () => { revIdx++; revShown = false; openWidget(curWidget); },
     'en-new-flip': async () => {
       const sess = enSess();
@@ -4976,6 +5696,7 @@ WIDGETS['英语学习'] = {
 
 /* ---------- 表达能力 ---------- */
 let topicIdx = 0;
+let debateIdx = 0;
 const TOPICS = ['描述你最近听到最打动你的一句话', '用30秒向别人推荐你最喜欢的一道菜', '用一个比喻描述你今天的感受', '复述一段你记得的电影台词', '介绍一个你擅长的技能给完全不懂的人', '用三个关键词讲一件今天的小事', '给一位朋友即兴想一个生日祝福', '说一个你最近的观点，并给一条理由', '用一分钟介绍你所在的城市', '即兴为一张想象中的照片配一段话', '描述一次你觉得很爽的体验', '向陌生人介绍你最近在用的一个 App', '讲一件你做过最勇敢的事', '用一句话让陌生人对你产生兴趣', '描述你理想的一天', '讲讲你最近一次帮助别人的经历', '如果明天是假期，你会怎么过', '用故事的方式讲你今天的通勤路上', '说说你最想感谢的一个人', '描述一种你特别喜欢的味道'];
 /* 积累本：分类标签 + 搜索 + 按周汇总 */
 const NOTE_TAGS = ['金句', '观点', '故事', '素材', '其他'];
@@ -5009,8 +5730,10 @@ WIDGETS['表达能力'] = {
     const t = todayStr();
     const today = l.find(x => x.date === t);
     if(!topicIdx) topicIdx = Math.floor(Math.random() * TOPICS.length);
+    if(!debateIdx) debateIdx = Math.floor(Math.random() * DEBATES.length);
     const topic = TOPICS[topicIdx % TOPICS.length];
-    const debate = DEBATES[Math.floor(Math.random() * DEBATES.length)];
+    /* 辩题也要缓存：否则任何一次 openWidget 重渲染都会把用户正在看的辩题换掉 */
+    const debate = DEBATES[debateIdx % DEBATES.length];
     return wCard('🗣️ 表达能力',
       goalCard('exp', today ? today.minutes : 0, '分钟', 10) +
       (today ? '<div class="w-row"><span class="w-row-t">今日已练习 ' + today.minutes + ' 分钟</span></div>' : wMin('exp-check', '打卡练习')),
@@ -5459,6 +6182,15 @@ async function buildReport(dv){
     }
     if(mealT.length){
       L.push('  · 三餐已记 ' + mealT.length + '/4 · 约 ' + mealT.reduce((s, x) => s + (x.kcal || 0), 0) + ' kcal');
+      const mn = mealT.filter(x => x.name).map(x => (MEALS.find(m => m.k === x.meal) || { n: '' }).n + x.name).filter(Boolean).join('、');
+      if(mn) L.push('    ' + mn);
+    }
+    {
+      const dd = dishById(dishToday());
+      const bl = buyGet();
+      if(dd) L.push('  · 今日推荐菜：' + dd.name + '（' + dd.kcal + ' kcal · 蛋白 ' + dd.pro + 'g · ' + dd.time + ' 分钟）');
+      const left = bl.items.filter(x => !x.done);
+      if(left.length) L.push('  · 待买 ' + left.length + ' 样：' + left.map(x => x.n + (x.q ? ' ' + x.q : '')).join('、'));
     }
     L.push('');
   }
@@ -5515,6 +6247,54 @@ async function buildReport(dv){
     L.push('  · Bug ' + (r.bugTotal || 0) + ' 个（致命 ' + (r.bugFatal || 0) + ' / 严重 ' + (r.bugMajor || 0) + ' / 一般 ' + (r.bugMinor || 0) + ' / 建议 ' + (r.bugIdea || 0) + '）');
     if((r.risk || '').trim()) L.push('  · 风险：' + r.risk.trim());
     if((r.plan || '').trim()) L.push('  · 明日：' + r.plan.trim());
+    L.push('');
+  }
+
+  /* 5.6 跟读 / 挑战 / OKR / 专注 / 费曼 / 结构化复盘（有记录才出现） */
+  const shToday = wget('sh_scores').filter(x => x && x.date === t);
+  if(shToday.length){
+    const best = shToday.reduce((m, x) => Math.max(m, x.score || 0), 0);
+    const sent = shFind((shToday[shToday.length - 1] || {}).id);
+    L.push('【今日跟读】练 ' + shToday.length + ' 次 · 最高 ' + best + ' 分');
+    if(sent && sent.en) L.push('  · ' + sent.en);
+    L.push('');
+  }
+  const ch = chGet();
+  if(ch && ch.name){
+    const on = !!(ch.days && ch.days[t]);
+    L.push('【30天挑战】' + ch.name + ' · 已坚持 ' + chDays() + '/30 天 · 今日' + (on ? '已打卡 ✓' : '未打卡'));
+    L.push('');
+  }
+  const oks = okrAll();
+  if(oks.length){
+    L.push('【OKR 进度】');
+    oks.forEach(o => {
+      const ks = o.krs || [];
+      L.push('  · ' + (o.obj || '—') + ' ' + okrProgress(o) + '%（' + ks.filter(k => k.done).length + '/' + ks.length + ' KR）');
+    });
+    L.push('');
+  }
+  const flToday = focusLogAll()[t];
+  if(flToday){
+    let mins = 0, pH = -1, pV = 0;
+    Object.keys(flToday).forEach(h => { const v = flToday[h] || 0; mins += v; if(v > pV){ pV = v; pH = parseInt(h, 10); } });
+    if(mins){
+      L.push('【今日专注】' + mins + ' 分钟' + (pH >= 0 ? ' · 集中在 ' + pH + ':00–' + (pH + 1) + ':00' : ''));
+      L.push('');
+    }
+  }
+  const fmToday = fmAll().filter(x => x && x.date === t);
+  if(fmToday.length){
+    L.push('【费曼输出】' + fmToday.length + ' 张');
+    fmToday.forEach(x => L.push('  · ' + (x.topic || '—')));
+    L.push('');
+  }
+  const rv = wget('rv2').find(x => x && x.date === t);
+  if(rv && ((rv.win || '').trim() || (rv.hard || '').trim() || (rv.plan || '').trim())){
+    L.push('【结构化复盘】' + (rv.mood ? rvMoodStars(rv.mood) : ''));
+    if((rv.win || '').trim())  L.push('  · 做成：' + rv.win.trim());
+    if((rv.hard || '').trim()) L.push('  · 困难：' + rv.hard.trim());
+    if((rv.plan || '').trim()) L.push('  · 明天：' + rv.plan.trim());
     L.push('');
   }
 
@@ -6268,7 +7048,17 @@ const ACHIEVEMENTS = [
   { id:'water7',     ic:'💧', nm:'喝水达人', ds:'连续 7 天喝水打卡' },
   { id:'perfect',    ic:'🏆', nm:'圆满一天', ds:'某天任务 100% 完成' },
   { id:'qa1',        ic:'🧪', nm:'首份日报', ds:'提交 1 份测试日报' },
-  { id:'qa5',        ic:'📈', nm:'测试周更', ds:'提交 5 份测试日报' }
+  { id:'qa5',        ic:'📈', nm:'测试周更', ds:'提交 5 份测试日报' },
+  { id:'sh1',        ic:'🎙️', nm:'开口说',   ds:'完成 1 次口语跟读' },
+  { id:'sh90',       ic:'💯', nm:'发音到位', ds:'跟读拿到 90 分以上' },
+  { id:'sh10',       ic:'🗣️', nm:'敢说敢练', ds:'累计跟读 10 次' },
+  { id:'ch7',        ic:'🔥', nm:'挑战周',   ds:'30 天挑战坚持 7 天' },
+  { id:'ch30',       ic:'👑', nm:'满月达成', ds:'30 天挑战打满 30 天' },
+  { id:'okr1',       ic:'📌', nm:'目标达成', ds:'完成 1 个 OKR 的全部 KR' },
+  { id:'fm1',        ic:'🧠', nm:'讲明白了', ds:'输出第 1 张费曼卡' },
+  { id:'fm10',       ic:'🎓', nm:'费曼十讲', ds:'累计输出 10 张费曼卡' },
+  { id:'rv7',        ic:'📝', nm:'复盘成习', ds:'累计结构化复盘 7 天' },
+  { id:'tk10',       ic:'🎓', nm:'题海十题', ds:'累计答对 10 道测试题' }
 ];
 function achGot(){ try{ return JSON.parse(localStorage.getItem('shuiji_ach') || '{}'); }catch(e){ return {}; } }
 async function evalAchievements(silent){
@@ -6278,6 +7068,12 @@ async function evalAchievements(silent){
     const habits = await getAll('habits');
     const qa = wget('qarep');
     const ws = wget('ex_w');
+    const shs = wget('sh_scores');
+    const ch = chGet();
+    const oks = okrAll();
+    const fms = fmAll();
+    const rvs = wget('rv2');
+    const tks = wget('tk_done');
     const doneAll = tasks.filter(x => x.completed);
     const doneDates = Array.from(new Set(doneAll.map(x => x.date))).sort();
     const drinkDates = Array.from(new Set(habits.filter(x => x.type === 'drink').map(x => x.date))).sort();
@@ -6296,7 +7092,17 @@ async function evalAchievements(silent){
       water7: calcStreak(drinkDates) >= 7,
       perfect: hasPerfect,
       qa1: qa.length >= 1,
-      qa5: qa.length >= 5
+      qa5: qa.length >= 5,
+      sh1: shs.length >= 1,
+      sh90: shs.some(x => (x.score || 0) >= 90),
+      sh10: shs.length >= 10,
+      ch7: chDays() >= 7,
+      ch30: chDays() >= 30,
+      okr1: oks.some(o => (o.krs || []).length > 0 && (o.krs || []).every(k => k.done)),
+      fm1: fms.length >= 1,
+      fm10: fms.length >= 10,
+      rv7: Array.isArray(rvs) ? rvs.length >= 7 : false,
+      tk10: tks.filter(x => x.correct).length >= 10
     };
     const got = achGot();
     const fresh = [];
@@ -6683,6 +7489,7 @@ WIDGETS['测试成长'] = {
       '</div>',
       '<div class="w-streak">连续 <b>' + calcStreak(wget('tk_done').map(x => x.date)) + '</b> 天</div>') +
     tkReviewHtml() +
+    tcRadarHtml() +
     wCard('➕ 添加知识卡',
       '<div class="w-add"><input id="tk-q" type="text" placeholder="问题 / 知识点" style="flex:1"><input id="tk-tag" type="text" placeholder="标签(选填)" style="width:80px"></div>' +
       '<textarea id="tk-a" rows="2" placeholder="答案 / 要点" style="width:100%;margin-top:6px;background:rgba(33,64,44,0.05);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:var(--fs-14,14px);color:var(--text);resize:none;font-family:inherit;box-sizing:border-box"></textarea>' +
@@ -6994,9 +7801,263 @@ WIDGETS['OKR目标'] = {
   }
 };
 
+/* ================= A6 精力 / 专注节律 ================= */
+/* 番茄完成时写一份 localStorage 镜像（render 不能读 IndexedDB），结构 { 'YYYY-MM-DD': { 小时: 分钟 } } */
+function focusLogAll(){ const o = wget('focus_log'); return (o && !Array.isArray(o)) ? o : {}; }
+function focusLogSave(o){ wset('focus_log', o); }
+function focusLogAdd(mins){
+  try{
+    const m = Math.max(0, Math.round((mins || 0) / 60));
+    if(!m) return;
+    const o = focusLogAll(); const d = todayStr(); const h = String(new Date().getHours());
+    o[d] = o[d] || {}; o[d][h] = (o[d][h] || 0) + m;
+    const ks = Object.keys(o).sort();
+    if(ks.length > 60) ks.slice(0, ks.length - 60).forEach(k => { delete o[k]; });
+    focusLogSave(o);
+  }catch(e){}
+}
+function focusLogByHour(){
+  const o = focusLogAll(); const lo = daysAgoStr(29);
+  const arr = new Array(24).fill(0);
+  try{
+    Object.keys(o).forEach(d => {
+      if(d < lo) return;
+      const hm = o[d] || {};
+      Object.keys(hm).forEach(h => { const i = parseInt(h, 10); if(i >= 0 && i < 24) arr[i] += (hm[h] || 0); });
+    });
+  }catch(e){}
+  return arr;
+}
+function focusLogTotal(){ return focusLogByHour().reduce((a, b) => a + b, 0); }
+function focusLogPeak(){
+  const a = focusLogByHour(); let bi = -1, bv = 0;
+  a.forEach((v, i) => { if(v > bv){ bv = v; bi = i; } });
+  return { hour: bi, mins: bv };
+}
+function focusLogBars(){
+  const a = focusLogByHour(); const max = Math.max(1, ...a); const peak = Math.max(...a);
+  return a.map((v, i) => {
+    const h = Math.max(v ? 3 : 1, Math.round(v / max * 46));
+    const isPeak = v > 0 && v === peak;
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="' + i + '点 ' + v + ' 分钟">' +
+      '<div style="width:100%;height:46px;display:flex;align-items:flex-end"><div style="width:100%;height:' + h + 'px;border-radius:2px 2px 0 0;background:' +
+      (v ? 'var(--accent)' : 'var(--line)') + ';opacity:' + (v ? (isPeak ? 1 : .75) : .5) + '"></div></div>' +
+      '<div style="font-size:9px;color:' + (isPeak ? 'var(--accent)' : 'var(--sub)') + ';font-weight:' + (isPeak ? 700 : 400) + '">' + (i % 4 === 0 ? i : '') + '</div></div>';
+  }).join('');
+}
+WIDGETS['专注节律'] = {
+  render(){
+    const tot = focusLogTotal(); const pk = focusLogPeak();
+    if(!tot) return wCard('📊 专注节律', '<div class="w-empty">还没有番茄记录。完成一个番茄后，这里会画出你一天里最能专注的时段。</div>');
+    const a = focusLogByHour();
+    const active = a.filter(v => v > 0).length;
+    return wCard('📊 专注节律',
+      '<div style="display:flex;gap:3px;align-items:flex-end">' + focusLogBars() + '</div>' +
+      '<div class="w-note" style="margin-top:10px">近 30 天专注 <b>' + tot + '</b> 分钟，分布在 <b>' + active + '</b> 个时段' +
+      (pk.hour >= 0 ? '。<br>高效时段：<b>' + pk.hour + ':00–' + (pk.hour + 1) + ':00</b>（累计 ' + pk.mins + ' 分钟）' : '') + '</div>' +
+      '<div class="w-note">把最难啃的任务排进高效时段，机械性事务放到低谷时段。</div>');
+  },
+  acts: {}
+};
+
+/* ================= A3 错词本 AI 例句 / 记忆口诀 ================= */
+function wnoteAll(){ const o = wget('wnote'); return (o && !Array.isArray(o)) ? o : {}; }
+function wnoteSave(o){ wset('wnote', o); }
+function wnoteGet(w){ return wnoteAll()[w] || null; }
+function wnoteSet(w, d){ const o = wnoteAll(); o[w] = Object.assign({ t: Date.now() }, d); wnoteSave(o); }
+/* 无 Key / AI 失败时的兜底：按构词法给口诀 */
+function wnoteLocal(word, def){
+  const w = (word || '').toLowerCase();
+  let tip = '';
+  if(/(tion|sion)$/.test(w)) tip = '名词后缀 -tion/-sion，记词根 + 后缀 = 「…的动作/结果」。';
+  else if(/^(un|in|im|dis|non)/.test(w)) tip = '否定前缀，先记词根再加否定含义。';
+  else if(/(able|ible)$/.test(w)) tip = '形容词后缀 -able = 「能够被…的」。';
+  else if(/(ous|ful|ive|al)$/.test(w)) tip = '形容词后缀，用来描述性质。';
+  else if(/ly$/.test(w)) tip = '副词后缀 -ly，多由形容词变来。';
+  else if(/(ment|ness|ity)$/.test(w)) tip = '名词后缀，表示状态/性质。';
+  else tip = '拆音节跟读三遍：' + w.split('').join('·') + '，再联想释义「' + (def || '') + '」。';
+  return { ex: '', exZh: '', tip: tip, local: true };
+}
+function wnoteParse(c){
+  try{
+    const m = String(c).match(/\{[\s\S]*\}/);
+    if(!m) return null;
+    const o = JSON.parse(m[0]);
+    if(!o.ex && !o.tip) return null;
+    return { ex: (o.ex || '').trim(), exZh: (o.exZh || '').trim(), tip: (o.tip || '').trim(), local: false };
+  }catch(e){ return null; }
+}
+async function wnoteGen(word, def){
+  const key = (localStorage.getItem('shuiji_ds_key') || '').trim();
+  if(!key) return null;
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 25000);
+  try{
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: '你是英语词汇老师。为给定单词生成：1) 一个简短实用的英文例句（≤18 词，B1 难度，必须自然包含该单词）；2) 例句的中文翻译；3) 一条好记的中文记忆口诀（≤30 字，可用谐音/词根/联想）。严格只输出 JSON，格式 {"ex":"...","exZh":"...","tip":"..."}，不要任何其他文字或代码标记。' },
+          { role: 'user', content: '单词：' + word + '\n释义：' + (def || '（无）') }
+        ],
+        max_tokens: 220, temperature: 0.7
+      }),
+      signal: ctl.signal
+    });
+    const j = await res.json();
+    if(!res.ok) return null;
+    const c = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+    return wnoteParse(c);
+  }catch(e){ return null; }
+  finally{ clearTimeout(to); }
+}
+
+/* ================= B6 测试能力雷达图（数据来自每日一题的 tag 答对率） ================= */
+const TC_DIMS = [
+  { k: '黑盒方法', tags: ['黑盒', '方法'] },
+  { k: '用例设计', tags: ['用例'] },
+  { k: '缺陷管理', tags: ['Bug'] },
+  { k: '流程规范', tags: ['流程'] },
+  { k: '接口测试', tags: ['接口'] },
+  { k: '测试类型', tags: ['类型'] }
+];
+function tcRadar(){
+  const done = wget('tk_done');
+  const bank = {};
+  TK_BANK.forEach(q => { bank[q.id] = q; });
+  return TC_DIMS.map(d => {
+    let n = 0, ok = 0;
+    done.forEach(r => {
+      const q = bank[r.qid]; if(!q) return;
+      if(d.tags.indexOf(q.tag) < 0) return;
+      n++; if(r.correct) ok++;
+    });
+    return { dim: d.k, ok: ok, n: n, pct: n ? Math.round(ok / n * 100) : 0 };
+  });
+}
+function tcRadarSvg(){
+  const r = tcRadar(); const n = r.length;
+  const cx = 92, cy = 92, R = 60, LBL = 74;
+  const pt = (i, rad) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * rad, cy + Math.sin(a) * rad]; };
+  let g = '';
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    g += '<polygon points="' + r.map((_, i) => pt(i, R * f).join(',')).join(' ') + '" fill="none" stroke="var(--line)" stroke-width="1"/>';
+  });
+  r.forEach((_, i) => { const p = pt(i, R); g += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="var(--line)" stroke-width="1"/>'; });
+  const dp = r.map((x, i) => pt(i, R * Math.max(0.05, x.pct / 100)).join(',')).join(' ');
+  const dots = r.map((x, i) => { const p = pt(i, R * Math.max(0.05, x.pct / 100)); return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="2.6" fill="var(--accent)"/>'; }).join('');
+  const labels = r.map((x, i) => {
+    const p = pt(i, LBL);
+    return '<text x="' + p[0].toFixed(1) + '" y="' + p[1].toFixed(1) + '" font-size="10" fill="var(--sub)" text-anchor="middle" dominant-baseline="middle">' + x.dim + '</text>';
+  }).join('');
+  return '<svg viewBox="0 0 184 184" style="width:100%;max-width:230px;display:block;margin:0 auto" role="img" aria-label="测试能力雷达图">' + g +
+    '<polygon points="' + dp + '" fill="var(--accentSoft)" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>' + dots + labels + '</svg>';
+}
+function tcRadarHtml(){
+  const r = tcRadar();
+  const tot = r.reduce((s, x) => s + x.n, 0);
+  if(!tot) return '';
+  const weak = r.filter(x => x.n > 0).sort((a, b) => a.pct - b.pct)[0];
+  return wCard('📡 测试能力雷达',
+    tcRadarSvg() +
+    '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">' +
+    r.map(x => '<span class="w-tag' + (x.n && x.pct >= 80 ? ' done' : '') + '" style="font-size:var(--fs-11,11px)">' + esc(x.dim) + ' ' +
+      (x.n ? x.pct + '%' : '未测') + '<span style="color:var(--sub)">(' + x.ok + '/' + x.n + ')</span></span>').join('') + '</div>' +
+    (weak && weak.n ? '<div class="w-note" style="margin-top:6px">最薄弱：<b>' + esc(weak.dim) + '</b>（' + weak.pct + '%），明天优先挑这类题。</div>' : ''),
+    '<div class="w-streak">已答 <b>' + tot + '</b> 题</div>');
+}
+
+/* ================= B5 费曼输出卡 ================= */
+function fmAll(){ return wget('fmans'); }
+function fmSave(l){ wset('fmans', l); }
+function fmAdd(topic, text){
+  const l = fmAll();
+  l.unshift({ id: Date.now(), date: todayStr(), topic: (topic || '').trim(), text: (text || '').trim(), review: '' });
+  fmSave(l.slice(0, 60));
+}
+function fmParse(c){
+  try{
+    const m = String(c).match(/\{[\s\S]*\}/);
+    if(!m) return null;
+    const o = JSON.parse(m[0]);
+    if(!o.review && !o.miss) return null;
+    return { review: (o.review || '').trim(), miss: (o.miss || '').trim() };
+  }catch(e){ return null; }
+}
+async function fmReview(topic, text){
+  const key = (localStorage.getItem('shuiji_ds_key') || '').trim();
+  if(!key) return null;
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 25000);
+  try{
+    const res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: '你是费曼学习法的教练。用户会用大白话解释一个概念，你要：1) 指出解释里说错或不准确的地方；2) 指出他讲不清楚、跳过了的关键点（这是他真正没学会的地方）；3) 给一句可以直接补上的准确表述。语气直接、不吹捧。严格只输出 JSON，格式 {"review":"总体点评，≤60字","miss":"没讲清的关键点，≤60字"}，不要其他文字或代码标记。' },
+          { role: 'user', content: '概念：' + topic + '\n他的解释：' + text }
+        ],
+        max_tokens: 260, temperature: 0.6
+      }),
+      signal: ctl.signal
+    });
+    const j = await res.json();
+    if(!res.ok) return null;
+    const c = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+    return fmParse(c);
+  }catch(e){ return null; }
+  finally{ clearTimeout(to); }
+}
+WIDGETS['费曼输出'] = {
+  render(){
+    const l = fmAll();
+    const t = todayStr();
+    const todayN = l.filter(x => x.date === t).length;
+    const list = l.length ? l.slice(0, 8).map(x => '<div style="padding:8px 0;border-bottom:1px solid var(--line)">' +
+      '<div style="font-weight:600">' + esc(x.topic) + '<span style="color:var(--sub);font-weight:400;font-size:var(--fs-11,11px)"> · ' + esc(x.date) + '</span></div>' +
+      '<div style="font-size:var(--fs-13,13px);line-height:1.6;color:var(--text);margin-top:3px;white-space:pre-wrap">' + esc(x.text) + '</div>' +
+      (x.review ? '<div style="margin-top:5px;padding:6px 8px;background:var(--accentSoft);border-radius:8px;font-size:var(--fs-12,12px);line-height:1.6">' +
+        (x.miss ? '🎯 没讲清：' + esc(x.miss) + '<br>' : '') + '💬 ' + esc(x.review) + '</div>' : '') +
+      '<div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button class="w-tag" data-wact="fm-ai" data-id="' + x.id + '">' + (x.review ? '重新点评' : 'AI 点评') + '</button>' +
+      '<button class="w-del" data-wact="fm-del" data-id="' + x.id + '">✕</button></div></div>').join('')
+      : '<div class="w-empty">还没输出过。学完一个知识点，用自己的话写一遍——写不下去的地方就是没真懂的地方。</div>';
+    const TA = 'width:100%;background:var(--accentSoft);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:var(--fs-14,14px);color:var(--text);resize:none;font-family:inherit;box-sizing:border-box';
+    return wCard('🧠 费曼输出',
+      list +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">' +
+      '<input id="fm-topic" type="text" placeholder="今天学的概念（如：等价类划分）" style="width:100%">' +
+      '<textarea id="fm-text" rows="3" placeholder="用大白话讲一遍，假装讲给完全不懂的人听" style="' + TA + '"></textarea>' +
+      '<div style="text-align:right"><button class="w-btn on" data-wact="fm-add">记一张</button></div></div>',
+      '<div class="w-streak">今日 <b>' + todayN + '</b> 张</div>');
+  },
+  acts: {
+    'fm-add': async () => {
+      const t = $('fm-topic') ? $('fm-topic').value : '';
+      const x = $('fm-text') ? $('fm-text').value : '';
+      if(!t.trim()){ toast('先写概念名'); return; }
+      if(!x.trim()){ toast('用自己的话讲一遍才是费曼'); return; }
+      fmAdd(t, x); toast('已记下 📝'); openWidget(curWidget);
+    },
+    'fm-ai': async b => {
+      const l = fmAll(); const it = l.find(x => String(x.id) === String(b.dataset.id));
+      if(!it) return;
+      toast('AI 点评中…');
+      const r = await fmReview(it.topic, it.text);
+      if(!r){ toast('AI 点评失败，检查 Key 或网络'); return; }
+      it.review = r.review; it.miss = r.miss || '';
+      fmSave(l); openWidget(curWidget);
+    },
+    'fm-del': async b => { fmSave(fmAll().filter(x => String(x.id) !== String(b.dataset.id))); openWidget(curWidget); }
+  }
+};
+
 function initV4(){
   initSections();
   showInstallBar();
+  bindAdvice();
   expandRepeats();
   trashPurge();
   saveSnapshot();
